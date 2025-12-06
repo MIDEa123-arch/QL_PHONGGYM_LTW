@@ -1,0 +1,116 @@
+﻿@model QL_PHONGGYM.Models.HoaDon
+@{
+    ViewBag.Title = "Details";
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+}
+<div class="container-fluid p-0">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4 class="fw-bold text-dark mb-0">Chi tiết đơn hàng #@Model.MaHD</h4>
+        <a href="@Url.Action("Index")" class="btn btn-light border"><i class="fas fa-arrow-left me-2"></i>Quay lại</a>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white py-3">
+                    <h6 class="mb-0 fw-bold">Danh sách sản phẩm / Dịch vụ</h6>
+                </div>
+                <div class="card-body p-0">
+                    <table class="table mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="ps-4">Tên dịch vụ</th>
+                                <th class="text-center">Số lượng</th>
+                                <th class="text-end pe-4">Thành tiền</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var ct in Model.ChiTietHoaDons)
+                            {
+                                string tenSP = "";
+                                if (ct.SanPham != null) { tenSP = ct.SanPham.TenSP; }
+                                else if (ct.DangKyGoiTap != null) { tenSP = "Gói tập: " + ct.DangKyGoiTap.GoiTap.TenGoi; }
+                                else if (ct.DangKyPT != null) { tenSP = "Thuê PT: " + ct.DangKyPT.NhanVien.TenNV; }
+                                else { tenSP = "Đăng ký lớp học"; }
+
+                                <tr>
+                                    <td class="ps-4">@tenSP</td>
+                                    <td class="text-center">x @ct.SoLuong</td>
+                                    <td class="text-end pe-4">@string.Format("{0:N0}đ", ct.DonGia * ct.SoLuong)</td>
+                                </tr>
+                            }
+                        </tbody>
+                        <tfoot class="bg-light">
+                            <tr>
+                                <td colspan="2" class="text-end fw-bold pt-3">Tổng cộng:</td>
+                                <td class="text-end pe-4 fw-bold text-danger fs-5 pt-3">@string.Format("{0:N0}đ", Model.TongTien)</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white py-3">
+                    <h6 class="mb-0 fw-bold">Thông tin khách hàng</h6>
+                </div>
+                <div class="card-body">
+                    <p class="mb-1"><strong>Họ tên:</strong> @Model.KhachHang.TenKH</p>
+                    <p class="mb-1"><strong>SĐT:</strong> @Model.KhachHang.SDT</p>
+                    <p class="mb-1"><strong>Ngày lập:</strong> @Model.NgayLap.Value.ToString("dd/MM/yyyy HH:mm")</p>
+                    <p class="mb-0">
+                        <strong>Trạng thái:</strong>
+                        @if (Model.TrangThai == "Đã thanh toán")
+                        {
+                            <span class="badge bg-success">@Model.TrangThai</span>
+                        }
+                        else if (Model.TrangThai == "Hủy")
+                        {
+                            <span class="badge bg-secondary">@Model.TrangThai</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-warning text-dark">@Model.TrangThai</span>
+                        }
+                    </p>
+                </div>
+            </div>
+
+            @if (Model.TrangThai == "Chưa thanh toán")
+            {
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body">
+                        <button onclick="updateStatus(@Model.MaHD, 'Đã thanh toán')" class="btn btn-success w-100 mb-2 fw-bold">
+                            <i class="fas fa-check me-2"></i> Xác nhận thanh toán
+                        </button>
+                        <button onclick="updateStatus(@Model.MaHD, 'Hủy')" class="btn btn-outline-danger w-100 fw-bold">
+                            <i class="fas fa-times me-2"></i> Hủy đơn hàng
+                        </button>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    function updateStatus(id, status) {
+        if (confirm('Bạn có chắc chắn muốn cập nhật trạng thái đơn hàng thành: ' + status + '?')) {
+            $.ajax({
+                url: '@Url.Action("UpdateStatus", "AdminOrder")',
+                type: 'POST',
+                data: { id: id, status: status },
+                success: function (res) {
+                    if (res.success) {
+                        location.reload();
+                    } else {
+                        alert(res.message);
+                    }
+                }
+            });
+        }
+    }
+</script>

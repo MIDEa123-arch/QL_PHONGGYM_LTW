@@ -1,0 +1,66 @@
+﻿@model List<QL_PHONGGYM.Models.HoaDon>
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+}
+<div class="card border-0 shadow-sm">
+    <div class="card-header bg-white py-3">
+        <h5 class="mb-0 fw-bold text-primary"><i class="fas fa-file-invoice-dollar me-2"></i> Danh sách đơn hàng</h5>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-4">Mã HĐ</th>
+                        <th>Khách hàng</th>
+                        <th>Ngày lập</th>
+                        <th>Tổng tiền</th>
+                        <th>Trạng thái</th>
+                        <th class="text-end pe-4">Hành động</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null && Model.Any())
+                    {
+                        foreach (var item in Model)
+                        {
+                            <tr>
+                                <td class="ps-4 fw-bold">#@item.MaHD</td>
+                                <td>
+                                    <div class="fw-bold">@item.KhachHang.TenKH</div>
+                                    <small class="text-muted">@item.KhachHang.SDT</small>
+                                </td>
+                                <td>@item.NgayLap.Value.ToString("dd/MM/yyyy HH:mm")</td>
+                                <td class="text-danger fw-bold">@string.Format("{0:N0}đ", item.TongTien)</td>
+                                <td>
+                                    @if (item.TrangThai == "Đã thanh toán")
+                                    {
+                                        <span class="badge bg-success">Đã thanh toán</span>
+                                    }
+                                    else if (item.TrangThai == "Hủy")
+                                    {
+                                        <span class="badge bg-secondary">Đã hủy</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-warning text-dark">Chờ xử lý</span>
+                                    }
+                                </td>
+                                <td class="text-end pe-4">
+                                    <a href="@Url.Action("Details", new { id = item.MaHD })" class="btn btn-primary btn-sm">
+                                        Xem chi tiết
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr><td colspan="6" class="text-center py-4">Chưa có đơn hàng nào</td></tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

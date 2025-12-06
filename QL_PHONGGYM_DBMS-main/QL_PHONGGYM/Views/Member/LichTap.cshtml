@@ -1,0 +1,234 @@
+﻿@{
+    ViewBag.Title = "Lịch tập luyện";
+    Layout = "~/Views/Shared/_LayoutMember.cshtml";
+
+    dynamic listLichTap = ViewBag.LichTap;
+
+    DateTime currentDate = ViewBag.CurrentDate;
+
+    int currentDayOfWeek = (int)currentDate.DayOfWeek;
+    int daysToMonday = currentDayOfWeek == 0 ? 6 : currentDayOfWeek - 1;
+    DateTime startOfWeek = currentDate.AddDays(-daysToMonday);
+    DateTime endOfWeek = startOfWeek.AddDays(6);
+
+    List<DateTime> weekDays = new List<DateTime>();
+    for (int i = 0; i < 7; i++)
+    {
+        weekDays.Add(startOfWeek.AddDays(i));
+    }
+}
+
+<style>
+    .header-controls {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .btn-nav-week {
+        background-color: #00e676;
+        color: white;
+        border: none;
+        padding: 6px 15px;
+        border-radius: 5px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: 0.3s;
+        font-size: 0.9rem;
+    }
+
+        .btn-nav-week:hover {
+            background-color: #00c853;
+            color: white;
+        }
+
+    .week-display-box {
+        background-color: #0f3d64;
+        color: white;
+        padding: 10px 25px;
+        border-radius: 8px;
+        border-top-right-radius: 15px;
+        border-bottom-right-radius: 15px;
+        font-weight: bold;
+        min-width: 280px;
+        text-align: center;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+
+    .schedule-header {
+        background-color: #0f3d64 !important;
+        color: white;
+        text-transform: uppercase;
+        font-size: 0.85rem;
+        font-weight: bold;
+        vertical-align: middle !important;
+    }
+
+    .table-bordered th, .table-bordered td {
+        border: 1px solid #dee2e6;
+        vertical-align: middle;
+        padding: 10px;
+        height: 100px;
+    }
+
+    .event-card {
+        background-color: #009ae0;
+        color: white;
+        border-radius: 8px;
+        padding: 5px;
+        font-size: 0.8rem;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        margin-bottom: 5px;
+        border: none;
+        text-align: center;
+    }
+
+    .event-card-pt {
+        background-color: #28a745;
+    }
+
+    .event-finished {
+        background-color: #6c757d;
+        opacity: 0.8;
+    }
+
+    .btn-checkin-custom {
+        background-color: white;
+        color: #009ae0;
+        font-weight: bold;
+        border-radius: 4px;
+        padding: 2px 8px;
+        font-size: 0.7rem;
+        margin-top: 4px;
+        border: none;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        width: 100%;
+    }
+
+        .btn-checkin-custom:hover {
+            background-color: #f1f1f1;
+        }
+
+    .time-col {
+        font-weight: bold;
+        background-color: #f8f9fa;
+        color: #333;
+        width: 80px;
+    }
+</style>
+
+<div class="bg-white rounded-3 shadow-sm p-4 h-100">
+
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+
+        <div class="header-controls">
+            <input type="date" class="form-control"
+                   value="@currentDate.ToString("yyyy-MM-dd")"
+                   style="width: 140px; height: 38px;"
+                   onchange="location.href='@Url.Action("LichTap", "Member")?date=' + this.value" />
+
+            <a href="@Url.Action("LichTap", "Member", new { date = currentDate.AddDays(-7).ToString("yyyy-MM-dd") })"
+               class="btn-nav-week">
+                Trước
+            </a>
+
+            <a href="@Url.Action("LichTap", "Member", new { date = currentDate.AddDays(7).ToString("yyyy-MM-dd") })"
+               class="btn-nav-week">
+                Sau
+            </a>
+        </div>
+
+        <h4 class="fw-bold mb-0 text-dark d-none d-lg-block">
+            <i class="fas fa-calendar-check me-2"></i> Lịch làm việc
+        </h4>
+
+        <div class="week-display-box">
+            Tuần: @startOfWeek.ToString("dd/MM/yyyy") &rarr; @endOfWeek.ToString("dd/MM/yyyy")
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-bordered text-center schedule-table mb-0">
+            <thead>
+                <tr class="schedule-header">
+                    <th style="width: 80px;">Thời gian</th>
+                    @foreach (var day in weekDays)
+                    {
+                        string dayName = day.DayOfWeek == DayOfWeek.Sunday ? "Chủ Nhật" : "Thứ " + ((int)day.DayOfWeek + 1);
+                        <th class="@(day.Date == currentDate.Date ? "bg-info text-white" : "")">
+                            <div>@dayName</div>
+                        </th>
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="time-col">Sáng</td>
+                    @foreach (var day in weekDays)
+                    {
+                        <td>@RenderScheduleCell(day, new TimeSpan(0, 0, 0), new TimeSpan(12, 0, 0), listLichTap)</td>
+                    }
+                </tr>
+
+                <tr>
+                    <td class="time-col">Chiều</td>
+                    @foreach (var day in weekDays)
+                    {
+                        <td>@RenderScheduleCell(day, new TimeSpan(12, 0, 0), new TimeSpan(18, 0, 0), listLichTap)</td>
+                    }
+                </tr>
+
+                <tr>
+                    <td class="time-col">Tối</td>
+                    @foreach (var day in weekDays)
+                    {
+                        <td>@RenderScheduleCell(day, new TimeSpan(18, 0, 0), new TimeSpan(23, 59, 59), listLichTap)</td>
+                    }
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@helper RenderScheduleCell(DateTime cellDate, TimeSpan start, TimeSpan end, dynamic listLich)
+{
+    var events = new List<dynamic>();
+    if (listLich != null)
+    {
+        foreach (var item in listLich)
+        {
+            if (item?.Ngay != null && item?.GioBD != null && item?.GioKT != null)
+            {
+                if (item.Ngay.Date == cellDate.Date && item.GioBD >= start && item.GioBD < end)
+                {
+                    events.Add(item);
+                }
+            }
+        }
+    }
+
+    // Sắp xếp theo giờ bắt đầu tăng dần
+    events = events.OrderBy(e => e.GioBD).ToList();
+
+    if (events.Count > 0)
+    {
+        foreach (var ev in events)
+        {
+            string cardClass = "event-card";
+            if (ev.Loai == "Tập PT") { cardClass += " event-card-pt"; }
+            if (ev.TrangThai.Contains("Đã")) { cardClass += " event-finished"; }
+
+            <div class="@cardClass">
+                <div class="fw-bold text-truncate">@ev.Ten</div>
+                <div class="small opacity-75 mb-1">
+                    @(ev?.GioBD?.ToString(@"hh\:mm") ?? "00:00") - @(ev?.GioKT?.ToString(@"hh\:mm") ?? "00:00")
+                </div>
+
+                @if (!string.IsNullOrEmpty(ev?.TrangThai) && ev.TrangThai.Contains("Đã"))
+                {
+                    <div class="small fst-italic mt-1"><i class="fas fa-check"></i> Đã tập</div>
+                }
+            </div>
+        }
+    }
+}

@@ -1,0 +1,112 @@
+﻿@model QL_PHONGGYM.Models.KhachHang
+@{
+    ViewBag.Title = "Thông tin tài khoản";
+    Layout = "~/Views/Shared/_LayoutMember.cshtml";
+}
+
+<div class="bg-white rounded-3 shadow-sm p-4 h-100">
+    <h5 class="fw-bold text-uppercase mb-4 pb-2 border-bottom">Hồ sơ cá nhân</h5>
+
+    <form class="mb-5">
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label class="form-label small fw-bold text-muted">Họ và tên</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-light"><i class="fas fa-user"></i></span>
+                    <input type="text" class="form-control bg-light" value="@Model.TenKH" readonly>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label small fw-bold text-muted">Số điện thoại</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-light"><i class="fas fa-phone"></i></span>
+                    <input type="text" class="form-control bg-light" value="@Model.SDT" readonly>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label class="form-label small fw-bold text-muted">Email</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-light"><i class="fas fa-envelope"></i></span>
+                    <input type="text" class="form-control bg-light" value="@Model.Email" readonly>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label small fw-bold text-muted">Ngày sinh</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-light"><i class="fas fa-calendar"></i></span>
+                    <input type="text" class="form-control bg-light" value="@(Model.NgaySinh.HasValue ? Model.NgaySinh.Value.ToString("dd/MM/yyyy") : "Chưa cập nhật")" readonly>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label class="form-label small fw-bold text-muted">Giới tính</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-light"><i class="fas fa-venus-mars"></i></span>
+                    <input type="text" class="form-control bg-light" value="@Model.GioiTinh" readonly>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label small fw-bold text-muted">Hạng thành viên</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-light"><i class="fas fa-crown text-warning"></i></span>
+                    <input type="text" class="form-control bg-light fw-bold text-primary" value="@(Model.LoaiKhachHang != null ? Model.LoaiKhachHang.TenLoai : "Thành viên mới")" readonly>
+                </div>
+            </div>
+        </div>
+    </form>
+
+    <h5 class="fw-bold text-uppercase mb-4 pb-2 border-bottom text-danger">
+        <i class="fas fa-lock me-2"></i>Thay đổi mật khẩu
+    </h5>
+
+    @using (Html.BeginForm("DoiMatKhau", "Member", FormMethod.Post, new { id = "formDoiMatKhau" }))
+    {
+        @Html.AntiForgeryToken()
+        <div class="row">
+            <div class="col-md-12 mb-3">
+                <label class="form-label small fw-bold">Mật khẩu hiện tại <span class="text-danger">*</span></label>
+                <input type="password" name="MatKhauCu" class="form-control" placeholder="Nhập mật khẩu đang sử dụng" required>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label class="form-label small fw-bold">Mật khẩu mới <span class="text-danger">*</span></label>
+                <input type="password" name="MatKhauMoi" id="MatKhauMoi" class="form-control" placeholder="Nhập mật khẩu mới" required>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label small fw-bold">Xác nhận mật khẩu mới <span class="text-danger">*</span></label>
+                <input type="password" id="XacNhanMatKhau" class="form-control" placeholder="Nhập lại mật khẩu mới" required>
+                <small id="msgError" class="text-danger d-none">Mật khẩu xác nhận không khớp!</small>
+            </div>
+        </div>
+
+        <div class="text-end mt-3">
+            <button type="submit" class="btn btn-danger px-4 fw-bold" onclick="return validatePassword()">
+                <i class="fas fa-save me-2"></i> Cập nhật mật khẩu
+            </button>
+        </div>
+    }
+</div>
+
+<script>
+    function validatePassword() {
+        var pass = document.getElementById("MatKhauMoi").value;
+        var confirm = document.getElementById("XacNhanMatKhau").value;
+        var msg = document.getElementById("msgError");
+
+        if (pass !== confirm) {
+            msg.classList.remove("d-none");
+            document.getElementById("XacNhanMatKhau").classList.add("is-invalid");
+            return false; =
+        } else {
+            msg.classList.add("d-none");
+            document.getElementById("XacNhanMatKhau").classList.remove("is-invalid");
+            return true;=
+        }
+    }
+</script>

@@ -1,0 +1,235 @@
+﻿<style>
+    #DangKyPT .modal-dialog {
+        max-width: 900px !important;
+        width: 90% !important;
+    }
+
+    #DangKyPT .modal-content {
+        width: 100% !important;
+    }
+
+    select:focus,
+    input[type="text"]:focus,
+    input[type="tel"]:focus,
+    textarea:focus {
+        outline: none;
+        border-color: #0dcaf0 !important;
+        box-shadow: 0 0 0 0.2rem rgba(13, 202, 240, 0.25);
+    }
+
+    select:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    .package-radio:checked + label {
+        background-color: #0dcaf0 !important;
+        color: white !important;
+        border-color: #0dcaf0 !important;
+        box-shadow: 0 4px 8px rgba(13, 202, 240, 0.3);
+        transform: translateY(-2px);
+        transition: all 0.3s ease;
+    }
+
+    .package-radio + label {
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+
+        .package-radio + label:hover {
+            border-color: #0dcaf0;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+    .benefit-icon {
+        width: 45px;
+        height: 45px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+    }
+
+    .modal-content {
+        border-radius: 0;
+        overflow: hidden;
+    }
+
+    .form-control, .form-select {
+        border-radius: 0.375rem;
+        padding: 0.65rem 0.75rem;
+    }
+
+    .info-section {
+        background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+    }
+</style>
+
+<div class="modal-body bg-white w-100 p-0">
+    <div class="row g-0">
+        <div class="col-md-5 info-section text-white p-4">
+            <h3 class="fw-bold text-uppercase mb-2">
+                ĐĂNG KÝ <span class="text-info">PERSONAL TRAINER</span>
+            </h3>
+            <p class="mb-4" style="font-size: 0.95rem;">
+                Huấn luyện viên cá nhân 1-1 tại Live Fit.<br>
+                Phản hồi trong <strong class="text-info">24 giờ</strong>.
+            </p>
+
+            <div class="mb-4">
+                <div class="d-flex align-items-center mb-3">
+                    <div class="bg-info rounded-circle benefit-icon me-3">
+                        <i class="bi bi-person-check-fill text-dark"></i>
+                    </div>
+                    <div>
+                        <div class="fw-bold">HLV chuyên nghiệp</div>
+                        <div class="small text-muted">Giàu kinh nghiệm, tận tâm</div>
+                    </div>
+                </div>
+
+                <div class="d-flex align-items-center mb-3">
+                    <div class="bg-info rounded-circle benefit-icon me-3">
+                        <i class="bi bi-calendar-check-fill text-dark"></i>
+                    </div>
+                    <div>
+                        <div class="fw-bold">Lịch tập linh hoạt</div>
+                        <div class="small text-muted">Theo thời gian của bạn</div>
+                    </div>
+                </div>
+
+                <div class="d-flex align-items-center mb-3">
+                    <div class="bg-info rounded-circle benefit-icon me-3">
+                        <i class="bi bi-trophy-fill text-dark"></i>
+                    </div>
+                    <div>
+                        <div class="fw-bold">Cam kết hiệu quả</div>
+                        <div class="small text-muted">Đạt mục tiêu nhanh chóng</div>
+                    </div>
+                </div>
+
+                <div class="d-flex align-items-center">
+                    <div class="bg-info rounded-circle benefit-icon me-3">
+                        <i class="bi bi-heart-pulse-fill text-dark"></i>
+                    </div>
+                    <div>
+                        <div class="fw-bold">Chế độ cá nhân hóa</div>
+                        <div class="small text-muted">Phù hợp với từng người</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="border-top border-secondary pt-3 mt-4">
+                <div class="d-flex align-items-center mb-2">
+                    <i class="bi bi-telephone-fill text-info me-2"></i>
+                    <span class="small">0377.827.641</span>
+                </div>
+                <div class="d-flex align-items-center">
+                    <i class="bi bi-chat-dots-fill text-info me-2"></i>
+                    <a class="small text-decoration-none text-white" href="">Facebook</a>
+                    /
+                    <a class="small text-decoration-none text-white" href="">Zalo</a>
+                </div>
+            </div>
+
+            <div class="alert alert-info mt-3 mb-0 small">
+                <i class="bi bi-gift-fill me-2"></i>
+                <strong>GIẢM 15%</strong> khi đăng ký qua form
+            </div>
+        </div>
+        <div class="col-md-7 p-4">
+            <h5 class="fw-bold mb-4 text-dark">Thông tin đăng ký</h5>
+
+            <form id="ptRegistrationForm" action="@Url.Action("CreateDangKyPT", "GoiTap")" method="post">
+                @Html.AntiForgeryToken()
+
+                @if (ViewBag.KhachHang != null)
+                {
+                    <div class="alert alert-light border mb-4 shadow-sm">
+                        <div class="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom">
+                            <span class="text-muted small text-uppercase">Họ tên</span>
+                            <span class="fw-bold text-dark small">@ViewBag.KhachHang.TenKH</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom">
+                            <span class="text-muted small text-uppercase ">Số điện thoại</span>
+                            <span class="fw-bold text-dark small">@ViewBag.KhachHang.SDT</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="text-muted small text-uppercase">Email</span>
+                            <span class="fw-bold text-dark small">@ViewBag.KhachHang.Email</span>
+                        </div>
+
+                    </div>
+                }
+                else
+                {
+                    <div class="mb-3">
+                        <label class="form-label small text-uppercase text-muted fw-semibold mb-2">
+                            Họ và tên <span class="text-danger">*</span>
+                        </label>
+                        <input type="text" name="tenKH" class="form-control" placeholder="Nhập họ và tên" required />
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label small text-uppercase text-muted fw-semibold mb-2">
+                            Số điện thoại <span class="text-danger">*</span>
+                        </label>
+                        <input type="tel" name="sdt" class="form-control" placeholder="Nhập số điện thoại" required />
+                    </div>
+                }
+
+                <div class="mb-4">
+                    <label class="form-label small text-uppercase text-muted fw-semibold mb-3">
+                        Chọn gói tập <span class="text-danger">*</span>
+                    </label>
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <input type="radio" class="btn-check package-radio" name="soBuoi" id="buoi8" value="8" required>
+                            <label class="btn btn-outline-info w-100 py-3" for="buoi8">
+                                <div class="fw-bold fs-5">8 buổi</div>
+                                <small class="text-muted">Khởi đầu</small>
+                            </label>
+                        </div>
+                        <div class="col-6">
+                            <input type="radio" class="btn-check package-radio" name="soBuoi" id="buoi12" value="12">
+                            <label class="btn btn-outline-info w-100 py-3" for="buoi12">
+                                <div class="fw-bold fs-5">12 buổi</div>
+                                <small class="text-muted">Phổ biến</small>
+                            </label>
+                        </div>
+                        <div class="col-6">
+                            <input type="radio" class="btn-check package-radio" name="soBuoi" id="buoi24" value="24">
+                            <label class="btn btn-outline-info w-100 py-3" for="buoi24">
+                                <div class="fw-bold fs-5">24 buổi</div>
+                                <small class="text-muted">Tiết kiệm</small>
+                            </label>
+                        </div>
+                        <div class="col-6">
+                            <input type="radio" class="btn-check package-radio" name="soBuoi" id="buoi32" value="32">
+                            <label class="btn btn-outline-info w-100 py-3" for="buoi32">
+                                <div class="fw-bold fs-5">32 buổi</div>
+                                <small class="text-muted">VIP</small>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label small text-uppercase text-muted fw-semibold mb-2">
+                        Mục tiêu & Ghi chú
+                    </label>
+                    <textarea name="ghiChu" class="form-control" rows="5" placeholder="VD: Muốn giảm cân, tăng cơ, tập buổi sáng..." style="resize: none"></textarea>
+                </div>
+
+                <div class="alert alert-info small mb-4 border-0 shadow-sm">
+                    <i class="bi bi-info-circle-fill me-2"></i>
+                    Tư vấn chi tiết và phân công PT trong <strong>24 giờ</strong>
+                </div>
+
+                <button type="submit" class="btn btn-info text-white w-100 py-3 fw-bold shadow">
+                    <i class="bi bi-send-fill me-2"></i>Gửi yêu cầu đăng ký
+                </button>
+            </form>
+        </div>
+    </div>
+</div>

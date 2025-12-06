@@ -1,0 +1,322 @@
+﻿@{
+    ViewBag.Title = "Tìm kiếm lớp học";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var listCM = ViewBag.ChuyenMons as List<QL_PHONGGYM.Models.ChuyenMon>;
+    dynamic Model = ViewData.Model;
+}
+
+<style>
+    .search-header {
+        background: linear-gradient(135deg, #0f3d64 0%, #0d6efd 100%);
+        padding: 60px 0;
+        color: white;
+        margin-bottom: 40px;
+    }
+
+    .class-card {
+        border: none;
+        border-radius: 15px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        overflow: hidden;
+        background: white;
+        height: 100%;
+        position: relative;
+    }
+
+        .class-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+
+    .card-badge {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        background: rgba(255, 255, 255, 0.95);
+        color: #0d6efd;
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-weight: 700;
+        font-size: 0.8rem;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        z-index: 2;
+    }
+
+    .status-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(255,255,255,0.8);
+        z-index: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .class-price {
+        font-size: 1.2rem;
+        font-weight: 800;
+        color: #d70018;
+    }
+
+    .filter-box {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        margin-bottom: 30px;
+    }
+
+    .custom-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .custom-box {
+        background: white;
+        width: 450px;
+        max-width: 90%;
+        padding: 30px 20px;
+        border-radius: 4px;
+        text-align: center;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        animation: fadeIn 0.3s ease-out;
+    }
+
+    .custom-title {
+        color: #555;
+        font-size: 24px;
+        font-weight: 500;
+        margin-top: 0;
+        margin-bottom: 20px;
+        text-transform: uppercase;
+    }
+
+    .custom-body {
+        color: #777;
+        font-size: 16px;
+        line-height: 1.5;
+        margin-bottom: 20px;
+    }
+
+    .custom-btn {
+        background: #e74c3c;
+        color: white;
+        border: none;
+        padding: 8px 25px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+    }
+
+        .custom-btn:hover {
+            background: #c0392b;
+        }
+</style>
+
+@if (TempData["Error"] != null)
+{
+    <div id="custom-alert-overlay" class="custom-overlay">
+        <div class="custom-box">
+            <h3 class="custom-title">THÔNG BÁO</h3>
+            <div class="custom-body">
+                @TempData["Error"]
+            </div>
+            <div class="custom-footer">
+                <button onclick="closeCustomAlert()" class="custom-btn">Đóng</button>
+            </div>
+        </div>
+    </div>
+}
+<div class="search-header text-center">
+    <div class="container">
+        <h2 class="fw-bold mb-3">TÌM LỚP HỌC PHÙ HỢP</h2>
+        <p class="opacity-75">Tham gia các lớp học chuyên nghiệp cùng huấn luyện viên hàng đầu</p>
+    </div>
+</div>
+
+<div class="container pb-5">
+
+    <div class="filter-box">
+        <form method="get" action="@Url.Action("Index", "Class")" class="row g-3 align-items-end">
+            <div class="col-md-4">
+                <label class="form-label fw-bold text-muted small">Tên lớp học</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-white border-end-0"><i class="fas fa-search text-muted"></i></span>
+                    <input type="text" name="search" class="form-control border-start-0" placeholder="Nhập tên lớp..." value="@ViewBag.CurrentSearch">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label fw-bold text-muted small">Bộ môn</label>
+                <select class="form-select" name="chuyenMonId">
+                    <option value="">Tất cả bộ môn</option>
+                    @if (listCM != null)
+                    {
+                        foreach (var cm in listCM)
+                        {
+                            <option value="@cm.MaCM" @(ViewBag.CurrentChuyenMon == cm.MaCM ? "selected" : "")>@cm.TenChuyenMon</option>
+                        }
+                    }
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label fw-bold text-muted small">Trạng thái</label>
+                <select class="form-select" name="filterType">
+                    <option value="">Tất cả lớp</option>
+                    <option value="not-joined" @(ViewBag.CurrentFilter == "not-joined" ? "selected" : "")>Chưa đăng ký</option>
+                    <option value="suitable" @(ViewBag.CurrentFilter == "suitable" ? "selected" : "")>Phù hợp (Không trùng)</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary w-100 fw-bold" style="height: 38px;">
+                    Lọc
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <div class="row g-4">
+        @if (Model != null && Model.Count > 0)
+        {
+            foreach (var item in Model)
+            {
+                <div class="col-lg-4 col-md-6">
+                    <div class="class-card position-relative d-flex flex-column @(item.DaDangKy || item.BiTrungLich ? "border border-warning" : "")">
+
+                        <div class="card-badge">@item.TenChuyenMon</div>
+
+                        @if (item.DaDangKy)
+                        {
+                            <div class="status-overlay">
+                                <span class="badge bg-success fs-6 shadow">Đã đăng ký</span>
+                            </div>
+                        }
+                        else if (item.BiTrungLich)
+                        {
+                            <div class="status-overlay">
+                                <div class="text-center">
+                                    <span class="badge bg-danger fs-6 shadow mb-2">Trùng lịch tập</span>
+                                    <div class="small text-danger fw-bold">Bạn bận giờ này</div>
+                                </div>
+                            </div>
+                        }
+
+                        <div style="height: 180px; background-color: #f0f4f8; display: flex; align-items: center; justify-content: center;">
+                            <img src="~/Content/Images/logo.png" style="height: 80px; opacity: 0.6; filter: grayscale(100%);">
+                        </div>
+
+                        <div class="p-4 flex-grow-1 d-flex flex-column">
+                            <h5 class="fw-bold text-dark mb-2">@item.TenLop</h5>
+
+                            <div class="mb-3">
+                                <div class="d-flex align-items-center text-muted small mb-1">
+                                    <i class="fas fa-user-tie me-2 text-primary" style="width: 20px;"></i>
+                                    <span>HLV: <strong>@item.TenHLV</strong></span>
+                                </div>
+                                <div class="d-flex align-items-center text-muted small mb-1">
+                                    <i class="fas fa-calendar-alt me-2 text-primary" style="width: 20px;"></i>
+                                    <span>Khai giảng: @item.NgayBatDau.ToString("dd/MM/yyyy")</span>
+                                </div>
+                                <div class="d-flex align-items-center text-muted small">
+                                    <i class="fas fa-users me-2 text-primary" style="width: 20px;"></i>
+                                    <span>Sĩ số: @item.SiSoHienTai / @item.SiSoToiDa</span>
+                                </div>
+                            </div>
+
+                            <div class="mt-auto d-flex align-items-center justify-content-between">
+                                <div class="class-price">
+                                    @if (item.HocPhi == 0)
+                                    {<span>Miễn phí</span> }
+                                    else
+                                    { <span>@string.Format("{0:N0}đ", item.HocPhi)</span>}
+                                </div>
+
+                                @if (!item.DaDangKy && !item.BiTrungLich)
+                                {
+                                    if (Session["MaKH"] != null)
+                                    {
+                                        <a href="@Url.Action("CheckOutLopHoc", "Class", new { maLop = item.MaLop, url = Request.RawUrl })"
+                                           class="btn btn-outline-primary btn-sm fw-bold px-3 rounded-pill">
+                                            Đăng ký ngay
+                                        </a>
+                                    }
+                                    else
+                                    {
+                                        <button class="btn btn-outline-primary btn-sm fw-bold px-3 rounded-pill"
+                                                data-bs-toggle="modal" data-bs-target="#loginModal">
+                                            Đăng ký ngay
+                                        </button>
+                                    }
+                                }
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="col-12 text-center py-5">
+                <img src="~/Content/Images/empty_calendar.png" style="width: 100px; opacity: 0.5;" class="mb-3" onerror="this.style.display='none'">
+                <h5 class="text-muted">Không tìm thấy lớp học nào phù hợp</h5>
+            </div>
+        }
+    </div>
+</div>
+
+<div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 w-75 mx-auto shadow-lg border-0 position-relative">
+            <div class="mt-3 border-0 text-center w-100">
+                <h5 class="modal-title fw-bold text-primary text-center" id="loginModalLabel">THE-GYM MEMBER</h5>
+            </div>
+            <img src="@Url.Content("~/Content/Images/Logo.png")" class="mx-auto" style="width: 5rem" />
+            <div class="modal-body text-center py-2">
+                <p class="mb-4 fw-semibold" style="font-size: 16px">
+                    Vui lòng đăng nhập tài khoản <strong>The GYM</strong> để xem ưu đãi và thanh toán dễ dàng hơn.
+                </p>
+                <div class="d-flex justify-content-center gap-3">
+                    <a href="@Url.Action("Login", "Account", new { returnUrl = Request.RawUrl })" class="btn btn-primary py-2 fw-semibold" style="width: 10rem">
+                        Đăng nhập
+                    </a>
+                    <a href="@Url.Action("Register", "Account", new { returnUrl = Request.RawUrl })" class="btn btn-outline-primary py-2 fw-semibold" style="width: 10rem">
+                        Đăng ký
+                    </a>
+                </div>
+            </div>
+            <button type="button" class="btn-close position-absolute mt-2" data-bs-dismiss="modal" style="right: 0.7rem" aria-label="Đóng"></button>
+        </div>
+    </div>
+</div>
+
+<script>
+    function closeCustomAlert() {
+        var overlay = document.getElementById('custom-alert-overlay');
+        if (overlay) {
+            overlay.style.display = 'none';
+        }
+    }
+
+    // Tự động đóng khi click ra ngoài vùng trắng (Optional)
+    window.onclick = function (event) {
+        var overlay = document.getElementById('custom-alert-overlay');
+        if (event.target == overlay) {
+            overlay.style.display = 'none';
+        }
+    }
+</script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>

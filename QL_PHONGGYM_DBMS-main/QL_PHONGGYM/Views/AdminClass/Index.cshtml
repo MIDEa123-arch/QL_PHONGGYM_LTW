@@ -1,0 +1,87 @@
+﻿@model List<QL_PHONGGYM.Models.LopHoc>
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<div class="card border-0 shadow-sm">
+    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+        <h5 class="mb-0 fw-bold text-primary"><i class="fas fa-calendar-alt me-2"></i> Danh sách Lớp học</h5>
+        <a href="@Url.Action("Create")" class="btn btn-primary btn-sm">
+            <i class="fas fa-plus me-1"></i> Tạo lớp mới
+        </a>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-4">Tên lớp</th>
+                        <th>Bộ môn</th>
+                        <th>HLV phụ trách</th>
+                        <th>Thời gian</th>
+                        <th>Học phí</th>
+                        <th>Sĩ số</th>
+                        <th class="text-end pe-4">Hành động</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null && Model.Any())
+                    {
+                        foreach (var item in Model)
+                        {
+                            <tr>
+                                <td class="ps-4 fw-bold text-primary">@item.TenLop</td>
+                                <td><span class="badge bg-info text-dark">@item.ChuyenMon.TenChuyenMon</span></td>
+                                <td>@(item.NhanVien != null ? item.NhanVien.TenNV : "Chưa gán")</td>
+                                <td>
+                                    <div class="small">@item.NgayBatDau.ToString("dd/MM") - @item.NgayKetThuc.ToString("dd/MM/yyyy")</div>
+                                    <div class="small text-muted">(@item.SoBuoi buổi)</div>
+                                </td>
+                                <td class="fw-bold text-danger">@string.Format("{0:N0}đ", item.HocPhi)</td>
+                                <td>
+                                    <span class="badge bg-light text-dark border">
+                                        @(item.SiSoHienTai ?? 0) / @item.SiSoToiDa
+                                    </span>
+                                </td>
+                                <td class="text-end pe-4">
+                                    <a href="@Url.Action("Edit", new { id = item.MaLop })" class="btn btn-outline-primary btn-sm me-1">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <button onclick="deleteClass(@item.MaLop)" class="btn btn-outline-danger btn-sm">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr><td colspan="7" class="text-center py-4">Chưa có lớp học nào</td></tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    function deleteClass(id) {
+        if (confirm('Bạn có chắc muốn xóa lớp học này?')) {
+            $.ajax({
+                url: '@Url.Action("Delete", "AdminClass")',
+                type: 'POST',
+                data: { id: id },
+                success: function (res) {
+                    if (res.success) {
+                        location.reload();
+                    } else {
+                        alert(res.message);
+                    }
+                }
+            });
+        }
+    }
+</script>
+

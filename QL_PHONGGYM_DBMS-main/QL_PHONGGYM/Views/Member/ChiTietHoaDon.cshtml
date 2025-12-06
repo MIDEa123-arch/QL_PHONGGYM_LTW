@@ -1,0 +1,353 @@
+﻿@model QL_PHONGGYM.Models.HoaDon
+
+@{
+    ViewBag.Title = "ChiTietHoaDon";
+    Layout = "~/Views/Shared/_LayoutMember.cshtml";
+}
+
+<div class="rounded-3 px-3 py-4 bg-white d-flex gap-2 mb-3">
+    <a class="fs-6 fw-bold text-decoration-none" href="@Url.Action("LichSuMuaHang", "Member")">< Lịch sử mua hàng</a>
+    <span class="text-muted fw-bold fs-6"> / Chi tiết đơn hàng</span>
+</div>
+
+@if (Model.MaDonHang != null)
+{    
+    <div class="card border-0 mb-3 rounded-3 bg-white px-3 py-3 text-decoration-none text-black">
+        <span class="fw-bold fs-5 ms-1">Tổng quan</span>
+        <div class="card-body p-2">
+            <div class="d-flex align-items-center w-100 mb-2 gap-2">
+                <div class="d-flex align-items-center align-content-center gap-2">
+                    <span class="text-muted">Đơn hàng: <span class="fw-bold text-black ms-1">#@Model.MaDonHang</span></span>
+                    <span class="text-muted fw-bolder fs-5 mx-2">•</span>
+                    <span class="text-muted">Ngày đặt hàng: <span class="fw-bold text-dark">@Model.NgayLap.Value.ToString("dd/MM/yyyy")</span></span>
+                </div>
+                <span class="text-muted fw-bolder fs-5 mx-2">•</span>
+                <div>
+                    @if (Model.DonHang.TrangThaiDonHang == "Đã nhận hàng")
+                    {
+                        <div class="text-success border border-1 rounded-2 p-1 fw-bold" style="background-color: #c9eed9; font-size: 12px"> @Model.DonHang.TrangThaiDonHang </div>
+                    }
+                    @if (Model.DonHang.TrangThaiDonHang == "Chờ xác nhận")
+                    {
+                        <div class="text-secondary border border-1 rounded-2 p-1 fw-bold" style="background-color: #e9e4e4; font-size: 12px"> @Model.DonHang.TrangThaiDonHang </div>
+                    }
+                    @if (Model.DonHang.TrangThaiDonHang == "Chờ giao hàng")
+                    {
+                        <div class="text-warning border border-1 rounded-2 p-1 fw-bold" style="background-color: #faefb9; font-size: 12px"> @Model.DonHang.TrangThaiDonHang </div>
+                    }
+                    @if (Model.DonHang.TrangThaiDonHang == "Đã hủy")
+                    {
+                        <div class="text-danger border border-1 rounded-2 p-1 fw-bold" style="background-color: #f5aeae; font-size: 12px"> @Model.DonHang.TrangThaiDonHang </div>
+                    }
+                </div>
+            </div>
+            @foreach (var item in Model.ChiTietHoaDons)
+            {
+                var mainImage = item.SanPham.HINHANHs.FirstOrDefault(h => h.IsMain == true)?.Url ?? "default.png";
+                var imageUrl = Url.Content("~/Content/Images/" + mainImage);
+                <div class="w-100 d-flex row mt-3">
+                    <div class="d-flex gap-2 mb-3 col-8">
+                        <img src="@imageUrl" style="width: 13%" alt="@item.SanPham.TenSP" />
+                        <div class="d-flex flex-column justify-content-center">
+                            <span class="fs-6 text-uppercase fw-bolder text-break" style="word-break: break-word;"> @item.SanPham.TenSP </span>
+                            <span class="small fw-bolder"> @(item.SanPham.GiaKhuyenMai != null && item.SanPham.GiaKhuyenMai > 0 ? item.SanPham.GiaKhuyenMai.Value.ToString("N0") + " đ" : item.SanPham.DonGia.ToString("N0") + " đ") </span>
+                        </div>
+                    </div>
+                    <div class="d-flex col-4 align-items-center justify-content-end text-end p-0 gap-2">
+                        <span class="fs-6">Số lượng: </span> <span class="fs-6 fw-bold">@item.SoLuong</span>
+                        <a class="btn btn-outline-info text-decoration-none py-2 px-3 ms-3" href="@Url.Action("ProductDetail", "Product", new { id = item.MaSP, url = Request.RawUrl })" target="_blank">Mua lại</a>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+    <div class="bg-transparent d-flex w-100 p-0 gap-3">
+        <div class="w-50 bg-transparent p-0 d-flex flex-column gap-3">
+            <div class="py-3 px-2 bg-white rounded-3 px-3">
+                <div class="fw-bold fs-5 mb-3">Thông tin khách hàng</div>
+                <div class="d-flex flex-column">
+                    <div class="d-flex justify-content-between py-3 border-1 border-bottom" style="border-color: #d2d1d1">
+                        <span class="text-muted">Họ và tên: </span> <span class="fw-bold">@Model.KhachHang.TenKH</span>
+                    </div>
+                    <div class="d-flex justify-content-between py-3 border-1 border-bottom" style="border-color: #d2d1d1">
+                        <span class="text-muted">Số điện thoại: </span> <span class="fw-bold">@Model.KhachHang.SDT</span>
+                    </div>
+                    <div class="d-flex justify-content-between py-3 border-1 border-bottom" style="border-color: #d2d1d1">
+                        <span class="text-muted">Địa chỉ:: </span>
+                        <div class="w-75 text-end">
+                            <span class="fw-bold text-break" style="word-break: break-word;">
+                                @(string.Join(" ", new[] { Model.DonHang.DiaChi.TinhThanhPho, Model.DonHang.DiaChi.QuanHuyen, Model.DonHang.DiaChi.PhuongXa, Model.DonHang.DiaChi.DiaChiCuThe }.Where(x => !string.IsNullOrWhiteSpace(x))))
+                            </span>
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-between py-3 mb-3" style="border-color: #d2d1d1">
+                        <span class="text-muted">Ghi chú: </span>
+                        @if (Model.DonHang.GhiChu == null)
+                        {
+                            <span class="fw-bold">-</span>
+                        }
+                        else
+                        {
+                            <span class="fw-bold">@Model.DonHang.GhiChu</span>
+                        }
+                    </div>
+                </div>
+            </div>
+            <div class="py-3 px-3 bg-white rounded-3">
+                <div class="fw-bold fs-5 mb-2">Thông tin hỗ trợ</div>
+                <div class="d-flex flex-column">
+                    <div class="d-flex justify-content-between align-items-center py-3 gap-2 border-bottom" style="border-color: #f0f0f0;">
+                        <div class="d-flex flex-column gap-1">
+                            <div class="mt-1 d-flex gap-2 align-items-center">
+                                <i class="bi bi-geo-alt-fill text-info fs-5"></i>
+                                <span class="text-secondary fw-medium">Địa chỉ cửa hàng:</span>
+                            </div>
+                            <div class="d-flex gap-2">
+                                <span class="fw-bold fs-6">127 Nguyễn Thị Tú, P. Bình Hưng Hoà B, Q. Bình Tân, TP. HCM</span>
+                            </div>
+                        </div>
+                        <a href="#" class="btn bg-info-subtle text-info-emphasis rounded-pill d-flex align-items-center fw-bold border-0 px-3 ms-2 text-nowrap text-info" style="background-color: #e7f7f4; height: 38px">
+                            <i class="bi bi-geo-alt me-1"></i> Chỉ đường
+                        </a>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center py-3 mb-3" style="border-color: #f0f0f0;">
+                        <div class="d-flex flex-column gap-1">
+                            <div class="mt-1 d-flex gap-2 align-items-center">
+                                <i class="bi bi-telephone-fill text-info fs-5"></i>
+                                <span class="text-secondary fw-medium">Số điện thoại:</span>
+                            </div>
+                            <div class="d-flex gap-2 justify-content-between w-100">
+                                <span class="fw-bold fs-6">02871000229</span>
+                            </div>
+                        </div>
+                        <a href="#" class="btn bg-info-subtle text-info-emphasis rounded-pill fw-bold align-middle  border-0 px-3 ms-2 text-nowrap text-info" style="background-color: #e7f7f4; height: 38px">
+                            <i class="bi bi-telephone-fill text-info me-1"></i> Liên hệ
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="w-50 bg-transparent p-0 d-flex flex-column gap-3">
+            <div class="py-3 px-2 bg-white rounded-3 px-3">
+                <div class="fw-bold fs-5 mb-3">Thông tin thanh toán</div>
+                <div class="fw-bold mb-1 p-2 rounded-2" style="background-color: #f4f4f4; font-size: 17px">Sản phẩm</div>
+                <div class="d-flex flex-column">
+                    <div class="d-flex justify-content-between py-3 border-1 border-bottom" style="border-color: #d2d1d1">
+                        <span class="text-muted">Số lượng sản phẩm: </span> <span class="fw-bold">@Model.ChiTietHoaDons.Sum(sp => sp.SoLuong)</span>
+                    </div>
+                    <div class="d-flex justify-content-between py-3 border-1 border-bottom" style="border-color: #d2d1d1">
+                        <span class="text-muted">Tổng tiền hàng: </span> <span class="fw-bold">@Model.TongTien.Value.ToString("N0")đ</span>
+                    </div>
+                    <div class="d-flex justify-content-between py-3 border-1 border-bottom" style="border-color: #d2d1d1">
+                        <span class="text-muted">Giảm giá: </span> <span class="fw-normal text-success">-@Model.GiamGia.Value.ToString("N0")đ</span>
+                    </div>
+                    <div class="d-flex justify-content-between py-3 mb-3" style="border-color: #d2d1d1">
+                        <span class="text-muted">Phí vận chuyển: </span> <span class="fw-normal text-success">0đ</span>
+                    </div>
+                </div>
+                <div class="fw-bold mb-1 p-2 rounded-2" style="background-color: #f4f4f4; font-size: 17px">Thanh toán</div>
+                <div class="d-flex flex-column">
+                    <div class="d-flex justify-content-between py-3 border-1 border-bottom" style="border-color: #d2d1d1">
+                        <span class="text-muted">Tổng số tiền: </span> <span class="fw-bold text-danger">@Model.ThanhTien.Value.ToString("N0")đ</span>
+                    </div>
+                    <div class="d-flex justify-content-between py-3" style="border-color: #d2d1d1">
+                        <span class="text-muted">Tổng tiền đã thanh toán: </span>
+                        @if (Model.TrangThai == "Đã thanh toán")
+                        {
+                            <span class="fw-normal text-success">@Model.ThanhTien.Value.ToString("N0")đ</span>
+                        }
+                        else
+                        {
+                            <span class="fw-normal text-danger">0đ</span>
+                        }
+                    </div>        
+                </div>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+
+    var detail = Model.ChiTietHoaDons.FirstOrDefault();
+    string serviceType = "";
+    string serviceName = "";
+    string info1 = "";
+    string info2 = "";
+    string iconClass = "bi-bag-check";
+    
+    if (detail != null)
+    {
+        if (detail.MaDKLop != null)
+        {
+            serviceType = "Đăng ký Lớp học";
+            serviceName = "Lớp: " + detail.DangKyLop.LopHoc.TenLop;
+            info1 = "Lịch học: " + (detail.DangKyLop.LopHoc.NgayBatDau.ToString("dd/MM") ?? "") + " - " + (detail.DangKyLop.LopHoc.NgayKetThuc.ToString("dd/MM/yyyy") ?? "");           
+            iconClass = "bi-collection-play";
+        }
+        else if (detail.MaDKPT != null)
+        {
+            serviceType = "Thuê Huấn luyện viên (PT)";
+            serviceName = "PT: " + detail.DangKyPT.NhanVien.TenNV;            
+            info2 = "Số buổi: " + detail.DangKyPT.SoBuoi + " buổi";
+            iconClass = "bi-person-badge-fill";
+        }
+        else if (detail.MaDKGT != null)
+        {
+            serviceType = "Đăng ký Gói tập";
+            serviceName = "Gói: " + detail.DangKyGoiTap.GoiTap.TenGoi;
+            info1 = "Thời hạn: " + detail.DangKyGoiTap.GoiTap.ThoiHan + " ngày";
+            info2 = "Ngày đăng ký: " + (detail.DangKyGoiTap.NgayBatDau.ToString("dd/MM/yyyy") ?? "");
+            iconClass = "bi-ticket-perforated-fill";
+        }
+    }
+
+    <div class="card border-0 mb-3 rounded-3 bg-white px-3 py-3 text-decoration-none text-black">
+        <span class="fw-bold fs-5 ms-1">Tổng quan dịch vụ</span>
+        <div class="card-body p-2">
+            <div class="d-flex align-items-center w-100 mb-2 gap-2">
+                <div class="d-flex align-items-center align-content-center gap-2">
+                    <span class="text-muted">Mã hóa đơn: <span class="fw-bold text-black ms-1">#@Model.MaHD</span></span>
+                    <span class="text-muted fw-bolder fs-5 mx-2">•</span>
+                    <span class="text-muted">Ngày lập: <span class="fw-bold text-dark">@Model.NgayLap.Value.ToString("dd/MM/yyyy")</span></span>
+                </div>
+                <span class="text-muted fw-bolder fs-5 mx-2">•</span>
+                <div>
+                    @if (Model.TrangThai == "Đã thanh toán")
+                    {
+                        <div class="text-success border border-1 rounded-2 p-1 fw-bold" style="background-color: #c9eed9; font-size: 12px">
+                            Đã thanh toán
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-warning border border-1 rounded-2 p-1 fw-bold" style="background-color: #faefb9; font-size: 12px">
+                            Chưa thanh toán
+                        </div>
+                    }
+                </div>
+            </div>
+            
+            <div class="w-100 d-flex row mt-3 border-top pt-3">
+                <div class="d-flex gap-2 mb-3 col-8">
+                    <div class="bg-light rounded-3 d-flex align-items-center justify-content-center" style="width: 13%; aspect-ratio: 1/1;">
+                        <i class="bi @iconClass fs-3 text-secondary"></i>
+                    </div>
+                    <div class="d-flex flex-column justify-content-center">
+                        <span class="fs-6 text-uppercase fw-bolder text-break" style="word-break: break-word;">@serviceName</span>
+                        <span class="small fw-bolder">@Model.ThanhTien.Value.ToString("N0") đ</span>
+                        <span class="small text-muted">@info1</span>
+                        @if (!string.IsNullOrEmpty(info2))
+                        {
+                            <span class="small text-muted">@info2</span>
+                        }
+                    </div>
+                </div>
+                <div class="d-flex col-4 align-items-center justify-content-end text-end p-0 gap-2">
+                    <span class="fs-6">Số lượng: </span> <span class="fs-6 fw-bold">1</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="bg-transparent d-flex w-100 p-0 gap-3">        
+        <div class="w-50 bg-transparent p-0 d-flex flex-column gap-3">
+            <div class="py-3 px-2 bg-white rounded-3 px-3">
+                <div class="fw-bold fs-5 mb-3">Thông tin khách hàng</div>
+                <div class="d-flex flex-column">
+                    <div class="d-flex justify-content-between py-3 border-1 border-bottom" style="border-color: #d2d1d1">
+                        <span class="text-muted">Họ và tên: </span> <span class="fw-bold">@Model.KhachHang.TenKH</span>
+                    </div>
+                    <div class="d-flex justify-content-between py-3 border-1 border-bottom" style="border-color: #d2d1d1">
+                        <span class="text-muted">Số điện thoại: </span> <span class="fw-bold">@Model.KhachHang.SDT</span>
+                    </div>
+                    <div class="d-flex justify-content-between py-3 mb-3" style="border-color: #d2d1d1">
+                        <span class="text-muted">Email: </span>
+                        <span class="fw-bold">@Model.KhachHang.Email</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="py-3 px-3 bg-white rounded-3">
+                <div class="fw-bold fs-5 mb-2">Thông tin hỗ trợ</div>
+                <div class="d-flex flex-column">
+                    <div class="d-flex justify-content-between align-items-center py-3 gap-2 border-bottom" style="border-color: #f0f0f0;">
+                        <div class="d-flex flex-column gap-1">
+                            <div class="mt-1 d-flex gap-2 align-items-center">
+                                <i class="bi bi-geo-alt-fill text-info fs-5"></i>
+                                <span class="text-secondary fw-medium">Địa chỉ phòng tập:</span>
+                            </div>
+                            <div class="d-flex gap-2">
+                                <span class="fw-bold fs-6">127 Nguyễn Thị Tú, P. Bình Hưng Hoà B, Q. Bình Tân, TP. HCM</span>
+                            </div>
+                        </div>
+                        <a href="#" class="btn bg-info-subtle text-info-emphasis rounded-pill d-flex align-items-center fw-bold border-0 px-3 ms-2 text-nowrap text-info" style="background-color: #e7f7f4; height: 38px">
+                            <i class="bi bi-geo-alt me-1"></i> Chỉ đường
+                        </a>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center py-3 mb-3" style="border-color: #f0f0f0;">
+                        <div class="d-flex flex-column gap-1">
+                            <div class="mt-1 d-flex gap-2 align-items-center">
+                                <i class="bi bi-telephone-fill text-info fs-5"></i>
+                                <span class="text-secondary fw-medium">Số điện thoại:</span>
+                            </div>
+                            <div class="d-flex gap-2 justify-content-between w-100">
+                                <span class="fw-bold fs-6">02871000229</span>
+                            </div>
+                        </div>
+                        <a href="#" class="btn bg-info-subtle text-info-emphasis rounded-pill fw-bold align-middle  border-0 px-3 ms-2 text-nowrap text-info" style="background-color: #e7f7f4; height: 38px">
+                            <i class="bi bi-telephone-fill text-info me-1"></i> Liên hệ
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="w-50 bg-transparent p-0 d-flex flex-column gap-3">
+            <div class="py-3 px-2 bg-white rounded-3 px-3">
+                <div class="fw-bold fs-5 mb-3">Thông tin thanh toán</div>
+                <div class="fw-bold mb-1 p-2 rounded-2" style="background-color: #f4f4f4; font-size: 17px">Chi phí</div>
+                <div class="d-flex flex-column">
+                    <div class="d-flex justify-content-between py-3 border-1 border-bottom" style="border-color: #d2d1d1">
+                        <span class="text-muted">Giá trị dịch vụ: </span> <span class="fw-bold">@Model.TongTien.Value.ToString("N0")đ</span>
+                    </div>
+                    <div class="d-flex justify-content-between py-3 border-1 border-bottom" style="border-color: #d2d1d1">
+                        <span class="text-muted">Giảm giá: </span> <span class="fw-normal text-success">-@Model.GiamGia.Value.ToString("N0")đ</span>
+                    </div>
+                    <div class="d-flex justify-content-between py-3 mb-3" style="border-color: #d2d1d1">
+                        <span class="text-muted">Phí khác: </span> <span class="fw-normal text-success">0đ</span>
+                    </div>
+                </div>
+                <div class="fw-bold mb-1 p-2 rounded-2" style="background-color: #f4f4f4; font-size: 17px">Thanh toán</div>
+                <div class="d-flex flex-column">
+                    <div class="d-flex justify-content-between py-3 border-1 border-bottom" style="border-color: #d2d1d1">
+                        <span class="text-muted">Tổng số tiền: </span> <span class="fw-bold text-danger">@Model.ThanhTien.Value.ToString("N0")đ</span>
+                    </div>
+                    <div class="d-flex justify-content-between py-3" style="border-color: #d2d1d1">
+                        <span class="text-muted">Trạng thái: </span>
+                        @if (Model.TrangThai == "Đã thanh toán")
+                        {
+                            <span class="fw-bold text-success">Đã thanh toán</span>
+                        }
+                        else
+                        {
+                            <span class="fw-bold text-danger">Chưa thanh toán</span>
+                        }
+                    </div>
+
+                    @if (detail != null && detail.MaDKPT != null && detail.HoaDon.TrangThai == "Chưa thanh toán" && detail.HoaDon.MaDonHang == null)
+                    {
+                        <div class="pt-2 border-top border-1" style="border-color: #d2d1d1">
+                            <a href="@Url.Action("CheckoutDangKyPT", "CartCheckout", new { maHD = Model.MaHD, url = Request.RawUrl })"
+                               class="btn btn-danger w-100 py-2 fw-bold text-uppercase shadow-sm">
+                                <i class="bi bi-credit-card-2-back-fill me-2"></i> Thanh toán ngay
+                            </a>
+                        </div>
+                    }
+
+
+                </div>
+            </div>
+        </div>
+    </div>
+}

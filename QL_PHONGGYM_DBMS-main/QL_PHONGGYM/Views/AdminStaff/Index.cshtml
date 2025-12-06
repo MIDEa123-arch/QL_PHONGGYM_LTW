@@ -1,0 +1,94 @@
+﻿@model List<QL_PHONGGYM.Models.NhanVien>
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+}
+<div class="card border-0 shadow-sm">
+    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+        <h5 class="mb-0 fw-bold text-primary"><i class="fas fa-user-tie me-2"></i> Danh sách nhân viên</h5>
+        <a href="@Url.Action("Create")" class="btn btn-primary btn-sm">
+            <i class="fas fa-plus me-1"></i> Thêm nhân viên
+        </a>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-4">Họ tên</th>
+                        <th>Chức vụ</th>
+                        <th>Liên hệ</th>
+                        <th>Tài khoản</th>
+                        <th class="text-end pe-4">Hành động</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null && Model.Any())
+                    {
+                        foreach (var item in Model)
+                        {
+                            <tr>
+                                <td class="ps-4">
+                                    <div class="fw-bold">@item.TenNV</div>
+                                    <small class="text-muted">@item.GioiTinh - @(item.NgaySinh.HasValue ? item.NgaySinh.Value.ToString("dd/MM/yyyy") : "")</small>
+                                </td>
+                                <td>
+                                    @if (item.ChucVu.TenChucVu == "Quản lý")
+                                    {
+                                        <span class="badge bg-danger">@item.ChucVu.TenChucVu</span>
+                                    }
+                                    else if (item.ChucVu.TenChucVu == "PT")
+                                    {
+                                        <span class="badge bg-success">@item.ChucVu.TenChucVu</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary">@item.ChucVu.TenChucVu</span>
+                                    }
+                                </td>
+                                <td>
+                                    <i class="fas fa-phone me-1 text-muted"></i> @item.SDT
+                                </td>
+                                <td>
+                                    <span class="text-primary fw-bold">@item.TenDangNhap</span>
+                                </td>
+                                <td class="text-end pe-4">
+                                    <a href="@Url.Action("Edit", new { id = item.MaNV })" class="btn btn-outline-primary btn-sm me-1">
+                                        <i class="fas fa-user-edit"></i>
+                                    </a>
+                                    <button onclick="deleteStaff(@item.MaNV)" class="btn btn-outline-danger btn-sm">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr><td colspan="5" class="text-center py-4">Chưa có dữ liệu</td></tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    function deleteStaff(id) {
+        if (confirm('Bạn có chắc muốn xóa nhân viên này?')) {
+            $.ajax({
+                url: '@Url.Action("Delete", "AdminStaff")',
+                type: 'POST',
+                data: { id: id },
+                success: function (res) {
+                    if (res.success) {
+                        location.reload();
+                    } else {
+                        alert(res.message);
+                    }
+                }
+            });
+        }
+    }
+</script>

@@ -1,0 +1,72 @@
+﻿@model QL_PHONGGYM.Models.NhanVien
+@{
+    ViewBag.Title = "Edit";
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<h2>Edit</h2>
+
+<div class="card border-0 shadow-sm" style="max-width: 800px; margin: 0 auto;">
+    <div class="card-header bg-white py-3">
+        <h5 class="mb-0 fw-bold text-primary">Cập nhật: @Model.TenNV</h5>
+    </div>
+    <div class="card-body">
+        @using (Html.BeginForm())
+        {
+            @Html.AntiForgeryToken()
+            @Html.HiddenFor(m => m.MaNV)
+            @Html.HiddenFor(m => m.TenDangNhap)
+
+            if (ViewBag.Error != null)
+            {
+                <div class="alert alert-danger">@ViewBag.Error</div>
+            }
+
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label fw-bold">Họ và tên</label>
+                    @Html.TextBoxFor(m => m.TenNV, new { @class = "form-control", required = "required" })
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label fw-bold">Chức vụ</label>
+                    @Html.DropDownList("MaChucVu", null, new { @class = "form-select", required = "required" })
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label fw-bold">Số điện thoại</label>
+                    @Html.TextBoxFor(m => m.SDT, new { @class = "form-control", required = "required" })
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label fw-bold">Ngày sinh</label>
+                    <input type="date" name="NgaySinh" class="form-control" value="@(Model.NgaySinh.HasValue ? Model.NgaySinh.Value.ToString("yyyy-MM-dd") : "")" />
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label fw-bold">Giới tính</label>
+                    <select name="GioiTinh" class="form-select">
+                        <option value="Nam" @(Model.GioiTinh == "Nam" ? "selected" : "")>Nam</option>
+                        <option value="Nữ" @(Model.GioiTinh == "Nữ" ? "selected" : "")>Nữ</option>
+                    </select>
+                </div>
+
+                <div class="col-12 mt-3">
+                    <h6 class="border-bottom pb-2 text-muted">Tài khoản (Chỉ nhập nếu muốn đổi mật khẩu)</h6>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label fw-bold">Tên đăng nhập</label>
+                    <input type="text" class="form-control" value="@Model.TenDangNhap" disabled readonly />
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label fw-bold">Mật khẩu mới</label>
+                    @Html.TextBoxFor(m => m.MatKhau, new { @class = "form-control", type = "password", placeholder = "Bỏ trống nếu không đổi" })
+                </div>
+            </div>
+
+            <div class="mt-4 text-end">
+                <a href="@Url.Action("Index")" class="btn btn-light border me-2">Hủy</a>
+                <button type="submit" class="btn btn-success px-4 fw-bold">Cập nhật</button>
+            </div>
+        }
+    </div>
+</div>

@@ -1,0 +1,245 @@
+﻿@model IEnumerable<QL_PHONGGYM.Models.GoiTap>
+@{
+    ViewBag.Title = "GoiTap";
+    Layout = "~/Views/Shared/_LayoutGoiTap.cshtml";
+}
+
+<style>
+    .gym-page {
+        background: linear-gradient(180deg, #00b4d8 0%, #ffffff 50%);
+        min-height: 100vh;
+        padding: 40px 0;
+    }
+
+
+    .section-banner {
+        position: relative;
+        width: 100%;
+        height: 330px;
+        background: linear-gradient(135deg, #00b4d8 0%, #0096c7 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 50px;
+        margin-top: 50px;
+        overflow: hidden;
+    }
+
+        .section-banner::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 50%;
+            height: 100%;
+            background: #000;
+            clip-path: polygon(20% 0, 100% 0, 100% 100%, 0% 100%);
+        }
+
+        .section-banner::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            right: 0%;            
+            width: 60%;
+            height: 100%;
+            background: url('../../content/images/adobestock_728899813.jpeg') center repeat;
+            background-size: 100%;
+            clip-path: polygon(25% 0, 100% 0, 100% 100%, 0% 100%);
+            opacity: 0.9;
+        }
+
+    .section-title {
+        position: absolute;
+        left: 10%;
+        font-size: 5rem;
+        font-weight: 900;
+        color: white;
+        text-transform: uppercase;
+        letter-spacing: 3px;
+        z-index: 1;
+        text-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        font-family: Roboto;
+    }
+
+    .section-banner-1 {
+        position: relative;
+        width: 100%;
+        height: 330px;
+        background: linear-gradient(135deg, #00b4d8 0%, #0096c7 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 50px;
+        margin-top: 50px;
+        overflow: hidden;
+    }
+
+        .section-banner-1::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 50%;
+            height: 100%;
+            background: #000;
+            clip-path: polygon(20% 0, 100% 0, 100% 100%, 0% 100%);
+        }
+
+        .section-banner-1::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            right: 0%;
+            width: 60%;
+            height: 100%;            
+            background: url('../../content/images/adobestock_725186100.jpeg') center repeat;
+            background-size: 100%;
+            clip-path: polygon(25% 0, 100% 0, 100% 100%, 0% 100%);
+            opacity: 0.9;
+        }
+
+</style>
+
+<div class="gym-page">
+    @{
+        var allPackages = Model.OrderBy(x => x.ThoiHan).ToList();
+        var shortTermPackages = allPackages.Where(x => x.ThoiHan <= 1).ToList();
+        var longTermPackages = allPackages.Where(x => x.ThoiHan > 1).ToList();
+    }
+    
+    @if (shortTermPackages.Any())
+    {
+        <section class="packages-section">
+            <div class="section-banner">
+                <h2 class="section-title text-uppercase">Đặt quyền<br />hội viên</h2>
+            </div>
+
+            <div class="container">
+                <div class="row g-4 justify-content-center gap-4">
+                    @foreach (var item in shortTermPackages)
+                    {
+                        var is12Thang = item.TenGoi == "12 tháng";
+                        <div class="card py-3 px-3 rounded-4 @(is12Thang ? "" : "bg-white")"
+                             style="width: 20rem; @(is12Thang ? "background: linear-gradient(45deg, #6a11cb, #2575fc);" : "")">
+                            <div class="d-flex justify-content-between align-items-center w-100">
+                                <div class="h5 text-uppercase m-0 @(is12Thang ? "text-white" : "text-black")"
+                                     style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif">
+                                    @item.TenGoi
+                                </div>
+                                <div class="text-uppercase fw-bold rounded-2 p-2" style="font-size: 11px; background-color: #17f696">Tất cả chi nhánh</div>
+                            </div>
+                            <div class="mt-4">
+                                <span class="fs-4 fw-bolder @(is12Thang ? "text-white" : "text-black")">
+                                    @item.Gia.ToString("N0").Replace(",", ".").Replace("'", ".") VNĐ
+                                </span>
+                                <span class="small @(is12Thang ? "text-white" : "text-black")">
+                                    / @(is12Thang ? "Năm" : "tháng")
+                                </span>
+                            </div>
+                            <div class="border-top border-bottom border-1 py-1 d-flex align-items-center @(is12Thang ? "text-white border-white" : "text-black border-dark") mt-2 fw-light"
+                                 style="font-size: 16px; height: 160px; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 4; overflow: hidden;">
+                                @item.MoTa
+                            </div>
+                            @if (Session["MaKH"] != null)
+                            {
+                                <a class="w-50 mx-auto btn rounded-pill btn-outline-primary border-0 fw-bold mt-4 text-white btn-info btn-thamgia"
+                                   href="@Url.Action("CheckoutGoiTap", "GoiTap", new { id = item.MaGoiTap, url = Request.RawUrl })">
+                                    Tham gia
+                                </a>
+                            }
+                            else
+                            {
+                                <button class="w-50 mx-auto btn rounded-pill btn-outline-primary border-0 fw-bold mt-4 text-white btn-info"
+                                        data-bs-toggle="modal" data-bs-target="#loginModal">
+                                    Tham gia
+                                </button>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+        </section>
+
+        <div class="section-divider"></div>
+    }
+    
+    @if (longTermPackages.Any())
+    {
+        <section class="packages-section">
+            <div class="section-banner-1">
+                <h2 class="section-title text-uppercase">đặt quyền<br />gói dài hạn</h2>
+            </div>
+
+            <div class="container">
+                <div class="row g-4 justify-content-center gap-4">
+                    @foreach (var item in longTermPackages)
+                    {
+                        var is12Thang = item.TenGoi == "12 tháng";
+                        <div class="card py-3 px-3 rounded-4 @(is12Thang ? "" : "bg-white")"
+                             style="width: 20rem; @(is12Thang ? "background: linear-gradient(45deg, #6a11cb, #2575fc);" : "")">
+                            <div class="d-flex justify-content-between align-items-center w-100">
+                                <div class="h5 text-uppercase m-0 @(is12Thang ? "text-white" : "text-black")"
+                                     style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif">
+                                    @item.TenGoi
+                                </div>
+                                <div class="text-uppercase fw-bold rounded-2 p-2" style="font-size: 11px; background-color: #17f696">Tất cả chi nhánh</div>
+                            </div>
+                            <div class="mt-4">
+                                <span class="fs-4 fw-bolder @(is12Thang ? "text-white" : "text-black")">
+                                    @item.Gia.ToString("N0").Replace(",", ".").Replace("'", ".") VNĐ
+                                </span>
+                                <span class="small @(is12Thang ? "text-white" : "text-black")">
+                                    / @(is12Thang ? "Năm" : "tháng")
+                                </span>
+                            </div>
+                            <div class="border-top border-bottom border-1 py-1 d-flex align-items-center @(is12Thang ? "text-white border-white" : "text-black border-dark") mt-2 fw-light"
+                                 style="font-size: 16px; height: 160px; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 4; overflow: hidden;">
+                                @item.MoTa
+                            </div>
+                            @if (Session["MaKH"] != null)
+                            {
+                                <a class="w-50 mx-auto btn rounded-pill btn-outline-primary border-0 fw-bold mt-4 text-white btn-info btn-thamgia"
+                                   href="@Url.Action("CheckoutGoiTap", "GoiTap", new { id = item.MaGoiTap, url = Request.RawUrl })">
+                                    Tham gia
+                                </a>
+                            }
+                            else
+                            {
+                                <button class="w-50 mx-auto btn rounded-pill btn-outline-primary border-0 fw-bold mt-4 text-white btn-info"
+                                        data-bs-toggle="modal" data-bs-target="#loginModal">
+                                    Tham gia
+                                </button>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+        </section>
+    }
+</div>
+
+<div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 w-75 mx-auto shadow-lg border-0 position-relative">
+            <div class="mt-3 border-0 text-center w-100">
+                <h5 class="modal-title fw-bold text-primary text-center" id="loginModalLabel">THE-GYM MEMBER</h5>
+            </div>
+            <img src="@Url.Content("~/Content/Images/Logo.png")" class="mx-auto" style="width: 5rem" />
+            <div class="modal-body text-center py-2">
+                <p class="mb-4 fw-semibold" style="font-size: 16px">
+                    Vui lòng đăng nhập tài khoản <strong>The GYM</strong> để xem ưu đãi và thanh toán dễ dàng hơn.
+                </p>
+                <div class="d-flex justify-content-center gap-3">
+                    <a href="@Url.Action("Login", "Account", new { returnUrl = Request.RawUrl })" class="btn btn-primary py-2 fw-semibold" style="width: 10rem">
+                        Đăng nhập
+                    </a>
+                    <a href="@Url.Action("Register", "Account", new { returnUrl = Request.RawUrl })" class="btn btn-outline-primary py-2 fw-semibold" style="width: 10rem">
+                        Đăng ký
+                    </a>
+                </div>
+            </div>
+            <button type="button" class="btn-close position-absolute mt-2" data-bs-dismiss="modal" style="right: 0.7rem" aria-label="Đóng"></button>
+        </div>
+    </div>
+</div>

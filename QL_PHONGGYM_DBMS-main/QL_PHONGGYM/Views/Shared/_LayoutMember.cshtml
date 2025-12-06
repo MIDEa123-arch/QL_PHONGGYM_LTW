@@ -1,0 +1,243 @@
+﻿@{
+    Layout = null;
+
+    var kh = Session["KhachHang"] as QL_PHONGGYM.Models.KhachHang;
+    decimal tongTien = ViewBag.TongTienTichLuy ?? 0;
+    int soDon = ViewBag.SoDonHang ?? 0;
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewBag.Title - Quản lý tài khoản</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    @Styles.Render("~/Content/css")
+    @Scripts.Render("~/bundles/modernizr")
+
+    <style>
+        body {
+            background-color: #f4f6f8;
+            color: #444;
+        }
+
+        .member-header {
+            background-color: white;
+            padding: 10px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            border-bottom: 1px solid #eee;
+        }
+
+            .member-header a {
+                text-decoration: none;
+            }
+
+        .profile-card {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .sidebar-menu {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .list-group-item {
+            border: none;
+            padding: 15px 20px;
+            font-weight: 500;
+            color: #333;
+            transition: all 0.2s;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+            .list-group-item:last-child {
+                border-bottom: none;
+            }
+
+            .list-group-item:hover {
+                background-color: #f9f9f9;
+                color: #0d6efd;
+                padding-left: 25px;
+                text-decoration: none;
+            }
+
+            .list-group-item.active {
+                background-color: #e7f1ff;
+                color: #0d6efd;
+                font-weight: 700;
+                border-left: 4px solid #0d6efd;
+            }
+
+            .list-group-item i {
+                width: 25px;
+                text-align: center;
+                margin-right: 10px;
+            }
+
+        .content-area {
+            min-height: 600px;
+        }
+
+        .member-footer {
+            text-align: center;
+            padding: 20px;
+            color: #888;
+            font-size: 0.9rem;
+            margin-top: 30px;
+        }
+
+        .d-flex {
+            display: flex;
+        }
+
+        .align-items-center {
+            align-items: center;
+        }
+
+        .justify-content-between {
+            justify-content: space-between;
+        }
+
+        .gap-2 {
+            gap: 0.5rem;
+        }
+
+        .gap-3 {
+            gap: 1rem;
+        }
+
+        .fw-bold {
+            font-weight: 700;
+        }
+
+        .text-uppercase {
+            text-transform: uppercase;
+        }
+
+        .rounded-circle {
+            border-radius: 50%;
+        }
+
+        .ms-3 {
+            margin-left: 1rem;
+        }
+
+        .mb-1 {
+            margin-bottom: 0.25rem;
+        }
+
+        .mb-4 {
+            margin-bottom: 1.5rem;
+        }
+
+        .mt-4 {
+            margin-top: 1.5rem;
+        }
+    </style>
+</head>
+<body>
+
+    <header class="member-header">
+        <div class="container d-flex justify-content-between align-items-center">
+            <a href="@Url.Action("Index", "Home")" class="d-flex align-items-center">
+                <img src="@Url.Content("~/Content/Images/logo.png")" style="height: 50px;" alt="Logo The Gym" />
+            </a>
+
+            <div class="d-flex align-items-center gap-3">
+                <span class="text-dark d-none d-md-block">Xin chào, <strong>@(kh != null ? kh.TenKH : "Khách")</strong></span>
+                <img src="~/Content/Images/user.png" class="rounded-circle border border-1" width="40" height="40" style="object-fit: cover;">
+            </div>
+        </div>
+    </header>
+
+    <div class="container mt-4">
+        <div class="row">
+
+            <div class="col-lg-3 col-md-4 mb-4">
+
+                <div class="profile-card">
+                    <img src="~/Content/Images/user.png" class="rounded-circle border" width="60" height="60" style="object-fit: cover;">
+                    <div class="ms-3 overflow-hidden">
+                        @if (kh != null)
+                        {
+                            <h5 class="fw-bold mb-1">@kh.TenKH</h5>
+                            <div class="badge text-primary" style="border: 1px solid #0d6efd; padding: 3px 8px; border-radius: 10px; font-size: 0.8rem;">
+                                @(kh.LoaiKhachHang != null ? kh.LoaiKhachHang.TenLoai : "S-Member")
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <div class="sidebar-menu list-group">
+                    <a href="@Url.Action("Index", "Member")" class="list-group-item list-group-item-action @(ViewBag.ActiveMenu == "tongquan" ? "active" : "")">
+                        <i class="fas fa-home"></i> Trang chủ
+                    </a>
+
+                    <a href="@Url.Action("LichTap", "Member")" class="list-group-item list-group-item-action @(ViewBag.ActiveMenu == "lichtap" ? "active" : "")">
+                        <i class="fas fa-calendar-check"></i> Lịch tập
+                    </a>
+
+
+                    <a href="@Url.Action("LichSuMuaHang", "Member")" class="list-group-item list-group-item-action @(ViewBag.ActiveMenu == "hoadon" ? "active" : "")">
+                        <i class="fas fa-history"></i> Lịch sử mua hàng
+                    </a>
+
+                    <a href="@Url.Action("SoDiaChi", "Member")" class="list-group-item list-group-item-action @(ViewBag.ActiveMenu == "diachi" ? "active" : "")">
+                        <i class="fas fa-map-marker-alt"></i> Sổ địa chỉ nhận hàng
+                    </a>
+
+                    <a href="@Url.Action("ThongTinTaiKhoan", "Member")" class="list-group-item list-group-item-action @(ViewBag.ActiveMenu == "taikhoan" ? "active" : "")">
+                        <i class="fas fa-user-cog"></i> Cập nhật tài khoản
+                    </a>
+
+                    <a href="@Url.Action("Logout", "Account")" class="list-group-item list-group-item-action text-danger">
+                        <i class="fas fa-sign-out-alt"></i> Đăng xuất
+                    </a>
+                </div>
+            </div>
+
+            <div class="col-lg-9 col-md-8">
+                <div class="content-area">
+                    @RenderBody()
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="member-footer">
+        &copy; 2025 The Gym Application. All rights reserved.
+    </div>
+
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/bootstrap")
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    @if (TempData["ThongBao"] != null)
+    {
+        <script>
+            Swal.fire({
+                icon: 'success',
+                title: 'Thông báo',
+                text: '@TempData["ThongBao"]',
+                timer: 3000,
+                showConfirmButton: false
+            });
+        </script>
+    }
+    @RenderSection("scripts", required: false)
+</body>
+</html>

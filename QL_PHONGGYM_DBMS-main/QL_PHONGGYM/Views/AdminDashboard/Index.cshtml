@@ -1,0 +1,116 @@
+﻿@model QL_PHONGGYM.Models.AdminDashboardViewModel
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+}
+<div class="row g-4">
+    <div class="col-md-6 col-lg-3">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body d-flex align-items-center">
+                <div class="bg-primary bg-opacity-10 p-3 rounded-3 text-primary me-3">
+                    <i class="fas fa-dollar-sign fa-2x"></i>
+                </div>
+                <div>
+                    <h6 class="text-muted mb-1">Tổng doanh thu</h6>
+                    <h4 class="fw-bold mb-0">@string.Format("{0:N0}đ", Model.DoanhThuThang)</h4>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6 col-lg-3">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body d-flex align-items-center">
+                <div class="bg-success bg-opacity-10 p-3 rounded-3 text-success me-3">
+                    <i class="fas fa-user-plus fa-2x"></i>
+                </div>
+                <div>
+                    <h6 class="text-muted mb-1">Đăng ký mới</h6>
+                    <h4 class="fw-bold mb-0">@Model.HoiVienMoi</h4>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6 col-lg-3">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body d-flex align-items-center">
+                <div class="bg-warning bg-opacity-10 p-3 rounded-3 text-warning me-3">
+                    <i class="fas fa-dumbbell fa-2x"></i>
+                </div>
+                <div>
+                    <h6 class="text-muted mb-1">Đang tập luyện</h6>
+                    <h4 class="fw-bold mb-0">@Model.KhachDangTap</h4>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6 col-lg-3">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body d-flex align-items-center">
+                <div class="bg-danger bg-opacity-10 p-3 rounded-3 text-danger me-3">
+                    <i class="fas fa-shopping-cart fa-2x"></i>
+                </div>
+                <div>
+                    <h6 class="text-muted mb-1">Tổng đơn hàng</h6>
+                    <h4 class="fw-bold mb-0">@Model.DonHangThang</h4>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-lg-12">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                <h6 class="mb-0 fw-bold">Đơn hàng mới nhất</h6>
+                <a href="@Url.Action("Index", "AdminOrder")" class="btn btn-sm btn-outline-primary">Xem tất cả</a>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="ps-4">Mã HĐ</th>
+                                <th>Khách hàng</th>
+                                <th>Ngày lập</th>
+                                <th>Tổng tiền</th>
+                                <th>Trạng thái</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model.DonHangMoiNhat)
+                            {
+                                <tr>
+                                    <td class="ps-4 fw-bold">#@item.MaHD</td>
+                                    <td>
+                                        <div class="fw-bold">@item.KhachHang.TenKH</div>
+                                        <small class="text-muted">@item.KhachHang.SDT</small>
+                                    </td>
+                                    <td>@item.NgayLap.Value.ToString("dd/MM/yyyy HH:mm")</td>
+                                    <td class="text-danger fw-bold">@string.Format("{0:N0}đ", item.TongTien)</td>
+                                    <td>
+                                        @if (item.TrangThai == "Đã thanh toán")
+                                        {
+                                            <span class="badge bg-success">@item.TrangThai</span>
+                                        }
+                                        else if (item.TrangThai == "Hủy")
+                                        {
+                                            <span class="badge bg-secondary">@item.TrangThai</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-warning text-dark">@item.TrangThai</span>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

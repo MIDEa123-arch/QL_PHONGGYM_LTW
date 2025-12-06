@@ -1,0 +1,102 @@
+﻿@model QL_PHONGGYM.Models.SanPham
+@{
+    ViewBag.Title = "Create";
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<div class="card border-0 shadow-sm">
+    <div class="card-header bg-white py-3">
+        <h5 class="mb-0 fw-bold text-primary">Thêm sản phẩm mới</h5>
+    </div>
+    <div class="card-body">
+        @using (Html.BeginForm("Create", "AdminProduct", FormMethod.Post, new { enctype = "multipart/form-data" }))
+        {
+            @Html.AntiForgeryToken()
+
+            if (ViewBag.Error != null)
+            {
+                <div class="alert alert-danger">@ViewBag.Error</div>
+            }
+
+            <div class="row g-3">
+                <div class="col-md-8">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Tên sản phẩm <span class="text-danger">*</span></label>
+                        @Html.TextBoxFor(m => m.TenSP, new { @class = "form-control", required = "required" })
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Danh mục <span class="text-danger">*</span></label>
+                            @Html.DropDownList("MaLoaiSP", null, "-- Chọn loại --", new { @class = "form-select", required = "required" })
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Thương hiệu (Hãng)</label>
+                            @Html.TextBoxFor(m => m.Hang, new { @class = "form-control" })
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Xuất xứ</label>
+                            @Html.TextBoxFor(m => m.XuatXu, new { @class = "form-control" })
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Bảo hành</label>
+                            @Html.TextBoxFor(m => m.BaoHanh, new { @class = "form-control" })
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Mô tả ngắn</label>
+                        @Html.TextAreaFor(m => m.MoTaChung, new { @class = "form-control", rows = "3" })
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Mô tả chi tiết (Thông số)</label>
+                        @Html.TextAreaFor(m => m.MoTaChiTiet, new { @class = "form-control", rows = "5" })
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="card bg-light border-0 mb-3">
+                        <div class="card-body">
+                            <h6 class="fw-bold border-bottom pb-2">Giá & Kho</h6>
+
+                            <div class="mb-3">
+                                <label class="form-label">Giá bán (VNĐ) <span class="text-danger">*</span></label>
+                                @Html.TextBoxFor(m => m.DonGia, new { @class = "form-control", type = "number", required = "required" })
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Giá khuyến mãi (Nếu có)</label>
+                                @Html.TextBoxFor(m => m.GiaKhuyenMai, new { @class = "form-control", type = "number" })
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Số lượng tồn kho <span class="text-danger">*</span></label>
+                                @Html.TextBoxFor(m => m.SoLuongTon, new { @class = "form-control", type = "number", required = "required", Value = "100" })
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card bg-light border-0">
+                        <div class="card-body">
+                            <h6 class="fw-bold border-bottom pb-2">Hình ảnh</h6>
+                            <div class="mb-3">
+                                <label class="form-label small">Chọn nhiều ảnh (Ảnh đầu tiên sẽ là ảnh chính)</label>
+                                <input type="file" name="images" class="form-control" multiple accept="image/*" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-4 pt-3 border-top d-flex justify-content-end gap-2">
+                <a href="@Url.Action("Index")" class="btn btn-light border">Hủy</a>
+                <button type="submit" class="btn btn-primary px-4 fw-bold">Lưu sản phẩm</button>
+            </div>
+        }
+    </div>
+</div>
+

@@ -1,0 +1,111 @@
+﻿@model List<QL_PHONGGYM.Models.DiaChi>
+@{
+    ViewBag.Title = "Sổ địa chỉ";
+    Layout = "~/Views/Shared/_LayoutMember.cshtml";
+    var kh = Session["KhachHang"] as QL_PHONGGYM.Models.KhachHang;
+}
+
+<div class="bg-white rounded-3 shadow-sm p-4 h-100">
+    <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+        <h5 class="fw-bold text-uppercase mb-0">Sổ địa chỉ</h5>
+        <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalThemDiaChi">
+            <i class="fas fa-plus me-1"></i> Thêm địa chỉ mới
+        </button>
+    </div>
+
+    @if (Model != null && Model.Count > 0)
+    {
+        <div class="row">
+            @foreach (var item in Model)
+            {
+                <div class="col-md-6 mb-4">
+                    <div class="card h-100 border @(item.LaDiaChiMacDinh ? "border-danger shadow-sm" : "")">
+                        <div class="card-body position-relative">
+                            @if (item.LaDiaChiMacDinh)
+                            {
+                                <span class="badge bg-danger position-absolute top-0 end-0 m-2">Mặc định</span>
+                            }
+
+                            <div class="d-flex align-items-center mb-3">
+                                <h6 class="fw-bold mb-0 me-2">@kh.TenKH</h6>
+                                @if (item.LaDiaChiMacDinh)
+                                {
+                                    <i class="fas fa-check-circle text-danger"></i>
+                                }
+                            </div>
+
+                            <p class="mb-1 small text-muted">
+                                <i class="fas fa-phone-alt me-2 width-20"></i> @kh.SDT
+                            </p>
+                            <p class="mb-0 small text-muted">
+                                <i class="fas fa-map-marker-alt me-2 width-20"></i>
+                                @item.DiaChiCuThe, @item.PhuongXa, @item.QuanHuyen, @item.TinhThanhPho
+                            </p>
+                        </div>
+                        <div class="card-footer bg-white border-top-0 text-end">
+                            @if (!item.LaDiaChiMacDinh)
+                            {
+                               <a href="@Url.Action("ChonDiaChiMacDinh", "Member", new { id = item.MaDC })" class="btn btn-link btn-sm text-decoration-none text-danger fw-bold">
+                                   Thiết lập mặc định
+                               </a>
+                            }
+                            <button class="btn btn-link btn-sm text-decoration-none text-muted">Sửa</button>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="text-center py-5">
+            <img src="~/Content/Images/empty_address.png" style="width: 80px; opacity: 0.5" class="mb-3" onerror="this.style.display='none'" />
+            <h6 class="text-muted fw-bold">Bạn chưa lưu địa chỉ nào</h6>
+            <p class="text-muted small mb-4">Thêm địa chỉ ngay để đặt hàng nhanh chóng hơn.</p>
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalThemDiaChi">Thêm địa chỉ ngay</button>
+        </div>
+    }
+</div>
+
+<div class="modal fade" id="modalThemDiaChi" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold">Thêm địa chỉ mới</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            @using (Html.BeginForm("ThemDiaChi", "Member", FormMethod.Post))
+            {
+                @Html.AntiForgeryToken()
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Tỉnh / Thành phố</label>
+                        <input name="province" class="form-control" required />
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label small fw-bold">Quận / Huyện</label>
+                            <input name="district" class="form-control" required />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label small fw-bold">Phường / Xã</label>
+                            <input name="ward" class="form-control" required />
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Địa chỉ cụ thể</label>
+                        <input name="address" class="form-control" placeholder="Số nhà, tên đường..." required />
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="isDefault" id="chkDefault">
+                        <label class="form-check-label" for="chkDefault">Đặt làm địa chỉ mặc định</label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-danger">Lưu địa chỉ</button>
+                </div>
+            }
+        </div>
+    </div>
+</div>

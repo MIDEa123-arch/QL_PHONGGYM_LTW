@@ -1,0 +1,11 @@
+﻿@model IEnumerable<QL_PHONGGYM.Models.LoaiSanPham>
+
+@foreach (var item in Model)
+{
+    <li>
+        <a class="dropdown-item py-3" href="@Url.Action("Product", "Product", new {loaisp = @item.TenLoaiSP})" style="padding-left: 30px">
+            <img src="@Url.Content("~/Content/Images/" + item.TenLoaiSP + ".png")" alt="@item.TenLoaiSP" style="width: 5%" />
+            <span>@item.TenLoaiSP</span>
+        </a>
+    </li>
+}

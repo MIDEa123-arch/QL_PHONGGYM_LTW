@@ -1,0 +1,187 @@
+﻿
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+
+    var firstDay = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1).ToString("yyyy-MM-dd");
+    var today = DateTime.Now.ToString("yyyy-MM-dd");
+}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <form id="filterForm" class="row g-3 align-items-end">
+                    <div class="col-md-3">
+                        <label class="form-label fw-bold">Từ ngày</label>
+                        <input type="date" id="fromDate" class="form-control" value="@firstDay">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label fw-bold">Đến ngày</label>
+                        <input type="date" id="toDate" class="form-control" value="@today">
+                    </div>
+                    <div class="col-md-3">
+                        <button type="button" onclick="loadReport()" class="btn btn-primary fw-bold px-4">
+                            <i class="fas fa-filter me-2"></i> Lọc dữ liệu
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card border-0 shadow-sm bg-primary text-white">
+            <div class="card-body p-4">
+                <h5 class="card-title opacity-75">TỔNG DOANH THU</h5>
+                <h2 class="fw-bold mb-0" id="totalRevenue">0đ</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-7 mb-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-white py-3">
+                <h6 class="mb-0 fw-bold text-primary"><i class="fas fa-chart-bar me-2"></i> Biểu đồ doanh thu</h6>
+            </div>
+            <div class="card-body">
+                <canvas id="revenueChart" style="height: 300px;"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-5 mb-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-white py-3">
+                <h6 class="mb-0 fw-bold text-primary"><i class="fas fa-list-ol me-2"></i> Chi tiết nguồn thu</h6>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive" style="max-height: 340px; overflow-y: auto;">
+                    <table class="table table-hover mb-0 align-middle">
+                        <thead class="table-light sticky-top">
+                            <tr>
+                                <th class="ps-4">Tên dịch vụ / Sản phẩm</th>
+                                <th class="text-end pe-4">Doanh thu</th>
+                            </tr>
+                        </thead>
+                        <tbody id="reportTableBody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script>
+    let myChart = null;
+
+    $(document).ready(function() {
+        loadReport();
+    });
+
+    function loadReport() {
+        var from = $('#fromDate').val();
+        var to = $('#toDate').val();
+
+        $.ajax({
+            url: '@Url.Action("GetRevenueData", "AdminReport")',
+            type: 'POST',
+            data: { fromDate: from, toDate: to },
+            success: function(res) {
+                if (res.success) {
+                    $('#totalRevenue').text(res.total + 'đ');
+                    renderChart(res.data);
+                    renderTable(res.data);
+                }
+            }
+        });
+    }
+
+    function renderTable(data) {
+        var html = '';
+        var total = data.reduce((sum, item) => sum + item.Value, 0);
+
+        if (data.length > 0) {
+            $.each(data, function(i, item) {
+                // Tính phần trăm
+                var percent = total > 0 ? ((item.Value / total) * 100).toFixed(1) : 0;
+
+                html += `<tr>
+                            <td class="ps-4">
+                                <span class="badge bg-secondary me-2" style="background-color: ${getColor(i)} !important;">&nbsp;</span>
+                                ${item.Label}
+                            </td>
+                            <td class="text-end text-muted small">${percent}%</td>
+                            <td class="text-end pe-4 fw-bold text-dark">${new Intl.NumberFormat('vi-VN').format(item.Value)}đ</td>
+                         </tr>`;
+            });
+        } else {
+            html = '<tr><td colspan="3" class="text-center py-3 text-muted">Không có dữ liệu</td></tr>';
+        }
+        $('#reportTableBody').html(html);
+    }
+
+    function renderChart(data) {
+        var labels = data.map(x => x.Label);
+        var values = data.map(x => x.Value);
+        // Tạo mảng màu động
+        var colors = data.map((_, i) => getColor(i));
+
+        var ctx = document.getElementById('revenueChart').getContext('2d');
+
+        if (myChart) myChart.destroy();
+
+        myChart = new Chart(ctx, {
+            type: 'doughnut', // Đổi sang hình vành khuyên (hoặc 'pie' nếu thích hình tròn đặc)
+            data: {
+                labels: labels,
+                datasets: [{
+                    data: values,
+                    backgroundColor: colors,
+                    hoverOffset: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom', // Chú thích nằm dưới
+                        labels: {
+                            usePointStyle: true,
+                            padding: 20
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let value = context.raw;
+                                return ' ' + new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value);
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // Hàm lấy màu sắc đẹp cho biểu đồ
+    function getColor(index) {
+        const palette = [
+            '#0d6efd', // Xanh dương (Gym)
+            '#198754', // Xanh lá (Sản phẩm)
+            '#ffc107', // Vàng (PT)
+            '#dc3545', // Đỏ (Lớp)
+            '#0dcaf0', // Xanh lơ
+            '#6610f2'  // Tím
+        ];
+        return palette[index % palette.length];
+    }
+</script>
