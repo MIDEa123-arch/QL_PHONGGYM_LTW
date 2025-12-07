@@ -29,38 +29,34 @@ namespace QL_PHONGGYM.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Register(KhachHangRegisterViewModel model, string returnUrl)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
+                return View(model);
+
+            try
             {
-                try
+                bool isSuccess = _accountRepo.CusRegister(model);
+
+                if (isSuccess)
                 {
-                    bool isSuccess = _accountRepo.CusRegister(model);
+                    TempData["SuccessMessage"] = "Đăng ký thành công! Vui lòng đăng nhập.";
 
-                    if (isSuccess)
-                    {
-                        TempData["SuccessMessage"] = "Đăng ký thành công! Vui lòng đăng nhập.";
+                    if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
+                        return RedirectToAction("Login", "Account", new { returnUrl });
 
-                        if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
-                        {
-                            return RedirectToAction("Login", "Account", new { returnUrl = returnUrl });
-                        }
-
-                        return RedirectToAction("Login", "Account");
-
-                    }
-                    else
-                    {
-                        ModelState.AddModelError("", "Đăng ký thất bại. Vui lòng thử lại.");
-                    }
+                    return RedirectToAction("Login", "Account");
                 }
-                catch (SqlException ex)
-                {
-                    string errorMsg = ex.InnerException?.Message ?? ex.Message;
-                    ModelState.AddModelError("", errorMsg);
-                }
+
+                ModelState.AddModelError("", "Đăng ký thất bại. Vui lòng thử lại.");
+            }
+            catch (Exception ex)
+            {
+                string errorMsg = ex.InnerException?.Message ?? ex.Message;
+                ModelState.AddModelError("", errorMsg);
             }
 
             return View(model);
         }
+
 
         public ActionResult Login(string returnUrl)
         {
@@ -73,29 +69,36 @@ namespace QL_PHONGGYM.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Login(KhachHangLoginViewModel model, string returnUrl)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
+                return View(model);
+
+            try
             {
                 var user = _accountRepo.CusLogin(model.TenDangNhap, model.MatKhau);
 
-                if (user != null)
+                if (user == null)
                 {
-                    Session["MaKH"] = user.MaKH;
-                    string fullName = user.TenKH;
-                    string firstName = fullName.Split(' ').Last();
-                    Session["TenKH"] = firstName;
-
-                    if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
-                        return Redirect(returnUrl);
-
-                    return RedirectToAction("Index", "Home");
+                    TempData["ErrorMessage"] = "Tên đăng nhập hoặc mật khẩu không chính xác.";
+                    return View(model);
                 }
-                else
-                {
-                    ViewBag.Err = "Tên đăng nhập hoặc mật khẩu không chính xác.";
-                }
+                
+                Session["MaKH"] = user.MaKH;
+
+                string fullName = user.TenKH ?? "";
+                Session["TenKH"] = fullName.Split(' ').Last();
+                Session["GioHang"] = _accountRepo.GetCartCount(user.MaKH);
+                if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
+                    return Redirect(returnUrl);
+
+                return RedirectToAction("Index", "Home");
             }
-            return View(model);
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = ex.InnerException?.Message ?? ex.Message;
+                return View(model);
+            }
         }
+
 
 
         // GET: /Account/Logout

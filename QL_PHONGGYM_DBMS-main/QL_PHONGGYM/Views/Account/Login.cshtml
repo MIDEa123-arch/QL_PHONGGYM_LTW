@@ -176,10 +176,10 @@
     </style>
 </head>
 <body class="bg-light">
-    @if (ViewBag.Err != null)
+    @if (TempData["ErrorMessage"] != null)
     {
         <div class="alert alert-danger alert-dismissible fade show login-alert" role="alert">
-            <div class="text-danger" style="font-size: 15px; line-height: 1.2;">@ViewBag.Err</div>
+            <div class="text-danger" style="font-size: 15px; line-height: 1.2;">@TempData["ErrorMessage"]</div>
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     }

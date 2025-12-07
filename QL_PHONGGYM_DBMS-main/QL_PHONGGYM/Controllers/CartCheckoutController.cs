@@ -14,17 +14,20 @@ namespace QL_PHONGGYM.Controllers
     {
         private readonly CartRepository _cartRepo;
         private readonly KhachHangRepository _cusRepo;
+        private readonly AccountRepository _accountRepo;
 
         public CartCheckoutController()
         {
             _cartRepo = new CartRepository(new QL_PHONGGYMEntities());
             _cusRepo = new KhachHangRepository(new QL_PHONGGYMEntities());
+            _accountRepo = new AccountRepository(new QL_PHONGGYMEntities());
         }
 
         
 
         public ActionResult CheckoutDangKyPT(int maHD, string url)
         {
+
             var HoaDonPT = _cartRepo.HoaDonPT(maHD);            
             var kh = _cusRepo.ThongTinKH((int)Session["maKH"]);
 
@@ -46,7 +49,8 @@ namespace QL_PHONGGYM.Controllers
 
             try
             {
-                _cartRepo.TaoHoaDon(form, maKH, cart, null, null, diaChi);                
+                _cartRepo.TaoHoaDon(form, maKH, cart, null, null, diaChi);
+                Session["GioHang"] = _accountRepo.GetCartCount(maKH);
             }
             catch (Exception ex)
             {
@@ -111,6 +115,7 @@ namespace QL_PHONGGYM.Controllers
             try
             { 
                 _cartRepo.Xoa(id);
+                Session["GioHang"] = _accountRepo.GetCartCount((int)Session["MaKH"]);
             }
             catch (Exception ex)
             {
@@ -125,6 +130,7 @@ namespace QL_PHONGGYM.Controllers
             try
             {
                 _cartRepo.Them(id, (int)Session["MaKH"]);
+                Session["GioHang"] = _accountRepo.GetCartCount((int)Session["MaKH"]);
             }
             catch (Exception ex)
             {
@@ -138,7 +144,7 @@ namespace QL_PHONGGYM.Controllers
         {
             int maKH = (int)Session["MaKH"];
             _cartRepo.XoaDon(id, maKH);
-
+            Session["GioHang"] = _accountRepo.GetCartCount(maKH);
             return RedirectToAction("ToCheckOut");
         }
 
@@ -152,6 +158,7 @@ namespace QL_PHONGGYM.Controllers
             if (actionType == "delete")
             {
                 _cartRepo.XoaDaChon(form, maKH);
+                Session["GioHang"] = _accountRepo.GetCartCount(maKH);
                 return RedirectToAction("ToCheckOut");
             }
             else if (actionType == "checkout")
@@ -192,6 +199,30 @@ namespace QL_PHONGGYM.Controllers
 
             return View(cart);
         }
+
+        [HttpPost]
+        public JsonResult AddToCartAjax(int maSP, int soLuong)
+        {
+            if (Session["MaKH"] == null)
+                return Json(new { success = false, needLogin = true });
+
+            int maKH = (int)Session["MaKH"];
+
+            bool added = _cartRepo.AddToCart(maKH, maSP, soLuong);
+
+            if (!added)
+            {
+                return Json(new { success = false, message = "Không thể thêm vào giỏ hàng!" });
+            }
+
+            int newCount = _accountRepo.GetCartCount(maKH);            
+            Session["GioHang"] = newCount;
+
+            return Json(new { success = true, cartCount = newCount });
+        }
+
+
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult AddToCart(int maSP, int soLuong)
@@ -212,7 +243,7 @@ namespace QL_PHONGGYM.Controllers
             {
                 bool result = _cartRepo.AddToCart(maKH, maSP, soLuong);
                 Session["cart"] = _cartRepo.GetCart(maKH);
-
+                Session["GioHang"] = _accountRepo.GetCartCount(maKH);
                 return RedirectToAction("ToCheckOut");
             }
             catch (SqlException ex)

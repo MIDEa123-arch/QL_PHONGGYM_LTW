@@ -127,34 +127,53 @@ namespace QL_PHONGGYM.Repositories
             {
                 DonHang donHang = null;
                 try
-                {               
+                {
                     if (cart != null)
                     {
-                        var dc = new DiaChi
-                        {
-                            MaKH = maKH,
-                            TinhThanhPho = diaChi.TinhThanhPho,
-                            QuanHuyen = diaChi.QuanHuyen,
-                            PhuongXa = diaChi.PhuongXa,
-                            DiaChiCuThe = diaChi.DiaChiCuThe,
-                            NgayThem = diaChi.NgayThem,
+                        var checkDiaChi = _context.DiaChis.FirstOrDefault(x =>
+                            x.MaKH == maKH &&
+                            x.TinhThanhPho == diaChi.TinhThanhPho &&
+                            x.QuanHuyen == diaChi.QuanHuyen &&
+                            x.PhuongXa == diaChi.PhuongXa &&
+                            x.DiaChiCuThe == diaChi.DiaChiCuThe
+                        );
 
-                        };
-                        _context.DiaChis.Add(dc);
-                        _context.SaveChanges();
+                        int maDiaChiFinal;
 
+                        if (checkDiaChi != null)
+                        {                            
+                            maDiaChiFinal = checkDiaChi.MaDC;
+                        }
+                        else
+                        {                            
+                            var newDC = new DiaChi
+                            {
+                                MaKH = maKH,
+                                TinhThanhPho = diaChi.TinhThanhPho,
+                                QuanHuyen = diaChi.QuanHuyen,
+                                PhuongXa = diaChi.PhuongXa,
+                                DiaChiCuThe = diaChi.DiaChiCuThe,
+                                NgayThem = DateTime.Now
+                            };
+
+                            _context.DiaChis.Add(newDC);
+                            _context.SaveChanges();
+
+                            maDiaChiFinal = newDC.MaDC;
+                        }
                         
                         donHang = new DonHang
                         {
                             MaKH = maKH,
-                            MaDC = dc?.MaDC,
+                            MaDC = maDiaChiFinal, 
                             NgayDat = DateTime.Now,
                             TrangThaiDonHang = "Chờ xác nhận",
                             TongTien = Convert.ToDecimal(form["thanhTien"])
                         };
+
                         _context.DonHangs.Add(donHang);
                         _context.SaveChanges();
-                    }                  
+                    }
                     var hoaDon = new HoaDon
                     {
                         MaKH = maKH,
