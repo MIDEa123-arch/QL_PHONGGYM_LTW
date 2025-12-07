@@ -3,72 +3,40 @@
     ViewBag.Title = "Index";
     Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
 }
-<div class="card border-0 shadow-sm">
-    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
-        <h5 class="mb-0 fw-bold text-primary"><i class="fas fa-users me-2"></i> Danh sách hội viên</h5>
 
-        <form class="d-flex" method="get" action="@Url.Action("Index")">
-            <input class="form-control form-control-sm me-2" type="search" name="search" placeholder="Tìm tên hoặc SĐT..." value="@ViewBag.CurrentSearch">
-            <button class="btn btn-outline-primary btn-sm" type="submit"><i class="fas fa-search"></i></button>
-        </form>
-    </div>
-    <div class="card-body p-0">
-        <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
-                <thead class="table-light">
-                    <tr>
-                        <th class="ps-4">Họ và tên</th>
-                        <th>Liên hệ</th>
-                        <th>Ngày sinh</th>
-                        <th>Loại thành viên</th>
-                        <th class="text-end pe-4">Hành động</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @if (Model != null && Model.Any())
-                    {
-                        foreach (var item in Model)
-                        {
-                            <tr>
-                                <td class="ps-4">
-                                    <div class="fw-bold text-dark">@item.TenKH</div>
-                                    <div class="small text-muted"><i class="fas fa-venus-mars me-1"></i> @item.GioiTinh</div>
-                                </td>
-                                <td>
-                                    <div class="small"><i class="fas fa-phone me-1 text-muted"></i> @item.SDT</div>
-                                    <div class="small text-muted">@item.Email</div>
-                                </td>
-                                <td>@(item.NgaySinh.HasValue ? item.NgaySinh.Value.ToString("dd/MM/yyyy") : "--")</td>
-                                <td>
-                                    <span class="badge bg-info text-dark">
-                                        @(item.LoaiKhachHang != null ? item.LoaiKhachHang.TenLoai : "Chưa phân loại")
-                                    </span>
-                                </td>
-                                <td class="text-end pe-4">
-                                    <a href="@Url.Action("Edit", new { id = item.MaKH })" class="btn btn-outline-primary btn-sm me-1">
-                                        <i class="fas fa-user-edit"></i>
-                                    </a>
-                                    <button onclick="deleteMember(@item.MaKH)" class="btn btn-outline-danger btn-sm">
-                                        <i class="fas fa-trash-alt"></i>
-                                    </button>
-                                </td>
-                            </tr>
-                        }
-                    }
-                    else
-                    {
-                        <tr><td colspan="5" class="text-center py-4">Không tìm thấy dữ liệu</td></tr>
-                    }
-                </tbody>
-            </table>
-        </div>
-    </div>
+<div id="ketQuaTimKiem">
+    @Html.Partial("_DanhSachHoiVien", Model)
 </div>
 
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+@section scripts {
+    <script>
+        function FilterData() {
+            var tuKhoa = $('#txtTuKhoa').val();
+            var maLoai = $('#ddlMaLoai').val();
+
+            $.ajax({
+                url: '/HoiVien/Index',
+                type: 'GET',
+                data: {
+                    tuKhoa: tuKhoa,
+                    maLoai: maLoai
+                },
+                success: function (res) {
+                    $('#ketQuaTimKiem').html(res);
+                },
+                error: function () {
+                    alert("Có lỗi xảy ra khi tải dữ liệu!");
+                }
+            });
+        }
+
+    </script>
+}
 <script>
     function deleteMember(id) {
         if (confirm('Bạn có chắc muốn xóa hội viên này?')) {
+            $('#msgAlert').hide();
+
             $.ajax({
                 url: '@Url.Action("Delete", "AdminMember")',
                 type: 'POST',
@@ -77,8 +45,13 @@
                     if (res.success) {
                         location.reload();
                     } else {
+                        $('#msgAlert').remove();
                         alert(res.message);
                     }
+                },
+                error: function() {
+                    $('#msgAlert').remove();
+                    alert("Lỗi hệ thống! Vui lòng thử lại sau.");
                 }
             });
         }

@@ -49,7 +49,6 @@ namespace QL_PHONGGYM.Models
         public virtual DbSet<NhanVien> NhanViens { get; set; }
         public virtual DbSet<SanPham> SanPhams { get; set; }
         public virtual DbSet<YeuCauHoTro> YeuCauHoTroes { get; set; }
-        public virtual DbSet<sysdiagram> sysdiagrams { get; set; }
     
         [DbFunction("QL_PHONGGYMEntities", "fn_TimKiemSanPham")]
         public virtual IQueryable<fn_TimKiemSanPham_Result> fn_TimKiemSanPham(Nullable<int> maSP, string tenSP)
@@ -743,6 +742,11 @@ namespace QL_PHONGGYM.Models
                 new ObjectParameter("MoTa", typeof(string));
     
             return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction("sp_ThemGoiTap", tenGoiParameter, thoiHanParameter, giaParameter, moTaParameter);
+        }
+    
+        public virtual int sp_UpdateTrangThaiLichLop1()
+        {
+            return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction("sp_UpdateTrangThaiLichLop1");
         }
     }
 }

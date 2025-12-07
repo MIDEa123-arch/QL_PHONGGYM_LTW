@@ -43,7 +43,10 @@ namespace QL_PHONGGYM.Controllers
                 .OrderByDescending(h => h.NgayLap)
                 .Take(5)
                 .ToList();
-
+            if (Request.IsAjaxRequest())
+            {
+                return PartialView("_DashboardContent", model);
+            }
             return View(model);
         }
     }

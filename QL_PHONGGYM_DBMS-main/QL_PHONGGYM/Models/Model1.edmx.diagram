@@ -56,7 +56,6 @@
         <AssociationConnector Association="QL_PHONGGYMModel.FK_LopHoc_NhanVien_MaNV" ManuallyRouted="false" />
         <AssociationConnector Association="QL_PHONGGYMModel.FK_YeuCau_NhanVien" ManuallyRouted="false" />
         <AssociationConnector Association="QL_PHONGGYMModel.NhanVienChuyenMon" ManuallyRouted="false" />
-        <EntityTypeShape EntityType="QL_PHONGGYMModel.sysdiagram" Width="1.5" PointX="0.75" PointY="0.75" />
         <AssociationConnector Association="QL_PHONGGYMModel.FK_DonHang_DiaChi" />
       </Diagram>
     </edmx:Diagrams>
