@@ -140,7 +140,7 @@
           </Key>
           <Property Name="MaHD" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
           <Property Name="MaKH" Type="int" Nullable="false" />
-          <Property Name="NgayLap" Type="date" Nullable="false" />
+          <Property Name="NgayLap" Type="datetime" />
           <Property Name="TongTien" Type="decimal" Precision="12" Scale="2" />
           <Property Name="ThanhTien" Type="decimal" Precision="12" Scale="2" />
           <Property Name="TrangThai" Type="nvarchar" MaxLength="20" />
@@ -801,6 +801,7 @@
           <Parameter Name="MaSP" Type="int" Mode="In" />
           <Parameter Name="SoLuong" Type="int" Mode="In" />
         </Function>
+        <Function Name="sp_UpdateTrangThaiLichLop" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo" />
         <Function Name="sp_XoaChucVu" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
           <Parameter Name="MaChucVu" Type="int" Mode="In" />
         </Function>
@@ -1148,7 +1149,7 @@
           </Key>
           <Property Name="MaHD" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
           <Property Name="MaKH" Type="Int32" Nullable="false" />
-          <Property Name="NgayLap" Type="DateTime" Precision="0" Nullable="false" />
+          <Property Name="NgayLap" Type="DateTime" Precision="3" />
           <Property Name="TongTien" Type="Decimal" Precision="12" Scale="2" />
           <Property Name="ThanhTien" Type="Decimal" Precision="12" Scale="2" />
           <Property Name="TrangThai" Type="String" MaxLength="20" FixedLength="false" Unicode="true" />
@@ -1991,6 +1992,7 @@
             <Parameter Name="Gia" Mode="In" Type="Decimal" />
             <Parameter Name="MoTa" Mode="In" Type="String" />
           </FunctionImport>
+          <FunctionImport Name="sp_UpdateTrangThaiLichLop1" />
         </EntityContainer>
         <ComplexType Name="sp_KhachHangLogin_Result">
           <Property Type="Int32" Name="MaKH" Nullable="false" />
@@ -2363,6 +2365,7 @@
           <FunctionImportMapping FunctionImportName="sp_XoaNhanVienChuyenMon" FunctionName="QL_PHONGGYMModel.Store.sp_XoaNhanVienChuyenMon" />
           <FunctionImportMapping FunctionImportName="sp_XoaSanPham" FunctionName="QL_PHONGGYMModel.Store.sp_XoaSanPham" />
           <FunctionImportMapping FunctionImportName="XoaLichVaLop" FunctionName="QL_PHONGGYMModel.Store.XoaLichVaLop" />
+          <FunctionImportMapping FunctionImportName="sp_UpdateTrangThaiLichLop1" FunctionName="QL_PHONGGYMModel.Store.sp_UpdateTrangThaiLichLop" />
           </EntityContainerMapping>
       </Mapping>
     </edmx:Mappings>

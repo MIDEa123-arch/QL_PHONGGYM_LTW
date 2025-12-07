@@ -743,5 +743,10 @@ namespace QL_PHONGGYM.Models
     
             return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction("sp_ThemGoiTap", tenGoiParameter, thoiHanParameter, giaParameter, moTaParameter);
         }
+    
+        public virtual int sp_UpdateTrangThaiLichLop1()
+        {
+            return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction("sp_UpdateTrangThaiLichLop1");
+        }
     }
 }

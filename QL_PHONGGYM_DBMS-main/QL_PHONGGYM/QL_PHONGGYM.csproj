@@ -159,6 +159,7 @@
     <Compile Include="Models\ChuyenMon.cs">
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
+    <Compile Include="Models\Class1.cs" />
     <Compile Include="Models\DangKyGoiTap.cs">
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>

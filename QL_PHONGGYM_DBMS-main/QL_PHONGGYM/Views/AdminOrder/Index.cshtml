@@ -86,7 +86,7 @@
                                         <div class="fw-bold">@item.KhachHang.TenKH</div>
                                         <small class="text-muted">@item.KhachHang.SDT</small>
                                     </td>
-                                    <td>@item.NgayLap.ToString("dd/MM/yyyy HH:mm")</td>
+                                    <td>@item.NgayLap.Value.ToString("dd/MM/yyyy HH:mm")</td>
                                     <td class="text-danger fw-bold">@string.Format("{0:N0}đ", item.TongTien)</td>
                                     <td>
                                         @if (item.TrangThai == "Đã thanh toán")
