@@ -11,7 +11,7 @@
 </div>
 
 @if (Model.MaDonHang != null)
-{    
+{
     <div class="card border-0 mb-3 rounded-3 bg-white px-3 py-3 text-decoration-none text-black">
         <span class="fw-bold fs-5 ms-1">Tổng quan</span>
         <div class="card-body p-2">
@@ -61,8 +61,13 @@
             }
         </div>
     </div>
-    <div class="bg-transparent d-flex w-100 p-0 gap-3">
+
+    @* --- CẤU TRÚC FLEXBOX ĐỒNG BỘ CHIỀU CAO --- *@
+    <div class="bg-transparent d-flex w-100 p-0 gap-3 align-items-stretch">
+
+        @* CỘT TRÁI (Chứa 2 hộp nhỏ) *@
         <div class="w-50 bg-transparent p-0 d-flex flex-column gap-3">
+            @* Hộp 1: Thông tin khách hàng *@
             <div class="py-3 px-2 bg-white rounded-3 px-3">
                 <div class="fw-bold fs-5 mb-3">Thông tin khách hàng</div>
                 <div class="d-flex flex-column">
@@ -93,7 +98,10 @@
                     </div>
                 </div>
             </div>
-            <div class="py-3 px-3 bg-white rounded-3">
+
+            @* Hộp 2: Thông tin hỗ trợ *@
+            @* QUAN TRỌNG: flex-grow-1 ở đây sẽ đẩy hộp này dài xuống đáy nếu cột phải dài hơn *@
+            <div class="py-3 px-3 bg-white rounded-3 flex-grow-1">
                 <div class="fw-bold fs-5 mb-2">Thông tin hỗ trợ</div>
                 <div class="d-flex flex-column">
                     <div class="d-flex justify-content-between align-items-center py-3 gap-2 border-bottom" style="border-color: #f0f0f0;">
@@ -127,8 +135,11 @@
                 </div>
             </div>
         </div>
-        <div class="w-50 bg-transparent p-0 d-flex flex-column gap-3">
-            <div class="py-3 px-2 bg-white rounded-3 px-3">
+
+        @* CỘT PHẢI (Chứa 1 hộp lớn) *@
+        <div class="w-50 bg-transparent p-0 d-flex flex-column">
+            @* QUAN TRỌNG: h-100 ở đây để hộp này luôn cao bằng wrapper cha *@
+            <div class="py-3 px-2 bg-white rounded-3 px-3 h-100">
                 <div class="fw-bold fs-5 mb-3">Thông tin thanh toán</div>
                 <div class="fw-bold mb-1 p-2 rounded-2" style="background-color: #f4f4f4; font-size: 17px">Sản phẩm</div>
                 <div class="d-flex flex-column">
@@ -160,7 +171,7 @@
                         {
                             <span class="fw-normal text-danger">0đ</span>
                         }
-                    </div>        
+                    </div>
                 </div>
             </div>
         </div>
@@ -168,27 +179,26 @@
 }
 else
 {
-
     var detail = Model.ChiTietHoaDons.FirstOrDefault();
     string serviceType = "";
     string serviceName = "";
     string info1 = "";
     string info2 = "";
     string iconClass = "bi-bag-check";
-    
+
     if (detail != null)
     {
         if (detail.MaDKLop != null)
         {
             serviceType = "Đăng ký Lớp học";
             serviceName = "Lớp: " + detail.DangKyLop.LopHoc.TenLop;
-            info1 = "Lịch học: " + (detail.DangKyLop.LopHoc.NgayBatDau.ToString("dd/MM") ?? "") + " - " + (detail.DangKyLop.LopHoc.NgayKetThuc.ToString("dd/MM/yyyy") ?? "");           
+            info1 = "Lịch học: " + (detail.DangKyLop.LopHoc.NgayBatDau.ToString("dd/MM") ?? "") + " - " + (detail.DangKyLop.LopHoc.NgayKetThuc.ToString("dd/MM/yyyy") ?? "");
             iconClass = "bi-collection-play";
         }
         else if (detail.MaDKPT != null)
         {
             serviceType = "Thuê Huấn luyện viên (PT)";
-            serviceName = "PT: " + detail.DangKyPT.NhanVien.TenNV;            
+            serviceName = "PT: " + detail.DangKyPT.NhanVien.TenNV;
             info2 = "Số buổi: " + detail.DangKyPT.SoBuoi + " buổi";
             iconClass = "bi-person-badge-fill";
         }
@@ -227,7 +237,7 @@ else
                     }
                 </div>
             </div>
-            
+
             <div class="w-100 d-flex row mt-3 border-top pt-3">
                 <div class="d-flex gap-2 mb-3 col-8">
                     <div class="bg-light rounded-3 d-flex align-items-center justify-content-center" style="width: 13%; aspect-ratio: 1/1;">
@@ -249,9 +259,13 @@ else
             </div>
         </div>
     </div>
-    
-    <div class="bg-transparent d-flex w-100 p-0 gap-3">        
+
+    @* --- CẤU TRÚC FLEXBOX PHẦN DỊCH VỤ --- *@
+    <div class="bg-transparent d-flex w-100 p-0 gap-3 align-items-stretch">
+
+        @* CỘT TRÁI *@
         <div class="w-50 bg-transparent p-0 d-flex flex-column gap-3">
+            @* Hộp 1 *@
             <div class="py-3 px-2 bg-white rounded-3 px-3">
                 <div class="fw-bold fs-5 mb-3">Thông tin khách hàng</div>
                 <div class="d-flex flex-column">
@@ -267,8 +281,9 @@ else
                     </div>
                 </div>
             </div>
-            
-            <div class="py-3 px-3 bg-white rounded-3">
+
+            @* Hộp 2: flex-grow-1 để tự lấp đầy khoảng trống *@
+            <div class="py-3 px-3 bg-white rounded-3 flex-grow-1">
                 <div class="fw-bold fs-5 mb-2">Thông tin hỗ trợ</div>
                 <div class="d-flex flex-column">
                     <div class="d-flex justify-content-between align-items-center py-3 gap-2 border-bottom" style="border-color: #f0f0f0;">
@@ -302,9 +317,11 @@ else
                 </div>
             </div>
         </div>
-        
-        <div class="w-50 bg-transparent p-0 d-flex flex-column gap-3">
-            <div class="py-3 px-2 bg-white rounded-3 px-3">
+
+        @* CỘT PHẢI *@
+        <div class="w-50 bg-transparent p-0 d-flex flex-column">
+            @* h-100 để hộp này tự giãn bằng chiều cao của cột trái nếu cột trái dài hơn *@
+            <div class="py-3 px-2 bg-white rounded-3 px-3 h-100">
                 <div class="fw-bold fs-5 mb-3">Thông tin thanh toán</div>
                 <div class="fw-bold mb-1 p-2 rounded-2" style="background-color: #f4f4f4; font-size: 17px">Chi phí</div>
                 <div class="d-flex flex-column">
@@ -344,8 +361,6 @@ else
                             </a>
                         </div>
                     }
-
-
                 </div>
             </div>
         </div>
