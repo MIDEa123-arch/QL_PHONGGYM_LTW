@@ -32,7 +32,9 @@ namespace QL_PHONGGYM.Controllers
             {
                 try
                 {
-                    _context.sp_ThemGoiTap(model.TenGoi, model.ThoiHan, model.Gia, model.MoTa);
+                    model.TrangThai = 1;
+                    _context.GoiTaps.Add(model);
+                    _context.SaveChanges();
                     return RedirectToAction("Index");
                 }
                 catch (Exception ex)

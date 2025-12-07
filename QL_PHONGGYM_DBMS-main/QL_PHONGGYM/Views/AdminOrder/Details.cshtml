@@ -59,7 +59,7 @@
                 <div class="card-body">
                     <p class="mb-1"><strong>Họ tên:</strong> @Model.KhachHang.TenKH</p>
                     <p class="mb-1"><strong>SĐT:</strong> @Model.KhachHang.SDT</p>
-                    <p class="mb-1"><strong>Ngày lập:</strong> @Model.NgayLap.ToString("dd/MM/yyyy HH:mm")</p>
+                    <p class="mb-1"><strong>Ngày lập:</strong> @Model.NgayLap.Value.ToString("dd/MM/yyyy HH:mm")</p>
                     <p class="mb-0">
                         <strong>Trạng thái:</strong>
                         @if (Model.TrangThai == "Đã thanh toán")
