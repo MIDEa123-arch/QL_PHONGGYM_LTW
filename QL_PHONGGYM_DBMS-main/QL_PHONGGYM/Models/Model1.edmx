@@ -711,7 +711,13 @@
           <Parameter Name="TenChuyenMon" Type="nvarchar" Mode="In" />
           <Parameter Name="MoTa" Type="nvarchar" Mode="In" />
         </Function>
-        
+        <Function Name="sp_SuaGoiTap" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+          <Parameter Name="MaGoiTap" Type="int" Mode="In" />
+          <Parameter Name="TenGoi" Type="nvarchar" Mode="In" />
+          <Parameter Name="ThoiHan" Type="int" Mode="In" />
+          <Parameter Name="Gia" Type="decimal" Mode="In" />
+          <Parameter Name="MoTa" Type="nvarchar(max)" Mode="In" />
+        </Function>
         <Function Name="sp_SuaLoaiSanPham" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
           <Parameter Name="MaLoaiSP" Type="int" Mode="In" />
           <Parameter Name="TenLoaiSP" Type="nvarchar" Mode="In" />
@@ -750,7 +756,12 @@
           <Parameter Name="TenChuyenMon" Type="nvarchar" Mode="In" />
           <Parameter Name="MoTa" Type="nvarchar" Mode="In" />
         </Function>
-        
+        <Function Name="sp_ThemGoiTap" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+          <Parameter Name="TenGoi" Type="nvarchar" Mode="In" />
+          <Parameter Name="ThoiHan" Type="int" Mode="In" />
+          <Parameter Name="Gia" Type="decimal" Mode="In" />
+          <Parameter Name="MoTa" Type="nvarchar(max)" Mode="In" />
+        </Function>
         <Function Name="sp_ThemLichLop" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
           <Parameter Name="MaLop" Type="int" Mode="In" />
           <Parameter Name="MaNV" Type="int" Mode="In" />
@@ -1999,6 +2010,19 @@
             <Parameter Name="MoTa" Mode="In" Type="String" />
           </FunctionImport>
           <FunctionImport Name="sp_UpdateTrangThaiLichLop1" />
+          <FunctionImport Name="sp_SuaGoiTap1" ReturnType="Collection(String)">
+            <Parameter Name="MaGoiTap" Mode="In" Type="Int32" />
+            <Parameter Name="TenGoi" Mode="In" Type="String" />
+            <Parameter Name="ThoiHan" Mode="In" Type="Int32" />
+            <Parameter Name="Gia" Mode="In" Type="Decimal" />
+            <Parameter Name="MoTa" Mode="In" Type="String" />
+          </FunctionImport>
+          <FunctionImport Name="sp_ThemGoiTap1">
+            <Parameter Name="TenGoi" Mode="In" Type="String" />
+            <Parameter Name="ThoiHan" Mode="In" Type="Int32" />
+            <Parameter Name="Gia" Mode="In" Type="Decimal" />
+            <Parameter Name="MoTa" Mode="In" Type="String" />
+          </FunctionImport>
         </EntityContainer>
         <ComplexType Name="sp_KhachHangLogin_Result">
           <Property Type="Int32" Name="MaKH" Nullable="false" />
@@ -2374,6 +2398,8 @@
           <FunctionImportMapping FunctionImportName="sp_XoaSanPham" FunctionName="QL_PHONGGYMModel.Store.sp_XoaSanPham" />
           <FunctionImportMapping FunctionImportName="XoaLichVaLop" FunctionName="QL_PHONGGYMModel.Store.XoaLichVaLop" />
           <FunctionImportMapping FunctionImportName="sp_UpdateTrangThaiLichLop1" FunctionName="QL_PHONGGYMModel.Store.sp_UpdateTrangThaiLichLop" />
+          <FunctionImportMapping FunctionImportName="sp_SuaGoiTap1" FunctionName="QL_PHONGGYMModel.Store.sp_SuaGoiTap" />
+          <FunctionImportMapping FunctionImportName="sp_ThemGoiTap1" FunctionName="QL_PHONGGYMModel.Store.sp_ThemGoiTap" />
           </EntityContainerMapping>
       </Mapping>
     </edmx:Mappings>

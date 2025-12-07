@@ -18,7 +18,11 @@
             <div class="card-header bg-white py-3">
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <h5 class="mb-0 fw-bold text-primary"><i class="fas fa-users me-2"></i> Danh sách hội viên</h5>
+                    <a href="@Url.Action("Create", "AdminMember")" class="btn btn-warning">
+                        <i class="fas fa-user-plus me-1"></i> Thêm hội viên
+                    </a>
                 </div>
+                
                 <div class="row">
                     <div class="row mb-3 flex-grow-1 ms-4">
                         <div class="col-md-5">
@@ -63,7 +67,7 @@
                                 <th>Liên hệ</th>
                                 <th>Ngày sinh</th>
                                 <th>Loại thành viên</th>
-                                <th class="text-end pe-4">Hành động</th>
+                                <th class="text-center pe-4">Hành động</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -74,7 +78,10 @@
                                     <tr>
                                         <td class="ps-4">
                                             <div class="fw-bold text-dark">@item.TenKH</div>
-                                            <div class="small text-muted"><i class="fas fa-venus-mars me-1"></i> @item.GioiTinh</div>
+                                            <div class="small text-muted">
+                                                <i class="fas @(item.GioiTinh == "Nam" ? "fa-mars text-primary" : (item.GioiTinh == "Nữ" ? "fa-venus text-danger" : "fa-venus-mars text-secondary")) me-1"></i>
+                                                @item.GioiTinh
+                                            </div>
                                         </td>
                                         <td>
                                             <div class="small"><i class="fas fa-phone me-1 text-muted"></i> @item.SDT</div>
@@ -86,14 +93,12 @@
                                                 @(item.LoaiKhachHang != null ? item.LoaiKhachHang.TenLoai : "Chưa phân loại")
                                             </span>
                                         </td>
-                                        <td class="text-end pe-4">
-                                            <a href="@Url.Action("Edit", new { id = item.MaKH })" class="btn btn-outline-primary btn-sm me-1">
+                                        <td class="text-center">
+                                            <a href="@Url.Action("Edit", new { id = item.MaKH })" class="btn btn-outline-primary btn-sm" title="Sửa thông tin">
                                                 <i class="fas fa-user-edit"></i>
                                             </a>
-                                            <button type="button" onclick="deleteMember(@item.MaKH)" class="btn btn-outline-danger btn-sm">
-                                                <i class="fas fa-trash-alt"></i>
-                                            </button>
                                         </td>
+                                        
                                     </tr>
                                 }
                             }

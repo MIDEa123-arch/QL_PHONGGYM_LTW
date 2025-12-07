@@ -655,6 +655,7 @@
     <Content Include="Views\AdminStaff\Index.cshtml" />
     <Content Include="Views\Shared\_DashboardContent.cshtml" />
     <Content Include="Views\Shared\_DanhSachHoiVien.cshtml" />
+    <Content Include="Views\AdminMember\Create.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

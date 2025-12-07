@@ -8,7 +8,7 @@
         <h5 class="mb-0 fw-bold text-primary">Cập nhật: @Model.TenGoi</h5>
     </div>
     <div class="card-body">
-        @using (Html.BeginForm())
+        @using (Html.BeginForm("Edit", "AdminService", FormMethod.Post))
         {
             @Html.AntiForgeryToken()
             @Html.HiddenFor(m => m.MaGoiTap)
@@ -22,6 +22,7 @@
                 <div class="col-md-12">
                     <label class="form-label fw-bold">Tên gói tập</label>
                     @Html.TextBoxFor(m => m.TenGoi, new { @class = "form-control", required = "required" })
+                    @Html.ValidationMessageFor(model => model.TenGoi, "", new { @class = "text-danger" })
                 </div>
 
                 <div class="col-md-6">
@@ -30,13 +31,25 @@
                 </div>
 
                 <div class="col-md-6">
-                    <label class="form-label fw-bold">Giá tiền (VNĐ)</label>
-                    @Html.TextBoxFor(m => m.Gia, new { @class = "form-control", type = "number", required = "required" })
+                    <label class="form-label fw-bold">Giá gói tập (VNĐ)</label>
+
+                    @Html.TextBoxFor(m => m.Gia, new
+               {
+                   @class = "form-control",
+                   type = "text",
+                   id = "txtGia",
+                   placeholder = "Nhập giá gói tập",
+                   Value = (Model != null && Model.Gia > 0) ? Model.Gia.ToString("#,##0").Replace(',', '.') : "",
+                   required = "required"
+               })
+
+                    @Html.ValidationMessageFor(m => m.Gia, "", new { @class = "text-danger small" })
                 </div>
 
                 <div class="col-md-12">
                     <label class="form-label fw-bold">Mô tả quyền lợi</label>
                     @Html.TextAreaFor(m => m.MoTa, new { @class = "form-control", rows = "4" })
+                    @Html.ValidationMessageFor(model => model.MoTa, "", new { @class = "text-danger" })
                 </div>
             </div>
 
@@ -47,4 +60,26 @@
         }
     </div>
 </div>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        var inputGia = document.getElementById('txtGia');
+        var form = document.querySelector('form');
+        if (inputGia) {
+            inputGia.addEventListener('input', function (e) {
+                var value = e.target.value;
+                value = value.replace(/\D/g, '');
+                value = value.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+                e.target.value = value;
+            });
 
+            if (form) {
+                form.addEventListener('submit', function () {
+                    var rawValue = inputGia.value.replace(/\./g, '');
+                    inputGia.value = rawValue;
+                });
+            }
+        } else {
+            console.error("Lỗi: Không tìm thấy ô nhập liệu có id='txtGia'. Kiểm tra lại code HTML.");
+        }
+    });
+</script>

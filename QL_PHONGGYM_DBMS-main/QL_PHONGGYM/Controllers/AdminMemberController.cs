@@ -109,5 +109,84 @@ namespace QL_PHONGGYM.Controllers
                 return Json(new { success = false, message = "Khách hàng này đã có dữ liệu giao dịch/đăng ký, không thể xóa!" });
             }
         }
+        public ActionResult Create()
+        {
+            if (Session["AdminUser"] == null) return RedirectToAction("Login", "Auth");
+            ViewBag.MaLoaiKH = new SelectList(_context.LoaiKhachHangs, "MaLoaiKH", "TenLoai");
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult Create(QL_PHONGGYM.Models.KhachHang model)
+        {
+            ViewBag.MaLoaiKH = new SelectList(_context.LoaiKhachHangs, "MaLoaiKH", "TenLoai", model.MaLoaiKH);
+            if (ModelState.IsValid)
+            {
+                if (string.IsNullOrEmpty(model.TenKH) || string.IsNullOrWhiteSpace(model.TenKH))
+                {
+                    ModelState.AddModelError("TenKH", "Vui lòng nhập họ và tên hội viên!");
+                    return View(model);
+                }
+                if (model.NgaySinh.HasValue && model.NgaySinh.Value > DateTime.Now)
+                {
+                    ModelState.AddModelError("NgaySinh", "Ngày sinh không được lớn hơn ngày hiện tại!");
+                    return View(model);
+                }
+                if (!string.IsNullOrEmpty(model.TenDangNhap))
+                {
+                    var checkTenDangNhap = _context.KhachHangs.FirstOrDefault(x => x.TenDangNhap == model.TenDangNhap);
+                    if (checkTenDangNhap != null)
+                    {
+                        ModelState.AddModelError("TenDangNhap", "Tên đăng nhập này đã tồn tại trong hệ thống!");
+                        return View(model);
+                    }
+                }
+                if(string.IsNullOrEmpty(model.TenDangNhap)||string.IsNullOrWhiteSpace(model.TenDangNhap))
+                {
+                    ModelState.AddModelError("TenDangNhap", "Không được bỏ trống tên đăng nhập!");
+                    return View(model);
+                }
+                if (!string.IsNullOrEmpty(model.Email))
+                {
+                    var checkEmail = _context.KhachHangs.FirstOrDefault(x => x.Email == model.Email);
+                    if (checkEmail != null)
+                    {
+                        ModelState.AddModelError("Email", "Email này đã tồn tại trong hệ thống!");
+                        return View(model);
+                    }
+                }
+
+                if (!string.IsNullOrEmpty(model.SDT))
+                {
+                    var checkSDT = _context.KhachHangs.FirstOrDefault(x => x.SDT == model.SDT);
+                    if (checkSDT != null)
+                    {
+                        ModelState.AddModelError("SDT", "Số điện thoại này đã được đăng ký!");
+                        return View(model);
+                    }
+                }
+
+                try
+                {
+                    if (string.IsNullOrEmpty(model.MatKhau))
+                    {
+                        model.MatKhau = "123456"; 
+                    }
+
+                    _context.KhachHangs.Add(model);
+                    _context.SaveChanges();
+
+                    TempData["ThongBao"] = "Thêm hội viên mới thành công!";
+                    return RedirectToAction("Index");
+                }
+                catch (Exception ex)
+                {
+                    ModelState.AddModelError("", "Có lỗi xảy ra khi lưu dữ liệu: " + ex.Message);
+                }
+            }
+
+            return View(model);
+        }
     }
 }
