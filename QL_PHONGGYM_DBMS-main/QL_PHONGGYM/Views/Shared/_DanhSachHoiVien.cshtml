@@ -1,0 +1,133 @@
+﻿@model List<QL_PHONGGYM.Models.KhachHang>
+@{
+    var danhSachLoai = ViewBag.DanhSachLoai as List<QL_PHONGGYM.Models.LoaiKhachHang>;
+}
+@if (TempData["ThongBao"] != null)
+{
+    <div id="msgAlert" class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="fas fa-check-circle me-2"></i> @TempData["ThongBao"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    TempData["ThongBao"] = null;
+}
+
+@using (Html.BeginForm("Index", "AdminMember", FormMethod.Get, new { @class = "row", id = "searchForm" }))
+{
+    <div class="card border-0 shadow-sm">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white py-3">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="mb-0 fw-bold text-primary"><i class="fas fa-users me-2"></i> Danh sách hội viên</h5>
+                </div>
+                <div class="row">
+                    <div class="row mb-3 flex-grow-1 ms-4">
+                        <div class="col-md-5">
+                            <input type="text" name="search" value="@ViewBag.CurrentSearch" class="form-control" placeholder="Nhập tên hoặc SĐT..." />
+                        </div>
+
+                        <div class="col-md-4">
+                            <select name="maLoai" class="form-control" onchange="this.form.submit()">
+                                <option value="0">-- Tất cả loại thành viên --</option>
+                                @if (ViewBag.DanhSachLoai != null)
+                                {
+                                    foreach (var item in ViewBag.DanhSachLoai)
+                                    {
+                                        <option value="@item.MaLoaiKH" @(ViewBag.CurrentStatus == item.MaLoaiKH ? "selected" : "")>
+                                            @item.TenLoai
+                                        </option>
+                                    }
+                                }
+                            </select>
+                        </div>
+
+                        <div class="col-md-2">
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="fa fa-search"></i> Tìm kiếm
+                            </button>
+                        </div>
+                        <div class="col-md-1">
+                            <a href="@Url.Action("Index")" class="btn btn-outline-primary border w-100" title="Xóa bộ lọc">
+                                <i class="fas fa-sync-alt"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="ps-4">Họ và tên</th>
+                                <th>Liên hệ</th>
+                                <th>Ngày sinh</th>
+                                <th>Loại thành viên</th>
+                                <th class="text-end pe-4">Hành động</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model != null && Model.Any())
+                            {
+                                foreach (var item in Model)
+                                {
+                                    <tr>
+                                        <td class="ps-4">
+                                            <div class="fw-bold text-dark">@item.TenKH</div>
+                                            <div class="small text-muted"><i class="fas fa-venus-mars me-1"></i> @item.GioiTinh</div>
+                                        </td>
+                                        <td>
+                                            <div class="small"><i class="fas fa-phone me-1 text-muted"></i> @item.SDT</div>
+                                            <div class="small text-muted">@item.Email</div>
+                                        </td>
+                                        <td>@(item.NgaySinh.HasValue ? item.NgaySinh.Value.ToString("dd/MM/yyyy") : "--")</td>
+                                        <td>
+                                            <span class="badge bg-info text-dark">
+                                                @(item.LoaiKhachHang != null ? item.LoaiKhachHang.TenLoai : "Chưa phân loại")
+                                            </span>
+                                        </td>
+                                        <td class="text-end pe-4">
+                                            <a href="@Url.Action("Edit", new { id = item.MaKH })" class="btn btn-outline-primary btn-sm me-1">
+                                                <i class="fas fa-user-edit"></i>
+                                            </a>
+                                            <button type="button" onclick="deleteMember(@item.MaKH)" class="btn btn-outline-danger btn-sm">
+                                                <i class="fas fa-trash-alt"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr><td colspan="5" class="text-center py-4">Không tìm thấy dữ liệu phù hợp</td></tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    function deleteMember(id) {
+        if (confirm('Bạn có chắc muốn xóa hội viên này?')) {
+            $.ajax({
+                url: '@Url.Action("Delete", "AdminMember")',
+                type: 'POST',
+                data: { id: id },
+                success: function (res) {
+                    if (res.success) {
+                        location.reload();
+                    } else {
+                        alert(res.message);
+                    }
+                },
+                error: function() {
+                    alert("Lỗi hệ thống!");
+                }
+            });
+        }
+    }
+</script>

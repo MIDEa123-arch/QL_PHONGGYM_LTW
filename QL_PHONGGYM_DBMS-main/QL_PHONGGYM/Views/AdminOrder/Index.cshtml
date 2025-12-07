@@ -3,64 +3,120 @@
     ViewBag.Title = "Index";
     Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
 }
-<div class="card border-0 shadow-sm">
-    <div class="card-header bg-white py-3">
-        <h5 class="mb-0 fw-bold text-primary"><i class="fas fa-file-invoice-dollar me-2"></i> Danh sách đơn hàng</h5>
-    </div>
-    <div class="card-body p-0">
-        <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
-                <thead class="table-light">
-                    <tr>
-                        <th class="ps-4">Mã HĐ</th>
-                        <th>Khách hàng</th>
-                        <th>Ngày lập</th>
-                        <th>Tổng tiền</th>
-                        <th>Trạng thái</th>
-                        <th class="text-end pe-4">Hành động</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @if (Model != null && Model.Any())
-                    {
-                        foreach (var item in Model)
+@using (Html.BeginForm("Index", "AdminOrder", FormMethod.Get))
+{
+    <div class="card border-0 shadow-sm">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white py-3">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="mb-0 fw-bold text-primary"><i class="fas fa-file-invoice-dollar me-2"></i> Danh sách đơn hàng</h5>
+                </div>
+                <div class="row">
+
+                    <div class="col-md-5">
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0"><i class="fas fa-search text-muted"></i></span>
+                            <input type="text" name="search" class="form-control border-start-0 ps-0"
+                                   placeholder="Nhập tên khách hàng..."
+                                   value="@ViewBag.CurrentSearch">
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <select name="status" class="form-select" onchange="this.form.submit()">
+                            <option value="">-- Tất cả trạng thái --</option>
+
+                            <option value="Đã thanh toán" @(ViewBag.CurrentStatus == "Đã thanh toán" ? "selected" : "")>
+                                Đã thanh toán
+                            </option>
+
+                            <option value="Chưa thanh toán" @(ViewBag.CurrentStatus == "Chưa thanh toán" ? "selected" : "")>
+                                Chưa thanh toán
+                            </option>
+
+                            <option value="Hủy" @(ViewBag.CurrentStatus == "Hủy" ? "selected" : "")>
+                                Đã hủy
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-3">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fa fa-search"></i> Tìm kiếm
+                        </button>
+                    </div>
+
+                    <div class="col-md-1">
+                        <a href="@Url.Action("Index")" class="btn btn-outline-primary border w-100" title="Xóa bộ lọc">
+                            <i class="fas fa-sync-alt"></i>
+                        </a>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="ps-4">Mã HĐ</th>
+                            <th>Khách hàng</th>
+                            <th>Ngày lập</th>
+                            <th>Tổng tiền</th>
+                            <th>Trạng thái</th>
+                            <th class="text-end pe-4">Hành động</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model != null && Model.Any())
                         {
-                            <tr>
-                                <td class="ps-4 fw-bold">#@item.MaHD</td>
-                                <td>
-                                    <div class="fw-bold">@item.KhachHang.TenKH</div>
-                                    <small class="text-muted">@item.KhachHang.SDT</small>
-                                </td>
-                                <td>@item.NgayLap.Value.ToString("dd/MM/yyyy HH:mm")</td>
-                                <td class="text-danger fw-bold">@string.Format("{0:N0}đ", item.TongTien)</td>
-                                <td>
-                                    @if (item.TrangThai == "Đã thanh toán")
-                                    {
-                                        <span class="badge bg-success">Đã thanh toán</span>
-                                    }
-                                    else if (item.TrangThai == "Hủy")
-                                    {
-                                        <span class="badge bg-secondary">Đã hủy</span>
-                                    }
-                                    else
-                                    {
-                                        <span class="badge bg-warning text-dark">Chờ xử lý</span>
-                                    }
-                                </td>
-                                <td class="text-end pe-4">
-                                    <a href="@Url.Action("Details", new { id = item.MaHD })" class="btn btn-primary btn-sm">
-                                        Xem chi tiết
-                                    </a>
-                                </td>
-                            </tr>
+                            foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td class="ps-4 fw-bold">#@item.MaHD</td>
+                                    <td>
+                                        <div class="fw-bold">@item.KhachHang.TenKH</div>
+                                        <small class="text-muted">@item.KhachHang.SDT</small>
+                                    </td>
+                                    <td>@item.NgayLap.ToString("dd/MM/yyyy HH:mm")</td>
+                                    <td class="text-danger fw-bold">@string.Format("{0:N0}đ", item.TongTien)</td>
+                                    <td>
+                                        @if (item.TrangThai == "Đã thanh toán")
+                                        {
+                                            <span class="badge bg-success">Đã thanh toán</span>
+                                        }
+                                        else if (item.TrangThai == "Hủy")
+                                        {
+                                            <span class="badge bg-secondary">Đã hủy</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-warning text-dark">Chờ xử lý</span>
+                                        }
+                                    </td>
+                                    <td class="text-end pe-4">
+                                        <a href="@Url.Action("Details", new { id = item.MaHD })" class="btn btn-primary btn-sm">
+                                            Xem chi tiết
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
                         }
-                    }
-                    else
-                    {
-                        <tr><td colspan="6" class="text-center py-4">Chưa có đơn hàng nào</td></tr>
-                    }
-                </tbody>
-            </table>
+                        else
+                        {
+                            <tr><td colspan="6" class="text-center py-4">Chưa có đơn hàng nào</td></tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
-</div>
+}

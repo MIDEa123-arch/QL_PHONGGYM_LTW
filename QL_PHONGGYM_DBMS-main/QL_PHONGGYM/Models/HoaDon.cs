@@ -22,7 +22,7 @@ namespace QL_PHONGGYM.Models
     
         public int MaHD { get; set; }
         public int MaKH { get; set; }
-        public Nullable<System.DateTime> NgayLap { get; set; }
+        public System.DateTime NgayLap { get; set; }
         public Nullable<decimal> TongTien { get; set; }
         public Nullable<decimal> ThanhTien { get; set; }
         public string TrangThai { get; set; }

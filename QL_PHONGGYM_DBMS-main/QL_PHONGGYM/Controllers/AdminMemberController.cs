@@ -11,18 +11,22 @@ namespace QL_PHONGGYM.Controllers
     {
         private readonly QL_PHONGGYMEntities _context = new QL_PHONGGYMEntities();
 
-        public ActionResult Index(string search = "")
+        public ActionResult Index(string search = "", int? maLoai=0)
         {
             if (Session["AdminUser"] == null) return RedirectToAction("Login", "Auth");
 
             var query = _context.KhachHangs.Include("LoaiKhachHang").AsQueryable();
-
+            ViewBag.DanhSachLoai = _context.LoaiKhachHangs.ToList();
             if (!string.IsNullOrEmpty(search))
             {
                 query = query.Where(k => k.TenKH.Contains(search) || k.SDT.Contains(search));
             }
-
+            if (maLoai!=0 && maLoai!=null)
+            {
+                query = query.Where(h => h.MaLoaiKH == maLoai);
+            }
             ViewBag.CurrentSearch = search;
+            ViewBag.CurrentStatus = maLoai;
             return View(query.OrderByDescending(k => k.MaKH).ToList());
         }
 
@@ -40,6 +44,20 @@ namespace QL_PHONGGYM.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Edit(KhachHang model)
         {
+            if (model.NgaySinh.HasValue && model.NgaySinh.Value > DateTime.Now)
+            {
+                ModelState.AddModelError("NgaySinh", "Ngày sinh không được lớn hơn ngày hiện tại.");
+            }
+
+            if (_context.KhachHangs.Any(x => x.SDT == model.SDT && x.MaKH != model.MaKH))
+            {
+                ModelState.AddModelError("SDT", "Số điện thoại này đã được sử dụng bởi người khác.");
+            }
+
+            if (!string.IsNullOrEmpty(model.Email) && _context.KhachHangs.Any(x => x.Email == model.Email && x.MaKH != model.MaKH))
+            {
+                ModelState.AddModelError("Email", "Email này đã được sử dụng bởi người khác.");
+            }
             if (ModelState.IsValid)
             {
                 try
@@ -60,7 +78,7 @@ namespace QL_PHONGGYM.Controllers
                         }
 
                         _context.SaveChanges();
-                        return RedirectToAction("Index");
+                        TempData["ThongBao"] = "Cập nhật thông tin hội viên thành công!";
                     }
                 }
                 catch (Exception ex)
@@ -82,11 +100,12 @@ namespace QL_PHONGGYM.Controllers
 
                 _context.KhachHangs.Remove(kh);
                 _context.SaveChanges();
-
+                TempData["ThongBao"] = "Đã xóa khách hàng thành công!";
                 return Json(new { success = true });
             }
             catch
             {
+                TempData["ThongBao"] = null;
                 return Json(new { success = false, message = "Khách hàng này đã có dữ liệu giao dịch/đăng ký, không thể xóa!" });
             }
         }

@@ -16,8 +16,15 @@
             {
                 <div class="alert alert-danger">@ViewBag.Error</div>
             }
-
+            if (TempData["ThongBao"] != null)
+            {
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="fas fa-check-circle me-2"></i> @TempData["ThongBao"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
             <div class="row g-3">
+
                 <div class="col-md-6">
                     <label class="form-label fw-bold">Họ và tên</label>
                     @Html.TextBoxFor(m => m.TenKH, new { @class = "form-control", required = "required" })
@@ -25,15 +32,19 @@
                 <div class="col-md-6">
                     <label class="form-label fw-bold">Số điện thoại</label>
                     @Html.TextBoxFor(m => m.SDT, new { @class = "form-control", required = "required" })
+                    @Html.ValidationMessageFor(m => m.SDT, "", new { @class = "text-danger small" })
                 </div>
 
                 <div class="col-md-6">
                     <label class="form-label fw-bold">Email</label>
                     @Html.TextBoxFor(m => m.Email, new { @class = "form-control" })
+                    @Html.ValidationMessageFor(m => m.Email, "", new { @class = "text-danger small" })
                 </div>
+
                 <div class="col-md-6">
                     <label class="form-label fw-bold">Ngày sinh</label>
                     <input type="date" name="NgaySinh" class="form-control" value="@(Model.NgaySinh.HasValue ? Model.NgaySinh.Value.ToString("yyyy-MM-dd") : "")" />
+                    @Html.ValidationMessageFor(m => m.NgaySinh, "", new { @class = "text-danger small" })
                 </div>
 
                 <div class="col-md-6">
@@ -58,7 +69,7 @@
             </div>
 
             <div class="mt-4 text-end">
-                <a href="@Url.Action("Index")" class="btn btn-light border me-2">Quay lại</a>
+                <a href="@Url.Action("Index")" class="btn btn-outline-danger border me-2">Quay lại</a>
                 <button type="submit" class="btn btn-primary px-4 fw-bold">Cập nhật hồ sơ</button>
             </div>
         }

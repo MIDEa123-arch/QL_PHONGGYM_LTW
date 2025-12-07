@@ -11,15 +11,25 @@ namespace QL_PHONGGYM.Controllers
     {
         private readonly QL_PHONGGYMEntities _context = new QL_PHONGGYMEntities();
 
-        public ActionResult Index()
+        public ActionResult Index(string search = "", string status = "")
         {
             if (Session["AdminUser"] == null) return RedirectToAction("Login", "Auth");
 
-            var list = _context.HoaDons
+            var query = _context.HoaDons
                 .Include("KhachHang")
                 .OrderByDescending(h => h.NgayLap)
                 .ToList();
-
+            if (!string.IsNullOrEmpty(search))
+            {
+                query = query.Where(h => h.KhachHang.TenKH.Contains(search)).ToList();
+            }
+            if (!string.IsNullOrEmpty(status))
+            {
+                query = query.Where(h => h.TrangThai == status).ToList();
+            }
+            ViewBag.CurrentSearch = search;
+            ViewBag.CurrentStatus = status;
+            var list = query.OrderByDescending(h => h.NgayLap).ToList();    
             return View(list);
         }
 
