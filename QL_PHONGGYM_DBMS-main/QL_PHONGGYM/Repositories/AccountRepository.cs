@@ -17,52 +17,93 @@ namespace QL_PHONGGYM.Repositories
             _context = context;
         }
 
+        public int GetCartCount(int maKH)
+        {
+            return _context.ChiTietGioHangs.Where(x => x.MaKH == maKH).Sum(x => (int?)x.SoLuong) ?? 0;
+        }
+
         public bool CusRegister(KhachHangRegisterViewModel model)
         {
             try
             {
-                _context.Database.ExecuteSqlCommand(
-                    "EXEC sp_KhachHangDangKy @TenKH, @GioiTinh, @NgaySinh, @SDT, @Email, @TenDangNhap, @MatKhau",
-                    new SqlParameter("@TenKH", model.TenKH),
-                    new SqlParameter("@GioiTinh", model.GioiTinh),
-                    new SqlParameter("@NgaySinh", model.NgaySinh),
-                    new SqlParameter("@SDT", model.SDT),
-                    new SqlParameter("@Email", model.Email),
-                    new SqlParameter("@TenDangNhap", model.TenDangNhap),
-                    new SqlParameter("@MatKhau", model.MatKhau)
-                );
+                if (_context.KhachHangs.Any(x => x.TenDangNhap == model.TenDangNhap))
+                    throw new Exception("Tên đăng nhập này đã được sử dụng. Vui lòng chọn tên khác.");
 
-                return true;
-            }
-            catch (SqlException ex)
-            {
-                throw ex;
-            }
-        }
+                if (!string.IsNullOrEmpty(model.SDT) &&
+                    _context.KhachHangs.Any(x => x.SDT == model.SDT))
+                    throw new Exception("Số điện thoại này đã được đăng ký cho một tài khoản khác.");
+                
+                if (!string.IsNullOrEmpty(model.Email) &&
+                    _context.KhachHangs.Any(x => x.Email == model.Email))
+                    throw new Exception("Email này đã được đăng ký cho một tài khoản khác.");
 
-        public KhachHangLoginResult CusLogin(string tenDangNhap, string matKhau)
-        {
-            return _context.Database.SqlQuery<KhachHangLoginResult>(
-                "EXEC sp_KhachHangLogin @p0, @p1",
-                tenDangNhap, matKhau
-            ).FirstOrDefault();
-        }
+                var kh = new KhachHang
+                {
+                    TenKH = model.TenKH,
+                    GioiTinh = model.GioiTinh,
+                    NgaySinh = model.NgaySinh,
+                    SDT = model.SDT,
+                    Email = model.Email,
+                    TenDangNhap = model.TenDangNhap,
+                    MatKhau = model.MatKhau,
+                    TrangThaiTaiKhoan = 1,
+                    MaLoaiKH = 4
+                };
 
-        public bool DangKyThu(string HoTen, string SoDienThoai, string Email)
-        {
-            try
-            {
-                string sql = "EXEC sp_DangKyTapThu @TenKH, @SDT, @Email";
-                _context.Database.ExecuteSqlCommand(sql, new SqlParameter("@TenKH", HoTen), new SqlParameter("@SDT", SoDienThoai),
-                                                    new SqlParameter("@Email", (object)Email ?? DBNull.Value)
-                );
+                _context.KhachHangs.Add(kh);
+                _context.SaveChanges();
 
                 return true;
             }
             catch (Exception ex)
             {
-                throw new Exception("Lỗi khi đăng ký tập thử: " + (ex.InnerException?.Message ?? ex.Message));
+                throw new Exception("Lỗi đăng ký khách hàng: " + ex.Message);
             }
         }
+
+
+        public KhachHangLoginResult CusLogin(string tenDangNhap, string matKhau)
+        {
+            var kh = _context.KhachHangs
+                             .Where(x => x.TenDangNhap == tenDangNhap && x.MatKhau == matKhau)
+                             .FirstOrDefault();
+
+            if (kh == null)
+                return null;
+            
+            if (kh.TrangThaiTaiKhoan == 0)
+                throw new Exception("Tài khoản đã bị khóa. Vui lòng liên hệ hỗ trợ.");
+
+            return new KhachHangLoginResult
+            {
+                MaKH = kh.MaKH,
+                TenKH = kh.TenKH,
+                SDT = kh.SDT,
+                Email = kh.Email
+            };
+        }
+
+
+        public bool DangKyThu(string hoTen, string soDienThoai, string email)
+        {
+            try
+            {
+                var dk = new KhachHang
+                {
+                    TenKH = hoTen,
+                    SDT = soDienThoai,
+                    Email = email,                    
+                };
+                _context.KhachHangs.Add(dk);
+                _context.SaveChanges();
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Lỗi khi đăng ký tập thử: " + ex.Message);
+            }
+        }
+
     }
 }

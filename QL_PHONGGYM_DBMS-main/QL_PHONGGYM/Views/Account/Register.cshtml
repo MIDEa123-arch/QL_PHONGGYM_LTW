@@ -131,7 +131,7 @@
                         @Html.ValidationMessageFor(m => m.SDT, "", new { @class = "text-danger small" })
                     </div>
                     <div class="col-md-6 mb-3">
-                        @Html.LabelFor(m => m.Email, "Email (Không bắt buộc)", new { @class = "form-label" })
+                        @Html.LabelFor(m => m.Email, "Email", new { @class = "form-label" })
                         @Html.TextBoxFor(m => m.Email, new { @class = "form-control", placeholder = "Nhập email", @style = "max-width: 350px" })
                         <label class="form-check-label small text-success mt-2" style="font-size:13px">
                             ✓ Hóa đơn VAT khi mua hàng sẽ được gửi qua email này

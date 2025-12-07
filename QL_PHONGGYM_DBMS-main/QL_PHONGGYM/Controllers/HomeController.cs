@@ -33,19 +33,24 @@ namespace QL_PHONGGYM.Controllers
         {
             try
             {
-                bool isSuccess = _accountRepo.DangKyThu(HoTen, SoDienThoai, Email);
+                var isSuccess = _accountRepo.DangKyThu(HoTen, SoDienThoai, Email);
 
-                if (isSuccess)
-                    return Json(new { success = true, message = "Đăng ký thành công!" });
-                else
-                    return Json(new { success = false, message = "Đăng ký thất bại." });
+                return Json(new
+                {
+                    success = isSuccess,
+                    message = isSuccess ? "Đăng ký thành công!" : "Đăng ký thất bại."
+                }, JsonRequestBehavior.AllowGet);
             }
             catch (Exception ex)
             {
-                string err = ex.InnerException?.Message ?? ex.Message;
-                return Json(new { success = false, message = err });
+                return Json(new
+                {
+                    success = false,
+                    message = ex.InnerException?.Message ?? ex.Message
+                }, JsonRequestBehavior.AllowGet);
             }
         }
+
 
 
         public ActionResult About()

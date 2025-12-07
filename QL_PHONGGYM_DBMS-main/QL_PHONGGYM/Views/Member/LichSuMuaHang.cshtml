@@ -2,166 +2,157 @@
 @{
     ViewBag.Title = "Lịch sử mua hàng";
     Layout = "~/Views/Shared/_LayoutMember.cshtml";
+
+    string currentStatus = Request.QueryString["status"] ?? "all";
+    string currentDateRange = Request.QueryString["daterange"] ?? "";
 }
 
-<div class="bg-white rounded-3 shadow-sm p-4 h-100">
-    <h5 class="fw-bold text-uppercase mb-4 pb-2 border-bottom">Lịch sử đơn hàng</h5>
+<style>
+    .date-picker-wrapper {
+        position: relative;
+        width: 250px;
+    }
+
+        .date-picker-wrapper input {
+            padding-left: 35px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .date-picker-wrapper i {
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6c757d;
+            z-index: 2;
+        }
+
+    .filter-btn {
+        text-decoration: none;
+        padding: 8px 16px;
+        transition: all 0.2s;
+        white-space: nowrap;
+    }
+
+    .filter-btn-default {
+        color: #6c757d !important;
+    }
+
+    .filter-btn-active {
+        color: #0d6efd !important;
+        border-bottom: 2px solid #0d6efd;
+    }
+</style>
+
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+
+<div class="bg-white rounded-3 shadow-sm px-4 py-2 h-100">
+
+    <div class="d-flex gap-2 mb-3 justify-content-start overflow-auto pb-2 border-bottom">
+        <a href="@Url.Action("LichSuMuaHang", new { status = "all", daterange = currentDateRange })"
+           class="filter-btn @(currentStatus == "all" ? "filter-btn-active" : "filter-btn-default")">Tất cả</a>
+
+        <a href="@Url.Action("LichSuMuaHang", new { status = "cho-xac-nhan", daterange = currentDateRange })"
+           class="filter-btn @(currentStatus == "cho-xac-nhan" ? "filter-btn-active" : "filter-btn-default")">Chờ xác nhận</a>
+
+        <a href="@Url.Action("LichSuMuaHang", new { status = "cho-giao-hang", daterange = currentDateRange })"
+           class="filter-btn @(currentStatus == "cho-giao-hang" ? "filter-btn-active" : "filter-btn-default")">Chờ giao hàng</a>
+
+        <a href="@Url.Action("LichSuMuaHang", new { status = "da-nhan-hang", daterange = currentDateRange })"
+           class="filter-btn @(currentStatus == "da-nhan-hang" ? "filter-btn-active" : "filter-btn-default")">Đã nhận hàng</a>
+
+        <a href="@Url.Action("LichSuMuaHang", new { status = "da-thanh-toan", daterange = currentDateRange })"
+           class="filter-btn @(currentStatus == "da-thanh-toan" ? "filter-btn-active" : "filter-btn-default")">Đã thanh toán</a>
+
+        <a href="@Url.Action("LichSuMuaHang", new { status = "chua-thanh-toan", daterange = currentDateRange })"
+           class="filter-btn @(currentStatus == "chua-thanh-toan" ? "filter-btn-active" : "filter-btn-default")">Chưa thanh toán</a>
+
+        <a href="@Url.Action("LichSuMuaHang", new { status = "da-huy", daterange = currentDateRange })"
+           class="filter-btn @(currentStatus == "da-huy" ? "filter-btn-active" : "filter-btn-default")">Đã hủy</a>
+    </div>
+
+    <div class="d-flex gap-3 align-items-center mb-4">
+        <h5 class="fw-bold m-0" style="font-size: 18px">Lịch sử đơn hàng</h5>
+        <div class="date-picker-wrapper">
+            <i class="fa fa-calendar me-2"></i>
+            <input type="text" name="daterange" class="form-control rounded-2 bg-light border-1 border" placeholder="Chọn khoảng ngày..." />
+        </div>
+    </div>
 
     @if (Model != null && Model.Count > 0)
     {
         <div class="accordion" id="accordionOrders">
             @foreach (var item in Model)
             {
-                if (item.MaDonHang != null)
-                {
-                    <a class="card mb-3 border-1 border px-2 py-0 text-decoration-none text-black" href="@Url.Action("ChiTietHoaDon", "Member", new {maHd = item.MaHD})">
-                        <div class="card-body p-2">
-                            <div class="d-flex justify-content-between align-items-center w-100 mb-2">
-                                <div class="d-flex align-items-center align-content-center">
+                <a class="card mb-3 border-1 border px-2 py-0 text-decoration-none text-black" href="@Url.Action("ChiTietHoaDon", "Member", new {maHd = item.MaHD})">
+                    <div class="card-body p-2">
+                        <div class="d-flex justify-content-between align-items-center w-100 mb-2">
+                            <div class="d-flex align-items-center align-content-center">
+                                @if (item.MaDonHang != null)
+                                {
                                     <span class="text-muted">Đơn hàng: </span>
                                     <span class="fw-bold ms-1">#@item.MaDonHang</span>
-                                    <span class="text-muted fw-bolder fs-5 mx-2">•</span>
-                                    <span class="text-muted">Ngày đặt hàng: <span class="fw-bold text-dark">@item.NgayLap.Value.ToString("dd/MM/yyyy")</span></span>
-                                </div>
-                                <div class="text-end">
-                                    @if (@item.DonHang.TrangThaiDonHang == "Đã nhận hàng")
-                                    {
-                                        <div class="text-success border border-1 rounded-2 p-1 fw-bold" style="background-color: #c9eed9; font-size: 12px">
-                                            @item.DonHang.TrangThaiDonHang
-                                        </div>
-                                    }
-                                    @if (@item.DonHang.TrangThaiDonHang == "Chờ xác nhận")
-                                    {
-                                        <div class="text-secondary border border-1 rounded-2 p-1 fw-bold" style="background-color: #e9e4e4; font-size: 12px">
-                                            @item.DonHang.TrangThaiDonHang
-                                        </div>
-                                    }
-                                    @if (@item.DonHang.TrangThaiDonHang == "Chờ giao hàng")
-                                    {
-                                        <div class="text-warning border border-1 rounded-2 p-1 fw-bold" style="background-color: #faefb9; font-size: 12px">
-                                            @item.DonHang.TrangThaiDonHang
-                                        </div>
-                                    }
-                                    @if (@item.DonHang.TrangThaiDonHang == "Đã hủy")
-                                    {
-                                        <div class="text-danger border border-1 rounded-2 p-1 fw-bold" style="background-color: #f5aeae; font-size: 12px">
-                                            @item.DonHang.TrangThaiDonHang
-                                        </div>
-                                    }
-                                </div>
-                            </div>
-                            @if (item.ChiTietHoaDons.Count > 1)
-                            {
-
-                                var firstProduct = item.ChiTietHoaDons.FirstOrDefault()?.SanPham;
-                                var mainImage = firstProduct?.HINHANHs.FirstOrDefault(h => h.IsMain == true)?.Url ?? "default.png";
-                                var imageUrl = Url.Content("~/Content/Images/" + mainImage);
-                                <div class="w-100 d-flex row">
-                                    <div class="d-flex gap-2 mb-3 col-8">
-                                        <img src="@imageUrl" style="width: 4rem" alt="@firstProduct?.TenSP" />
-                                        <div class="d-flex flex-column justify-content-center">
-                                            <span class="fs-6 text-uppercase fw-bolder text-break" style="word-break: break-word;">
-                                                @firstProduct.TenSP
-                                            </span>
-                                            <span class="small fw-bolder">
-                                                @(firstProduct.GiaKhuyenMai != null && firstProduct.GiaKhuyenMai > 0 ? firstProduct.GiaKhuyenMai.Value.ToString("N0") + " đ": firstProduct.DonGia.ToString("N0") + " đ")
-                                            </span>
-                                            <span class="small">Cùng @(item.ChiTietHoaDons.Count - 1) sản phẩm khác</span>
-                                        </div>
-                                    </div>
-                                    <div class="d-flex col-4 flex-column justify-content-center text-end p-0">
-                                        <span class="fw-normal" style="font-size: 12px">Tổng thanh toán: <span class="fw-bold text-danger" style="font-size: 15px">@item.DonHang.TongTien.ToString("N0")đ</span></span>
-                                        <span class="fw-bold" style="font-size: 13px">Xem chi tiết ></span>
-                                    </div>
-                                </div>
-                            }
-                            else
-                            {
-                                var firstProduct = item.ChiTietHoaDons.FirstOrDefault()?.SanPham;
-                                var mainImage = firstProduct?.HINHANHs.FirstOrDefault(h => h.IsMain == true)?.Url ?? "default.png";
-                                var imageUrl = Url.Content("~/Content/Images/" + mainImage);
-                                <div class="w-100 d-flex row">
-                                    <div class="d-flex gap-2 mb-3 col-8">
-                                        <img src="@imageUrl" style="width: 4rem" alt="@firstProduct?.TenSP" />
-                                        <div class="d-flex flex-column justify-content-center">
-                                            <span class="fs-6 text-uppercase fw-bolder text-break" style="word-break: break-word;">
-                                                @firstProduct.TenSP
-                                            </span>
-                                            <span class="small fw-bolder">
-                                                @(firstProduct.GiaKhuyenMai != null && firstProduct.GiaKhuyenMai > 0 ? firstProduct.GiaKhuyenMai.Value.ToString("N0") + " đ": firstProduct.DonGia.ToString("N0") + " đ")
-                                            </span>
-                                        </div>
-                                    </div>
-                                    <div class="d-flex col-4 flex-column justify-content-center text-end p-0">
-                                        <span class="fw-normal" style="font-size: 12px">Tổng thanh toán: <span class="fw-bold text-danger" style="font-size: 15px">@item.DonHang.TongTien.ToString("N0")đ</span></span>
-                                        <span class="fw-bold" style="font-size: 13px">Xem chi tiết ></span>
-                                    </div>
-                                </div>
-                            }
-                        </div>
-
-                    </a>
-                }
-                else
-                {
-                    var firstDetail = item.ChiTietHoaDons.FirstOrDefault();
-                    decimal gia = 0;
-                    string tenHienThi = "";
-
-                    <a class="card mb-3 border-1 border px-2 py-0 text-decoration-none text-black" href="@Url.Action("ChiTietHoaDon", "Member", new {maHd = item.MaHD})">
-                        <div class="card-body p-2">
-                            <div class="d-flex justify-content-between align-items-center w-100 mb-2">
-                                <div class="d-flex align-items-center align-content-center">
+                                }
+                                else
+                                {
                                     <span class="text-muted">Hóa đơn: </span>
                                     <span class="fw-bold ms-1">#@item.MaHD</span>
-                                    <span class="text-muted fw-bolder fs-5 mx-2">•</span>
-                                    <span class="text-muted">Ngày đăng ký: <span class="fw-bold text-dark">@item.NgayLap.Value.ToString("dd/MM/yyyy")</span></span>
-                                </div>
-                                <div class="text-end">
-                                    @if (@item.TrangThai == "Đã thanh toán")
+                                }
+                                <span class="text-muted fw-bolder fs-5 mx-2">•</span>
+                                <span class="text-muted">Ngày đặt: <span class="fw-bold text-dark">@item.NgayLap.Value.ToString("dd/MM/yyyy")</span></span>
+                            </div>
+
+                            <div class="text-end">
+                                @{
+                                    string trangThaiHienThi = item.TrangThai;
+                                    string colorClass = "text-secondary";
+                                    string bgClass = "#e9e4e4";
+
+                                    if (item.DonHang != null)
                                     {
-                                        <div class="text-success border border-1 rounded-2 p-1 fw-bold" style="background-color: #c9eed9; font-size: 12px">
-                                            @item.TrangThai
-                                        </div>
+                                        trangThaiHienThi = item.DonHang.TrangThaiDonHang;
                                     }
-                                    @if (@item.TrangThai == "Chưa thanh toán")
+
+                                    if (trangThaiHienThi == "Đã nhận hàng" || trangThaiHienThi == "Đã thanh toán")
                                     {
-                                        <div class="text-warning border border-1 rounded-2 p-1 fw-bold" style="background-color: #faefb9; font-size: 12px">
-                                            @item.TrangThai
-                                        </div>
+                                        colorClass = "text-success";
+                                        bgClass = "#c9eed9";
                                     }
+                                    else if (trangThaiHienThi == "Chờ giao hàng" || trangThaiHienThi == "Chưa thanh toán")
+                                    {
+                                        colorClass = "text-warning";
+                                        bgClass = "#faefb9";
+                                    }
+                                    else if (trangThaiHienThi == "Đã hủy")
+                                    {
+                                        colorClass = "text-danger";
+                                        bgClass = "#f5aeae";
+                                    }
+                                }
+                                <div class="@colorClass border border-1 rounded-2 p-1 fw-bold" style="background-color: @bgClass; font-size: 12px">
+                                    @trangThaiHienThi
                                 </div>
                             </div>
-                            <div class="w-100 d-flex row p-0">
-                                <div class="d-flex gap-2 mb-3 col-8 p-0">
-                                    <img src="@Url.Content("~/Content/logo.png")" class="me-2 ms-2" style="width: 4rem; filter: opacity(0.7);" />
+                        </div>
+
+                        @if (item.ChiTietHoaDons.Count > 1)
+                        {
+                            var firstProduct = item.ChiTietHoaDons.FirstOrDefault()?.SanPham;
+                            var mainImage = firstProduct?.HINHANHs.FirstOrDefault(h => h.IsMain == true)?.Url ?? "default.png";
+                            var imageUrl = Url.Content("~/Content/Images/" + mainImage);
+                            <div class="w-100 d-flex row">
+                                <div class="d-flex gap-2 mb-3 col-8">
+                                    <img src="@imageUrl" style="width: 4rem" alt="@firstProduct?.TenSP" />
                                     <div class="d-flex flex-column justify-content-center">
-
-                                        @if (firstDetail != null)
-                                        {
-                                            if (firstDetail.MaDKLop != null)
-                                            {
-                                                tenHienThi = "lớp " + firstDetail.DangKyLop.LopHoc.TenLop;
-                                                gia = firstDetail.DangKyLop.LopHoc.HocPhi;
-                                            }
-                                            else if (firstDetail.MaDKPT != null)
-                                            {
-                                                tenHienThi = "PT " + firstDetail.DangKyPT.NhanVien.TenNV;
-                                                gia = firstDetail.DangKyPT.GiaMoiBuoi * firstDetail.DangKyPT.SoBuoi;
-                                            }
-                                            else if (firstDetail.MaDKGT != null)
-                                            {
-                                                tenHienThi = "Gói tập " + firstDetail.DangKyGoiTap.GoiTap.TenGoi;
-                                                gia = firstDetail.DangKyGoiTap.GoiTap.Gia;
-                                            }
-                                        }
-
                                         <span class="fs-6 text-uppercase fw-bolder text-break" style="word-break: break-word;">
-                                            @tenHienThi
+                                            @firstProduct.TenSP
                                         </span>
                                         <span class="small fw-bolder">
-                                            @gia.ToString("N0")đ
+                                            @(firstProduct.GiaKhuyenMai != null && firstProduct.GiaKhuyenMai > 0 ? firstProduct.GiaKhuyenMai.Value.ToString("N0") + " đ": firstProduct.DonGia.ToString("N0") + " đ")
                                         </span>
+                                        <span class="small">Cùng @(item.ChiTietHoaDons.Count - 1) sản phẩm khác</span>
                                     </div>
                                 </div>
                                 <div class="d-flex col-4 flex-column justify-content-center text-end p-0">
@@ -169,9 +160,39 @@
                                     <span class="fw-bold" style="font-size: 13px">Xem chi tiết ></span>
                                 </div>
                             </div>
-                        </div>
-                    </a>
-                }
+                        }
+                        else
+                        {
+                            var firstDetail = item.ChiTietHoaDons.FirstOrDefault();
+                            var firstProduct = firstDetail?.SanPham;
+                            var mainImage = firstProduct?.HINHANHs.FirstOrDefault(h => h.IsMain == true)?.Url ?? "logo.png";
+                            var imageUrl = Url.Content("~/Content/Images/" + mainImage);
+                            string tenHienThi = ""; decimal gia = 0;
+
+                            if (firstDetail != null)
+                            {
+                                if (firstDetail.MaDKLop != null) { tenHienThi = "lớp " + firstDetail.DangKyLop.LopHoc.TenLop; gia = firstDetail.DangKyLop.LopHoc.HocPhi; }
+                                else if (firstDetail.MaDKPT != null) { tenHienThi = "PT " + firstDetail.DangKyPT.NhanVien.TenNV; gia = firstDetail.DangKyPT.GiaMoiBuoi * firstDetail.DangKyPT.SoBuoi; }
+                                else if (firstDetail.MaDKGT != null) { tenHienThi = "Gói tập " + firstDetail.DangKyGoiTap.GoiTap.TenGoi; gia = firstDetail.DangKyGoiTap.GoiTap.Gia; }
+                                else if (firstProduct != null) { tenHienThi = firstProduct.TenSP; gia = firstProduct.GiaKhuyenMai ?? firstProduct.DonGia; }
+                            }
+
+                            <div class="w-100 d-flex row">
+                                <div class="d-flex gap-2 mb-3 col-8">
+                                    <img src="@imageUrl" style="width: 4rem" />
+                                    <div class="d-flex flex-column justify-content-center">
+                                        <span class="fs-6 text-uppercase fw-bolder text-break" style="word-break: break-word;">@tenHienThi</span>
+                                        <span class="small fw-bolder">@gia.ToString("N0")đ</span>
+                                    </div>
+                                </div>
+                                <div class="d-flex col-4 flex-column justify-content-center text-end p-0">
+                                    <span class="fw-normal" style="font-size: 12px">Tổng thanh toán: <span class="fw-bold text-danger" style="font-size: 15px">@item.ThanhTien.Value.ToString("N0")đ</span></span>
+                                    <span class="fw-bold" style="font-size: 13px">Xem chi tiết ></span>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </a>
             }
         </div>
     }
@@ -184,3 +205,60 @@
         </div>
     }
 </div>
+
+@section scripts {
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+
+    <script>
+        $(function () {
+            var serverDateRange = '@Html.Raw(ViewBag.CurrentDateRange)';
+            var start = moment().subtract(7, 'days');
+            var end = moment();
+
+            if (serverDateRange) {
+                var dates = serverDateRange.split('-');
+                start = moment(dates[0].trim(), 'DD/MM/YYYY');
+                end = moment(dates[1].trim(), 'DD/MM/YYYY');
+            }
+
+            $('input[name="daterange"]').daterangepicker({
+                startDate: start,
+                endDate: end,
+                opens: 'left',
+                locale: {
+                    format: 'DD/MM/YYYY',
+                    applyLabel: "Lọc",
+                    cancelLabel: "Xóa",
+                    fromLabel: "Từ",
+                    toLabel: "Đến",
+                    customRangeLabel: "Tùy chọn",
+                    daysOfWeek: ["CN", "T2", "T3", "T4", "T5", "T6", "T7"],
+                    monthNames: ["Tháng 1", "Tháng 2", "Tháng 3", "Tháng 4", "Tháng 5", "Tháng 6", "Tháng 7", "Tháng 8", "Tháng 9", "Tháng 10", "Tháng 11", "Tháng 12"],
+                    firstDay: 1
+                }
+            });
+
+            if (serverDateRange) {
+                $('input[name="daterange"]').val(serverDateRange);
+            } else {
+                $('input[name="daterange"]').val(start.format('DD/MM/YYYY') + ' - ' + end.format('DD/MM/YYYY'));
+            }
+
+            $('input[name="daterange"]').on('apply.daterangepicker', function (ev, picker) {
+                var selectedRange = picker.startDate.format('DD/MM/YYYY') + ' - ' + picker.endDate.format('DD/MM/YYYY');
+                $(this).val(selectedRange);
+                var urlParams = new URLSearchParams(window.location.search);
+                var currentStatus = urlParams.get('status') || 'all';
+                window.location.href = '@Url.Action("LichSuMuaHang", "Member")' + '?status=' + currentStatus + '&daterange=' + selectedRange;
+            });
+
+            $('input[name="daterange"]').on('cancel.daterangepicker', function (ev, picker) {
+                $(this).val('');
+                var urlParams = new URLSearchParams(window.location.search);
+                var currentStatus = urlParams.get('status') || 'all';
+                window.location.href = '@Url.Action("LichSuMuaHang", "Member")' + '?status=' + currentStatus;
+            });
+        });
+    </script>
+}

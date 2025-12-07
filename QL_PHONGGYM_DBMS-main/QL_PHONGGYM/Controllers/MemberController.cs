@@ -3,6 +3,7 @@ using QL_PHONGGYM.Repositories;
 using System;
 using System.Linq;
 using System.Web.Mvc;
+using System.Globalization;
 
 namespace QL_PHONGGYM.Controllers
 {
@@ -23,18 +24,41 @@ namespace QL_PHONGGYM.Controllers
 
         private bool KiemTraDangNhap()
         {
-            if (Session["MaKH"] == null) return false;
-            if (Session["KhachHang"] == null)
-            {
-                int maKH = (int)Session["MaKH"];
-                Session["KhachHang"] = _cusRepo.ThongTinKH(maKH);
-            }
+            if (Session["MaKH"] == null)
+                return false;
+
+
+            if (!int.TryParse(Session["MaKH"].ToString(), out int maKH))
+                return false;
+
+            var kh = _cusRepo.ThongTinKH(maKH);
+
+            if (kh == null)
+                throw new Exception("Tài khoản không tồn tại.");
+
+            if (kh.TrangThaiTaiKhoan == 0)
+                throw new Exception("Tài khoản đã bị khóa. Vui lòng liên hệ hỗ trợ.");
+
+            Session["KhachHang"] = kh;
+
             return true;
         }
 
         public ActionResult Index()
         {
-            if (!KiemTraDangNhap()) return RedirectToAction("Login", "Account");
+            try
+            {
+                if (!KiemTraDangNhap())
+                    return RedirectToAction("Login", "Account");
+            }
+            catch (Exception ex)
+            {
+                Session.Clear();
+
+                TempData["ErrorMessage"] = ex.Message;
+
+                return RedirectToAction("Login", "Account");
+            }
 
             ViewBag.ActiveMenu = "tongquan";
 
@@ -53,6 +77,7 @@ namespace QL_PHONGGYM.Controllers
             return View(khachHang);
         }
 
+
         public ActionResult LichTap(DateTime? date)
         {
             if (Session["MaKH"] == null) return RedirectToAction("Login", "Account");
@@ -64,13 +89,62 @@ namespace QL_PHONGGYM.Controllers
             return View();
         }
 
-        public ActionResult LichSuMuaHang()
-        {
+        public ActionResult LichSuMuaHang(string status = "all", string daterange = "")
+        {            
             if (!KiemTraDangNhap()) return RedirectToAction("Login", "Account");
+
             ViewBag.ActiveMenu = "hoadon";
             int maKH = (int)Session["MaKH"];
-            var listHoaDon = _cusRepo.GetLichSuMuaHang(maKH);
-            return View(listHoaDon);
+
+            var listHoaDon = _cusRepo.GetLichSuMuaHang(maKH).AsQueryable();
+
+            if (!string.IsNullOrEmpty(daterange))
+            {
+                try
+                {
+                    var dates = daterange.Split('-');
+                    if (dates.Length == 2)
+                    {
+                        DateTime startDate = DateTime.ParseExact(dates[0].Trim(), "dd/MM/yyyy", CultureInfo.InvariantCulture);
+                        DateTime endDate = DateTime.ParseExact(dates[1].Trim(), "dd/MM/yyyy", CultureInfo.InvariantCulture).AddDays(1).AddSeconds(-1);
+
+                        listHoaDon = listHoaDon.Where(n => n.NgayLap >= startDate && n.NgayLap <= endDate);
+                    }
+                }
+                catch
+                {
+                }
+            }
+            switch (status)
+            {
+                case "cho-xac-nhan":
+                    listHoaDon = listHoaDon.Where(n => n.DonHang != null && n.DonHang.TrangThaiDonHang == "Chờ xác nhận");
+                    break;
+                case "cho-giao-hang":
+                    listHoaDon = listHoaDon.Where(n => n.DonHang != null && n.DonHang.TrangThaiDonHang == "Chờ giao hàng");
+                    break;
+                case "da-nhan-hang":
+                    listHoaDon = listHoaDon.Where(n => n.DonHang != null && n.DonHang.TrangThaiDonHang == "Đã nhận hàng");
+                    break;
+                case "da-huy":
+                    listHoaDon = listHoaDon.Where(n => n.DonHang != null && n.DonHang.TrangThaiDonHang == "Đã hủy");
+                    break;
+                case "da-thanh-toan": 
+                    listHoaDon = listHoaDon.Where(n => n.TrangThai == "Đã thanh toán");
+                    break;
+                case "chua-thanh-toan": 
+                    listHoaDon = listHoaDon.Where(n => n.TrangThai == "Chưa thanh toán");
+                    break;
+                default: 
+                    break;
+            }
+
+            var resultList = listHoaDon.OrderByDescending(n => n.NgayLap).ToList();
+
+            ViewBag.CurrentStatus = status;
+            ViewBag.CurrentDateRange = daterange;
+
+            return View(resultList);
         }
 
         public ActionResult SoDiaChi()
@@ -85,7 +159,7 @@ namespace QL_PHONGGYM.Controllers
         public ActionResult ThongTinTaiKhoan()
         {
             if (!KiemTraDangNhap()) return RedirectToAction("Login", "Account");
-            ViewBag.ActiveMenu = "taikhoan"; 
+            ViewBag.ActiveMenu = "taikhoan";
             int maKH = (int)Session["MaKH"];
             var khachHang = _cusRepo.ThongTinKH(maKH);
             return View(khachHang);
@@ -102,7 +176,7 @@ namespace QL_PHONGGYM.Controllers
                 TempData["ThongBao"] = "Thêm địa chỉ thành công!";
             }
             return RedirectToAction("SoDiaChi");
-        }       
+        }
 
         [HttpPost]
         [ValidateAntiForgeryToken]

@@ -534,24 +534,37 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     btnAddToCart?.addEventListener('click', function () {
-        var maSP = this.dataset.id;
-        var soLuong = parseInt(quantityInput.value);
+    var maSP = this.dataset.id;
+    var soLuong = parseInt(quantityInput.value);
 
-        fetch('@Url.Action("AddToCart", "Product")', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ maSP: parseInt(maSP), soLuong: soLuong })
-        })
-        .then(res => res.json())
-        .then(data => {
-            if (data.success) {
-                toast.show();
-            } else {
-                alert(data.message);
-            }
-        })
-        .catch(err => console.error(err));
-    });
+    fetch('@Url.Action("AddToCartAjax", "CartCheckout")', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ maSP: parseInt(maSP), soLuong: soLuong })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            toast.show();
+
+            // Chọn tất cả các phần tử có class 'cartCount' (thay vì getElementById)
+            const cartBadges = document.querySelectorAll(".cartCount");
+
+            cartBadges.forEach(badge => {
+                // Cập nhật số lượng mới
+                badge.textContent = data.cartCount;
+                // Hiển thị badge lên (xóa style display: none)
+                badge.style.display = 'inline-block';
+            });
+
+        } else {
+            alert(data.message);
+        }
+    })
+    .catch(err => console.error(err));
+});
+
+
 });
 </script>
 
