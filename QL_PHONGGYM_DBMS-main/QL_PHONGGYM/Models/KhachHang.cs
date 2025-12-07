@@ -36,6 +36,7 @@ namespace QL_PHONGGYM.Models
         public string GioiTinh { get; set; }
         public string TenDangNhap { get; set; }
         public string MatKhau { get; set; }
+        public Nullable<int> TrangThaiTaiKhoan { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<CheckIn> CheckIns { get; set; }

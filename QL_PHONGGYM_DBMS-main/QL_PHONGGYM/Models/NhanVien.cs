@@ -32,6 +32,7 @@ namespace QL_PHONGGYM.Models
         public string TenNV { get; set; }
         public string SDT { get; set; }
         public Nullable<System.DateTime> NgaySinh { get; set; }
+        public Nullable<int> TrangThaiTaiKhoan { get; set; }
     
         public virtual ChucVu ChucVu { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
