@@ -57,5 +57,25 @@ namespace QL_PHONGGYM.Controllers
                 total = totalRevenue.Value.ToString("N0")
             });
         }
+        [HttpPost]
+        public JsonResult GetMonthlyRevenue(int year)
+        {
+            // Lấy tất cả hóa đơn đã thanh toán trong năm được chọn
+            var data = _context.HoaDons
+                .Where(h => h.TrangThai == "Đã thanh toán" && h.NgayLap.Value.Year == year)
+                .Select(h => new { h.NgayLap.Value.Month, h.TongTien })
+                .ToList();
+
+            // Khởi tạo mảng 12 tháng với giá trị 0
+            decimal[] monthlyData = new decimal[12];
+
+            // Cộng dồn doanh thu vào từng tháng (Index 0 là tháng 1, Index 11 là tháng 12)
+            foreach (var item in data)
+            {
+                monthlyData[item.Month - 1] += item.TongTien ?? 0;
+            }
+
+            return Json(new { success = true, data = monthlyData, year = year });
+        }
     }
 }
