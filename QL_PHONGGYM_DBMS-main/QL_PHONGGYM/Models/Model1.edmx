@@ -269,6 +269,30 @@
           <Property Name="NgayGui" Type="datetime" />
           <Property Name="NgayXuLy" Type="datetime" />
         </EntityType>
+        <Association Name="FK_CheckIn_KH">
+          <End Role="KhachHang" Type="Self.KhachHang" Multiplicity="1" />
+          <End Role="CheckIn" Type="Self.CheckIn" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="KhachHang">
+              <PropertyRef Name="MaKH" />
+            </Principal>
+            <Dependent Role="CheckIn">
+              <PropertyRef Name="MaKH" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_ChiTietGioHang_KhachHang">
+          <End Role="KhachHang" Type="Self.KhachHang" Multiplicity="1" />
+          <End Role="ChiTietGioHang" Type="Self.ChiTietGioHang" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="KhachHang">
+              <PropertyRef Name="MaKH" />
+            </Principal>
+            <Dependent Role="ChiTietGioHang">
+              <PropertyRef Name="MaKH" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
         <Association Name="FK_CT_HD">
           <End Role="HoaDon" Type="Self.HoaDon" Multiplicity="1" />
           <End Role="ChiTietHoaDon" Type="Self.ChiTietHoaDon" Multiplicity="*" />
@@ -326,30 +350,6 @@
             </Principal>
             <Dependent Role="ChiTietHoaDon">
               <PropertyRef Name="MaSP" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <Association Name="FK_CheckIn_KH">
-          <End Role="KhachHang" Type="Self.KhachHang" Multiplicity="1" />
-          <End Role="CheckIn" Type="Self.CheckIn" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="KhachHang">
-              <PropertyRef Name="MaKH" />
-            </Principal>
-            <Dependent Role="CheckIn">
-              <PropertyRef Name="MaKH" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <Association Name="FK_ChiTietGioHang_KhachHang">
-          <End Role="KhachHang" Type="Self.KhachHang" Multiplicity="1" />
-          <End Role="ChiTietGioHang" Type="Self.ChiTietGioHang" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="KhachHang">
-              <PropertyRef Name="MaKH" />
-            </Principal>
-            <Dependent Role="ChiTietGioHang">
-              <PropertyRef Name="MaKH" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
@@ -575,6 +575,18 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <Association Name="FK_NhanVien_ChucVu">
+          <End Role="ChucVu" Type="Self.ChucVu" Multiplicity="0..1" />
+          <End Role="NhanVien" Type="Self.NhanVien" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="ChucVu">
+              <PropertyRef Name="MaChucVu" />
+            </Principal>
+            <Dependent Role="NhanVien">
+              <PropertyRef Name="MaChucVu" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
         <Association Name="FK_NVCM_CM">
           <End Role="ChuyenMon" Type="Self.ChuyenMon" Multiplicity="1" />
           <End Role="NhanVienChuyenMon" Type="Self.NhanVienChuyenMon" Multiplicity="*" />
@@ -596,18 +608,6 @@
             </Principal>
             <Dependent Role="NhanVienChuyenMon">
               <PropertyRef Name="MaNV" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <Association Name="FK_NhanVien_ChucVu">
-          <End Role="ChucVu" Type="Self.ChucVu" Multiplicity="0..1" />
-          <End Role="NhanVien" Type="Self.NhanVien" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="ChucVu">
-              <PropertyRef Name="MaChucVu" />
-            </Principal>
-            <Dependent Role="NhanVien">
-              <PropertyRef Name="MaChucVu" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
@@ -860,6 +860,14 @@
           <EntitySet Name="NhanVienChuyenMon" EntityType="Self.NhanVienChuyenMon" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="SanPham" EntityType="Self.SanPham" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="YeuCauHoTro" EntityType="Self.YeuCauHoTro" Schema="dbo" store:Type="Tables" />
+          <AssociationSet Name="FK_CheckIn_KH" Association="Self.FK_CheckIn_KH">
+            <End Role="KhachHang" EntitySet="KhachHang" />
+            <End Role="CheckIn" EntitySet="CheckIn" />
+          </AssociationSet>
+          <AssociationSet Name="FK_ChiTietGioHang_KhachHang" Association="Self.FK_ChiTietGioHang_KhachHang">
+            <End Role="KhachHang" EntitySet="KhachHang" />
+            <End Role="ChiTietGioHang" EntitySet="ChiTietGioHang" />
+          </AssociationSet>
           <AssociationSet Name="FK_CT_HD" Association="Self.FK_CT_HD">
             <End Role="HoaDon" EntitySet="HoaDon" />
             <End Role="ChiTietHoaDon" EntitySet="ChiTietHoaDon" />
@@ -879,14 +887,6 @@
           <AssociationSet Name="FK_CT_SP" Association="Self.FK_CT_SP">
             <End Role="SanPham" EntitySet="SanPham" />
             <End Role="ChiTietHoaDon" EntitySet="ChiTietHoaDon" />
-          </AssociationSet>
-          <AssociationSet Name="FK_CheckIn_KH" Association="Self.FK_CheckIn_KH">
-            <End Role="KhachHang" EntitySet="KhachHang" />
-            <End Role="CheckIn" EntitySet="CheckIn" />
-          </AssociationSet>
-          <AssociationSet Name="FK_ChiTietGioHang_KhachHang" Association="Self.FK_ChiTietGioHang_KhachHang">
-            <End Role="KhachHang" EntitySet="KhachHang" />
-            <End Role="ChiTietGioHang" EntitySet="ChiTietGioHang" />
           </AssociationSet>
           <AssociationSet Name="FK_DiaChi_KhachHang" Association="Self.FK_DiaChi_KhachHang">
             <End Role="KhachHang" EntitySet="KhachHang" />
@@ -960,6 +960,10 @@
             <End Role="NhanVien" EntitySet="NhanVien" />
             <End Role="LopHoc" EntitySet="LopHoc" />
           </AssociationSet>
+          <AssociationSet Name="FK_NhanVien_ChucVu" Association="Self.FK_NhanVien_ChucVu">
+            <End Role="ChucVu" EntitySet="ChucVu" />
+            <End Role="NhanVien" EntitySet="NhanVien" />
+          </AssociationSet>
           <AssociationSet Name="FK_NVCM_CM" Association="Self.FK_NVCM_CM">
             <End Role="ChuyenMon" EntitySet="ChuyenMon" />
             <End Role="NhanVienChuyenMon" EntitySet="NhanVienChuyenMon" />
@@ -967,10 +971,6 @@
           <AssociationSet Name="FK_NVCM_NV" Association="Self.FK_NVCM_NV">
             <End Role="NhanVien" EntitySet="NhanVien" />
             <End Role="NhanVienChuyenMon" EntitySet="NhanVienChuyenMon" />
-          </AssociationSet>
-          <AssociationSet Name="FK_NhanVien_ChucVu" Association="Self.FK_NhanVien_ChucVu">
-            <End Role="ChucVu" EntitySet="ChucVu" />
-            <End Role="NhanVien" EntitySet="NhanVien" />
           </AssociationSet>
           <AssociationSet Name="FK_SP_LSP" Association="Self.FK_SP_LSP">
             <End Role="LoaiSanPham" EntitySet="LoaiSanPham" />

@@ -276,6 +276,25 @@
             </div>
         }
     </div>
+
+    @if (ViewBag.TotalPages > 1)
+    {
+        <nav aria-label="Page navigation" class="mt-5">
+            <ul class="pagination justify-content-center">
+                @for (int i = 1; i <= ViewBag.TotalPages; i++)
+                {
+                    <li class="page-item @(i == ViewBag.CurrentPage ? "active" : "")">
+                        <a class="page-link" href="@Url.Action("Index", new {
+                            page = i,
+                            search = ViewBag.CurrentSearch,
+                            chuyenMonId = ViewBag.CurrentChuyenMon,
+                            filterType = ViewBag.CurrentFilter
+                        })">@i</a>
+                    </li>
+                }
+            </ul>
+        </nav>
+    }
 </div>
 
 <div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
@@ -311,7 +330,6 @@
         }
     }
 
-    // Tự động đóng khi click ra ngoài vùng trắng (Optional)
     window.onclick = function (event) {
         var overlay = document.getElementById('custom-alert-overlay');
         if (event.target == overlay) {

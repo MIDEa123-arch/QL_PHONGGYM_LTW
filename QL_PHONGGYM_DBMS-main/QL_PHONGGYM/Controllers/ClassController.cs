@@ -4,6 +4,7 @@ using System;
 using System.Linq;
 using System.Security.Policy;
 using System.Web.Mvc;
+using System.Collections.Generic;
 
 namespace QL_PHONGGYM.Controllers
 {
@@ -21,7 +22,7 @@ namespace QL_PHONGGYM.Controllers
             _khachhangRepo = new KhachHangRepository(db);
         }
 
-        public ActionResult Index(string search = "", int? chuyenMonId = null, string filterType = "")
+        public ActionResult Index(string search = "", int? chuyenMonId = null, string filterType = "", int? page = 1)
         {
             int? maKH = null;
             if (Session["MaKH"] != null)
@@ -36,13 +37,22 @@ namespace QL_PHONGGYM.Controllers
 
             var listLop = _productRepo.GetLopHocs(search, chuyenMonId, maKH, filterType);
 
-            return View(listLop);
+            int pageSize = 9;
+            int pageNumber = (page ?? 1);
+            int totalItems = listLop.Count();
+
+            ViewBag.TotalPages = (int)Math.Ceiling((double)totalItems / pageSize);
+            ViewBag.CurrentPage = pageNumber;
+
+            var pagedList = listLop.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToList();
+
+            return View(pagedList);
         }
 
         public ActionResult CheckOutLopHoc(int maLop, string url)
         {
             try
-            { 
+            {
                 var maKH = (int)Session["MaKH"];
 
                 var lop = _productRepo.LopHocDetail(maLop);
@@ -62,8 +72,6 @@ namespace QL_PHONGGYM.Controllers
                 TempData["Error"] = ex.Message;
                 return RedirectToAction("Index");
             }
-
-            
         }
 
         [HttpPost]
