@@ -14,7 +14,7 @@
         <p class="mt-2 fw-normal fs-5" style="font-family:Arial">Gear up for every workout with our essentials: Supplements (protein, pre-workouts), performance Workout Apparel, key Training Accessories (gloves, shakers, bags), and Small Training Equipment like bands and rollers. Hit your goals equipped.</p>
     </div>
     <img class="img-fluid mb-5" src="@Url.Content("~/Content/Images/PosterProduct.jpeg")" />
-    <div class="container bg-white mx-auto p-0 row d-flex justify-content-between">     
+    <div class="container bg-white mx-auto p-0 row d-flex justify-content-between">
         <div class="col-2" style="flex: 0 0 auto; width: 16%;">
             <form method="post" action="@Url.Action("Product", "Product")">
                 @Html.AntiForgeryToken()
@@ -90,7 +90,7 @@
                 </div>
             </form>
         </div>
-       
+
         <div class="col-10 ps-2">
             <div class="d-flex gap-3 mb-3">
                 <span>Sắp xếp: </span>
@@ -101,8 +101,11 @@
                         xuatXu = Request["xuatXu"],
                         minPrice = Request["minPrice"],
                         maxPrice = Request["maxPrice"],
-                        sapXepTheoTen = 0
-                   })">
+                        khuyenmai = Request["khuyenmai"],
+                        conhang = Request["conhang"],
+                        sapXepTheoTen = 0,
+                        page = 1
+                    })">
                     Tên A → Z
                 </a>
                 <a class="border-0 sort-btn bg-transparent p-0 small"
@@ -112,8 +115,11 @@
                         xuatXu = Request["xuatXu"],
                         minPrice = Request["minPrice"],
                         maxPrice = Request["maxPrice"],
-                        sapXepTheoTen = 1
-                   })">
+                        khuyenmai = Request["khuyenmai"],
+                        conhang = Request["conhang"],
+                        sapXepTheoTen = 1,
+                        page = 1
+                    })">
                     Tên Z → A
                 </a>
                 <a class="border-0 sort-btn bg-transparent p-0 small"
@@ -123,7 +129,10 @@
                     xuatXu = Request["xuatXu"],
                     minPrice = Request["minPrice"],
                     maxPrice = Request["maxPrice"],
-                    sapXepTheoGia = 0
+                    khuyenmai = Request["khuyenmai"],
+                    conhang = Request["conhang"],
+                    sapXepTheoGia = 0,
+                    page = 1
                })">
                     Giá tăng dần
                 </a>
@@ -135,8 +144,11 @@
                         xuatXu = Request["xuatXu"],
                         minPrice = Request["minPrice"],
                         maxPrice = Request["maxPrice"],
-                        sapXepTheoGia = 1
-                   })">
+                        khuyenmai = Request["khuyenmai"],
+                        conhang = Request["conhang"],
+                        sapXepTheoGia = 1,
+                        page = 1
+                    })">
                     Giá giảm dần
                 </a>
 
@@ -183,6 +195,32 @@
                     </div>
                 }
             </div>
+
+            @if (ViewBag.TotalPages > 1)
+            {
+                <nav aria-label="Page navigation" class="mt-4">
+                    <ul class="pagination justify-content-center">
+                        @for (int i = 1; i <= ViewBag.TotalPages; i++)
+                        {
+                            <li class="page-item @(i == ViewBag.CurrentPage ? "active" : "")">
+                                <a class="page-link" href="@Url.Action("Product", new {
+                                    page = i,
+                                    loaisp = Request["loaisp"],
+                                    hang = Request["hang"],
+                                    xuatXu = Request["xuatXu"],
+                                    minPrice = Request["minPrice"],
+                                    maxPrice = Request["maxPrice"],
+                                    khuyenmai = Request["khuyenmai"],
+                                    conhang = Request["conhang"],
+                                    sapXepTheoTen = Request["sapXepTheoTen"],
+                                    sapXepTheoGia = Request["sapXepTheoGia"]
+                                })">@i</a>
+                            </li>
+                        }
+                    </ul>
+                </nav>
+            }
+
         </div>
     </div>
     <hr class="mt-5" />
