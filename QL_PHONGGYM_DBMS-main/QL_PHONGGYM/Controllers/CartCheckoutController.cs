@@ -23,19 +23,57 @@ namespace QL_PHONGGYM.Controllers
             _accountRepo = new AccountRepository(new QL_PHONGGYMEntities());
         }
 
-        
+        private bool KiemTraDangNhap()
+        {
+            if (Session["MaKH"] == null)
+                return false;
+
+
+            if (!int.TryParse(Session["MaKH"].ToString(), out int maKH))
+                return false;
+
+            var kh = _cusRepo.ThongTinKH(maKH);
+
+            if (kh == null)
+            {     
+                TempData["ErrorMessage"] = "Tài khoản không tồn tại";
+                return false;
+            }
+
+            if (kh.TrangThaiTaiKhoan == 0)
+            {
+                Session["MaKH"] = null;
+                TempData["ErrorMessage"] = "Tài khoản đã bị khóa. Vui lòng liên hệ hỗ trợ.";
+                return false;
+            }
+
+            Session["KhachHang"] = kh;
+
+            return true;
+        }
 
         public ActionResult CheckoutDangKyPT(int maHD, string url)
         {
+            if (!KiemTraDangNhap())
+                return RedirectToAction("Login", "Account");
+            try
+            {                
+                var HoaDonPT = _cartRepo.HoaDonPT(maHD);
+                var kh = _cusRepo.ThongTinKH((int)Session["maKH"]);
 
-            var HoaDonPT = _cartRepo.HoaDonPT(maHD);            
-            var kh = _cusRepo.ThongTinKH((int)Session["maKH"]);
+                ViewBag.HoaDon = maHD;
+                ViewBag.Khachhang = kh;
+                ViewBag.LoaiKh = kh.MaLoaiKH.HasValue ? _cusRepo.LoaiKh(kh.MaLoaiKH.Value) : null;
+                ViewBag.Url = url;
+                return View(HoaDonPT);
+            }
+            catch(Exception ex)
+            {
+                TempData["ErrorMessage"] = ex.Message;
 
-            ViewBag.HoaDon = maHD;
-            ViewBag.Khachhang = kh;
-            ViewBag.LoaiKh = kh.MaLoaiKH.HasValue ? _cusRepo.LoaiKh(kh.MaLoaiKH.Value) : null;
-            ViewBag.Url = url;
-            return View(HoaDonPT);
+                return Redirect(url);
+            }
+           
 
         }
 
@@ -43,6 +81,8 @@ namespace QL_PHONGGYM.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult TaoHoaDon(FormCollection form)
         {
+            if (!KiemTraDangNhap())
+                return RedirectToAction("Login", "Account");
             var cart = (List<GioHangViewModel>)Session["thanhtoan"];
             int maKH = (int)Session["MaKH"];
             var diaChi = Session["Diachi"] as DiaChi;
@@ -54,7 +94,7 @@ namespace QL_PHONGGYM.Controllers
             }
             catch (Exception ex)
             {
-                TempData["Error"] = ex.Message;
+                TempData["ErrorMessage"] = ex.Message;
                 return RedirectToAction("ThanhToanfinal");
             }
 
@@ -64,6 +104,9 @@ namespace QL_PHONGGYM.Controllers
 
         public ActionResult ThanhToanfinal()
         {
+            if (!KiemTraDangNhap())
+                return RedirectToAction("Login", "Account");
+
             int maKH = (int)Session["MaKH"];
             var kh = _cusRepo.ThongTinKH(maKH);
 
@@ -77,6 +120,8 @@ namespace QL_PHONGGYM.Controllers
 
         public ActionResult ThanhToanThanhCong()
         {
+            if (!KiemTraDangNhap())
+                return RedirectToAction("Login", "Account");
             return View();
         }
 
@@ -85,6 +130,9 @@ namespace QL_PHONGGYM.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult ThanhToanfinal(FormCollection form)
         {
+            if (!KiemTraDangNhap())
+                return RedirectToAction("Login", "Account");
+
             int maKH = (int)Session["MaKH"];                        
 
                 string tinh = form["province"];
@@ -112,14 +160,16 @@ namespace QL_PHONGGYM.Controllers
 
         public ActionResult GiamSoLuong(int id)
         {
+            if (!KiemTraDangNhap())
+                return RedirectToAction("Login", "Account");
             try
-            { 
+            {                
                 _cartRepo.Xoa(id);
                 Session["GioHang"] = _accountRepo.GetCartCount((int)Session["MaKH"]);
             }
             catch (Exception ex)
             {
-                TempData["Error"] = ex.Message;
+                TempData["ErrorMessage"] = ex.Message;
             }
             return RedirectToAction("ToCheckOut");
 
@@ -127,14 +177,16 @@ namespace QL_PHONGGYM.Controllers
 
         public ActionResult TangSoLuong(int id)
         {
+            if (!KiemTraDangNhap())
+                return RedirectToAction("Login", "Account");
             try
-            {
+            {               
                 _cartRepo.Them(id, (int)Session["MaKH"]);
                 Session["GioHang"] = _accountRepo.GetCartCount((int)Session["MaKH"]);
             }
             catch (Exception ex)
             {
-                TempData["Error"] = ex.Message;
+                TempData["ErrorMessage"] = ex.Message;
             }
             return RedirectToAction("ToCheckOut");
         }
@@ -142,6 +194,9 @@ namespace QL_PHONGGYM.Controllers
 
         public ActionResult XoaDon(int id)
         {
+            if (!KiemTraDangNhap())
+                return RedirectToAction("Login", "Account");
+
             int maKH = (int)Session["MaKH"];
             _cartRepo.XoaDon(id, maKH);
             Session["GioHang"] = _accountRepo.GetCartCount(maKH);
@@ -153,6 +208,9 @@ namespace QL_PHONGGYM.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult XoaVaThanhToan(FormCollection form, string actionType)
         {
+            if (!KiemTraDangNhap())
+                return RedirectToAction("Login", "Account");
+
             int maKH = (int)Session["MaKH"];
 
             if (actionType == "delete")
@@ -174,6 +232,9 @@ namespace QL_PHONGGYM.Controllers
 
         public ActionResult ThanhToan()
         {
+            if (!KiemTraDangNhap())
+                return RedirectToAction("Login", "Account");
+
             int maKH = (int)Session["MaKH"];
             var list = (List<GioHangViewModel>)Session["thanhtoan"];
             var kh = _cusRepo.ThongTinKH(maKH);
@@ -194,6 +255,9 @@ namespace QL_PHONGGYM.Controllers
         }
         public ActionResult ToCheckOut()
         {
+            if (!KiemTraDangNhap())
+                return RedirectToAction("Login", "Account");
+
             int maKH = (int)Session["MaKH"];
             var cart = _cartRepo.GetCart(maKH).OrderByDescending(sp => sp.NgayThem);
 
@@ -205,6 +269,7 @@ namespace QL_PHONGGYM.Controllers
         {
             try
             {
+
                 if (Session["MaKH"] == null)
                 {
                     return Json(new { success = false, needLogin = true });
@@ -239,14 +304,13 @@ namespace QL_PHONGGYM.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult AddToCart(int maSP, int soLuong)
         {
+            if (!KiemTraDangNhap())
+                return RedirectToAction("Login", "Account");
+
             if (soLuong <= 0)
             {
                 TempData["ErrorMessage"] = "Sản phẩm đã hết!";
                 return RedirectToAction("ProductDetail", "Product", new { id = maSP });
-            }
-            if (Session["MaKH"] == null)
-            {
-                return RedirectToAction("Login", "Account");
             }
 
             int maKH = (int)Session["MaKH"];

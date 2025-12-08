@@ -65,6 +65,11 @@ namespace QL_PHONGGYM.Repositories
 
             };
 
+            if (hoaDon == null)
+                throw new Exception("Hóa đơn không tồn tại.");
+            if (hoaDon.TrangThai == "Đã thanh toán")
+                throw new Exception("Hóa đơn đã được thanh toán.");
+
             return dk;
         }
 
@@ -413,6 +418,10 @@ namespace QL_PHONGGYM.Repositories
                 try
                 {
                     var sanPham = _context.SanPhams.FirstOrDefault(sp => sp.MaSP == maSP);
+                    var khachHang = _context.KhachHangs.FirstOrDefault(k => k.MaKH == maKH && k.TrangThaiTaiKhoan == 1);
+
+                    if (khachHang == null)
+                        throw new Exception("Tài khoản đã bị khóa. Vui lòng liên hệ hỗ trợ.");
 
                     if (sanPham == null)
                         throw new Exception("Sản phẩm không tồn tại!");
