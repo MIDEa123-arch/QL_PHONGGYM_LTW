@@ -18,6 +18,7 @@
                         <th class="ps-4">Tên gói</th>
                         <th>Thời hạn (Tháng)</th>
                         <th>Giá tiền</th>
+                        <th>Trạng thái</th>
                         <th>Mô tả</th>
                         <th class="text-end pe-4">Hành động</th>
                     </tr>
@@ -31,6 +32,16 @@
                                 <td class="ps-4 fw-bold">@item.TenGoi</td>
                                 <td>@item.ThoiHan tháng</td>
                                 <td class="text-danger fw-bold">@string.Format("{0:N0}đ", item.Gia)</td>
+                                <td>
+                                    @if (item.TrangThai == 1)
+                                    {
+                                        <span class="badge bg-success">Đang hoạt động</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary">Ngừng kinh doanh</span>
+                                    }
+                                </td>
                                 <td class="text-muted small text-truncate" style="max-width: 300px;">@item.MoTa</td>
                                 <td class="text-end pe-4">
                                     <a href="@Url.Action("Edit", new { id = item.MaGoiTap })" class="btn btn-outline-primary btn-sm me-1">

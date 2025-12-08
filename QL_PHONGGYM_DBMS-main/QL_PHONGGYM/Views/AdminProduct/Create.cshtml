@@ -18,17 +18,21 @@
                 <div class="alert alert-danger">@ViewBag.Error</div>
             }
 
+            @Html.ValidationSummary(true, "", new { @class = "text-danger mb-3" })
+
             <div class="row g-3">
                 <div class="col-md-8">
                     <div class="mb-3">
                         <label class="form-label fw-bold">Tên sản phẩm <span class="text-danger">*</span></label>
-                        @Html.TextBoxFor(m => m.TenSP, new { @class = "form-control", required = "required" })
+                        @Html.TextBoxFor(m => m.TenSP, new { @class = "form-control", required = "required", placeholder = "Nhập tên sản phẩm" })
+                        @Html.ValidationMessageFor(m => m.TenSP, "", new { @class = "text-danger" })
                     </div>
 
                     <div class="row mb-3">
                         <div class="col-md-6">
                             <label class="form-label fw-bold">Danh mục <span class="text-danger">*</span></label>
                             @Html.DropDownList("MaLoaiSP", null, "-- Chọn loại --", new { @class = "form-select", required = "required" })
+                            @Html.ValidationMessageFor(m => m.MaLoaiSP, "", new { @class = "text-danger" })
                         </div>
                         <div class="col-md-6">
                             <label class="form-label fw-bold">Thương hiệu (Hãng)</label>
@@ -48,13 +52,14 @@
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label fw-bold">Mô tả ngắn</label>
-                        @Html.TextAreaFor(m => m.MoTaChung, new { @class = "form-control", rows = "3" })
+                        <label class="form-label fw-bold">Mô tả ngắn <span class="text-danger">*</span></label>
+                        @Html.TextAreaFor(m => m.MoTaChung, new { @class = "form-control", rows = "3", required = "required" })
+                        @Html.ValidationMessageFor(m => m.MoTaChung, "", new { @class = "text-danger" })
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label fw-bold">Mô tả chi tiết (Thông số)</label>
-                        @Html.TextAreaFor(m => m.MoTaChiTiet, new { @class = "form-control", rows = "5" })
+                        <label class="form-label fw-bold">Mô tả chi tiết</label>
+                        @Html.TextAreaFor(m => m.MoTaChiTiet, new { @class = "form-control", rows = "5", placeholder = "Nhập thông số kỹ thuật...\nXuống dòng sẽ tự động chuyển thành dấu |" })
                     </div>
                 </div>
 
@@ -65,17 +70,33 @@
 
                             <div class="mb-3">
                                 <label class="form-label">Giá bán (VNĐ) <span class="text-danger">*</span></label>
-                                @Html.TextBoxFor(m => m.DonGia, new { @class = "form-control", type = "number", required = "required" })
+
+                                <input type="text"
+                                       name="strDonGia"
+                                       id="txtDonGia"
+                                       class="form-control currency-input"
+                                       required
+                                       placeholder="0"
+                                       value="@(Model.DonGia > 0 ? Model.DonGia.ToString("#,##0").Replace(",",".") : "")" />
+
+                                @Html.ValidationMessageFor(m => m.DonGia, "", new { @class = "text-danger" })
                             </div>
 
                             <div class="mb-3">
-                                <label class="form-label">Giá khuyến mãi (Nếu có)</label>
-                                @Html.TextBoxFor(m => m.GiaKhuyenMai, new { @class = "form-control", type = "number" })
+                                <label class="form-label">Giá khuyến mãi (VNĐ)</label>
+
+                                <input type="text"
+                                       name="strGiaKhuyenMai"
+                                       class="form-control currency-input"
+                                       placeholder="Để trống nếu không có"
+                                       value="@(Model.GiaKhuyenMai > 0 ? Model.GiaKhuyenMai.Value.ToString("#,##0").Replace(",",".") : "")" />
+                                @Html.ValidationMessageFor(m => m.GiaKhuyenMai, "", new { @class = "text-danger" })
                             </div>
 
                             <div class="mb-3">
                                 <label class="form-label">Số lượng tồn kho <span class="text-danger">*</span></label>
-                                @Html.TextBoxFor(m => m.SoLuongTon, new { @class = "form-control", type = "number", required = "required", Value = "100" })
+                                @Html.TextBoxFor(m => m.SoLuongTon, new { @class = "form-control number-only", required = "required" })
+                                @Html.ValidationMessageFor(m => m.SoLuongTon, "", new { @class = "text-danger" })
                             </div>
                         </div>
                     </div>
@@ -100,3 +121,47 @@
     </div>
 </div>
 
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        var currencyInputs = document.querySelectorAll('.currency-input');
+        function formatCurrency(input) {
+            var value = input.value.replace(/\D/g, "");
+            if (value !== "") {
+                value = new Intl.NumberFormat('vi-VN').format(value);
+            }
+            input.value = value;
+        }
+        currencyInputs.forEach(function (input) {
+            input.addEventListener('input', function () {
+                formatCurrency(this);
+            });
+            formatCurrency(input);
+        });
+        var numberInputs = document.querySelectorAll('.number-only');
+        numberInputs.forEach(function (input) {
+            input.addEventListener('input', function () {
+                this.value = this.value.replace(/[^0-9]/g, '');
+            });
+        });
+    });
+    $('.currency-input').on('blur keyup', function () {
+        CheckGiaKhuyenMai();
+    });
+    function CheckGiaKhuyenMai() {
+        var strGiaBan = $('#txtDonGia').val().replace(/\./g, '');
+        var strGiaKM = $('#txtGiaKM').val().replace(/\./g, '');
+        var giaBan = parseFloat(strGiaBan) || 0;
+        var giaKM = parseFloat(strGiaKM) || 0;
+        if (giaKM > 0 && giaKM >= giaBan) {
+            var errorSpan = $('span[data-valmsg-for="GiaKhuyenMai"]');
+            if (errorSpan.length === 0) {
+                $('#txtGiaKM').addClass('is-invalid');
+            } else {
+                errorSpan.text("Giá khuyến mãi phải nhỏ hơn giá gốc!").addClass("field-validation-error").removeClass("field-validation-valid");
+            }
+        } else {
+            $('#txtGiaKM').removeClass('is-invalid');
+            $('span[data-valmsg-for="GiaKhuyenMai"]').text("").addClass("field-validation-valid").removeClass("field-validation-error");
+        }
+    }
+</script>

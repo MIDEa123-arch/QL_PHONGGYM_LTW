@@ -21,7 +21,7 @@ namespace QL_PHONGGYM.Controllers
         public ActionResult Create()
         {
             if (Session["AdminUser"] == null) return RedirectToAction("Login", "Auth");
-            return View();
+            return View(new GoiTap());
         }
 
         [HttpPost]
@@ -32,14 +32,7 @@ namespace QL_PHONGGYM.Controllers
             {
                 ModelState.AddModelError("TenGoi", "Vui lòng nhập tên gói tập!");
             }
-            else
-            {
-                var checkTen = _context.GoiTaps.FirstOrDefault(g => g.TenGoi == model.TenGoi);
-                if (checkTen != null)
-                {
-                    ModelState.AddModelError("TenGoi", "Tên gói tập này đã tồn tại!");
-                }
-            }
+            
             if (model.Gia <= 0)
             {
                 ModelState.AddModelError("Gia", "Giá gói tập phải lớn hơn 0!");
@@ -87,14 +80,7 @@ namespace QL_PHONGGYM.Controllers
             {
                 ModelState.AddModelError("TenGoi", "Vui lòng nhập tên gói tập!");
             }
-            else
-            {
-                var checkTen = _context.GoiTaps.FirstOrDefault(g => g.TenGoi == model.TenGoi&&g.MaGoiTap!=model.MaGoiTap);
-                if (checkTen != null)
-                {
-                    ModelState.AddModelError("TenGoi", "Tên gói tập này đã tồn tại!");
-                }
-            }
+            
             if (model.Gia <= 0)
             {
                 ModelState.AddModelError("Gia", "Giá gói tập phải lớn hơn 0!");
@@ -109,20 +95,30 @@ namespace QL_PHONGGYM.Controllers
             }
             if (ModelState.IsValid)
             {
-                //try
-                //{
+                try
+                {
+                    if (model.TrangThai == 0)
+                    {
+                        var checkDangKyGoi = _context.DangKyGoiTaps.FirstOrDefault(t => t.MaGoiTap == model.MaGoiTap);
+                        if(checkDangKyGoi != null)
+                        {
+                            ModelState.AddModelError("TrangThai", "Không thể chuyển đổi trạng thái gói tập vì có người đang đăng ký gói tập này");
+                            return View(model);
+                        }
+                    }
                     GoiTap temp = _context.GoiTaps.FirstOrDefault(t => t.MaGoiTap == model.MaGoiTap);
                     temp.TenGoi = model.TenGoi;
                     temp.ThoiHan = model.ThoiHan;
                     temp.Gia= model.Gia;
+                    temp.TrangThai= model.TrangThai;
                     temp.MoTa= model.MoTa;
                     _context.SaveChanges();
                     return RedirectToAction("Index");
-                //}
-                //catch (Exception ex)
-                //{
-                //    ViewBag.Error = "Lỗi: " + ex.Message;
-                //}
+                }
+                catch (Exception ex)
+                {
+                    ViewBag.Error = "Lỗi: " + ex.Message;
+                }
             }
             return View(model);
         }
@@ -130,15 +126,24 @@ namespace QL_PHONGGYM.Controllers
         [HttpPost]
         public JsonResult Delete(int id)
         {
+            var goiTap = _context.GoiTaps.FirstOrDefault(t=>t.MaGoiTap==id);
+            if (goiTap == null)
+            {
+                return Json(new { success = false, message = "Không tìm thấy gói tập!" });
+            }
             try
             {
-                var item = _context.GoiTaps.Find(id);
-                if (item == null) return Json(new { success = false, message = "Không tìm thấy gói tập" });
-
-                _context.GoiTaps.Remove(item);
-                _context.SaveChanges();
-
-                return Json(new { success = true });
+                var checkDangKyGoiTap = _context.DangKyGoiTaps.FirstOrDefault(x => x.MaGoiTap == id);
+                if (checkDangKyGoiTap==null)
+                {
+                    goiTap.TrangThai = 0;
+                    _context.SaveChanges();
+                    return Json(new { success = true, message = "Gói tập đang được sử dụng nên hệ thống đã chuyển sang trạng thái 'Ngừng kinh doanh'!" });
+                }
+                else
+                {
+                    return Json(new { success = false, message = "Không thể xóa gói tập vì có khách hàng đang đăng ký gói tập" });
+                }
             }
             catch
             {

@@ -1,0 +1,71 @@
+﻿@model List<QL_PHONGGYM.Models.LichLop>
+
+<div class="table-responsive">
+    <table class="table table-bordered table-striped align-middle mb-0">
+        <thead class="table-primary">
+            <tr>
+                <th class="text-center">STT</th>
+                <th>Ngày học</th>
+                <th>Giờ học</th>
+                <th>HLV</th>
+                <th class="text-center">Trạng thái</th>
+                <th class="text-center">Tác vụ</th>
+            </tr>
+        </thead>
+        <<tbody>
+    @if (Model != null && Model.Any())
+    {
+        int i = 1;
+        foreach (var item in Model)
+        {
+            <tr>
+                <td class="text-center">@(i++)</td>
+
+                <td class="fw-bold">
+                    @item.NgayHoc.ToString("dd/MM/yyyy")
+                    <div class="small text-muted">(@item.NgayHoc.ToString("dddd"))</div>
+                </td>
+
+                <td>
+                    @item.GioBatDau.ToString(@"hh\:mm") - @item.GioKetThuc.ToString(@"hh\:mm")
+                </td>
+
+                <td>@(item.NhanVien != null ? item.NhanVien.TenNV : "---")</td>
+
+                <td class="text-center">
+                    @if (item.TrangThai == "Đã diễn ra")
+                    {
+                        <span class="badge bg-success">Đã hoàn thành</span>
+                    }
+                    else if (item.TrangThai == "Đã hủy")
+                    {
+                        <span class="badge bg-danger">Đã hủy/Hoãn</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-warning text-dark">Sắp tới</span>
+                    }
+                </td>
+
+                <td class="text-center">
+                    @if (item.TrangThai != "Đã diễn ra" && item.TrangThai != "Đã hủy")
+                    {
+                        <button onclick="cancelSession(@item.MaLichLop, @item.MaLop)" class="btn btn-outline-danger btn-sm" title="Hoãn buổi này">
+                            <i class="fas fa-times-circle"></i> Hủy
+                        </button>
+                    }
+                    else
+                    {
+                        <span class="text-muted small">---</span>
+                    }
+                </td>
+            </tr>
+        }
+    }
+    else
+    {
+        <tr><td colspan="6" class="text-center py-3">Chưa có lịch học</td></tr>
+    }
+</tbody>
+    </table>
+</div>

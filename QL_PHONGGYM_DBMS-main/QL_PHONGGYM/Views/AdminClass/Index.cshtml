@@ -5,11 +5,33 @@
 }
 
 <div class="card border-0 shadow-sm">
-    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
-        <h5 class="mb-0 fw-bold text-primary"><i class="fas fa-calendar-alt me-2"></i> Danh sách Lớp học</h5>
-        <a href="@Url.Action("Create")" class="btn btn-primary btn-sm">
-            <i class="fas fa-plus me-1"></i> Tạo lớp mới
-        </a>
+    <div class="card-header bg-white py-3">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="mb-0 fw-bold text-primary"><i class="fas fa-chalkboard-teacher me-2"></i> Danh sách lớp học</h5>
+            <a href="@Url.Action("Create")" class="btn btn-primary btn-sm">
+                <i class="fas fa-plus me-1"></i> Tạo lớp mới
+            </a>
+        </div>
+        @using (Html.BeginForm("Index", "AdminClass", FormMethod.Get, new { @class = "row g-3" }))
+        {
+            <div class="col-md-5">
+                <div class="input-group">
+                    <span class="input-group-text bg-light"><i class="fas fa-search"></i></span>
+                    <input type="text" name="search" value="@ViewBag.CurrentSearch" class="form-control" placeholder="Nhập tên lớp học..." />
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                @Html.DropDownList("MaCM", (SelectList)ViewBag.ListChuyenMon, "-- Tất cả bộ môn --", new { @class = "form-select", onchange = "this.form.submit()" })
+            </div>
+
+            <div class="col-md-4">
+                <button type="submit" class="btn btn-primary"><i class="fas fa-filter me-1"></i> Lọc</button>
+                <a href="@Url.Action("Index")" class="btn btn-outline-secondary ms-1" title="Xóa bộ lọc">
+                    <i class="fas fa-sync-alt"></i>
+                </a>
+            </div>
+        }
     </div>
     <div class="card-body p-0">
         <div class="table-responsive">
@@ -45,6 +67,9 @@
                                     </span>
                                 </td>
                                 <td class="text-end pe-4">
+                                    <button onclick="viewSchedule(@item.MaLop)" class="btn btn-outline-info btn-sm me-1" title="Xem lịch học">
+                                        <i class="fas fa-calendar-alt"></i>
+                                    </button>
                                     <a href="@Url.Action("Edit", new { id = item.MaLop })" class="btn btn-outline-primary btn-sm me-1">
                                         <i class="fas fa-edit"></i>
                                     </a>
@@ -64,7 +89,29 @@
         </div>
     </div>
 </div>
-
+<div class="modal fade" id="scheduleModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title fw-bold">
+                    <i class="fas fa-calendar-week me-2"></i> Lịch học chi tiết: <span id="modalClassName">...</span>
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-0" id="modalScheduleContent">
+                <div class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-2">Đang tải dữ liệu...</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+            </div>
+        </div>
+    </div>
+</div>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
     function deleteClass(id) {
@@ -85,3 +132,112 @@
     }
 </script>
 
+<script>
+    // Hàm gọi Modal Xem Lịch
+    function viewSchedule(id) {
+        var myModalEl = document.getElementById('scheduleModal');
+        // 1. Hiện Modal lên trước
+        var myModal = bootstrap.Modal.getInstance(myModalEl);
+        if (!myModal) {
+            myModal = new bootstrap.Modal(myModalEl);
+        }
+        myModal.show();
+
+        // 2. Reset nội dung loading
+        document.getElementById('modalScheduleContent').innerHTML = `
+        <div class="text-center py-5">
+            <div class="spinner-border text-primary" role="status"></div>
+            <p class="mt-2">Đang tải dữ liệu...</p>
+        </div>`;
+
+        // 3. Gọi Ajax lấy dữ liệu
+        fetch('/AdminClass/GetSchedule/' + id)
+            .then(response => response.text())
+            .then(html => {
+                document.getElementById('modalScheduleContent').innerHTML = html;
+            })
+            .catch(error => {
+                document.getElementById('modalScheduleContent').innerHTML =
+                    '<div class="alert alert-danger m-3">Không thể tải lịch học. Vui lòng thử lại!</div>';
+            });
+    }
+    function cancelSession(maLich, maLop) {
+        if (confirm('Bạn có chắc muốn HOÃN/HỦY buổi học này không?\nHành động này sẽ đổi trạng thái buổi học thành "Đã hủy".')) {
+            $.ajax({
+                url: '/AdminClass/CancelSession',
+                type: 'POST',
+                data: { id: maLich },
+                success: function (res) {
+                    if (res.success) {
+                        alert(res.message);
+
+                        viewSchedule(maLop);
+                    } else {
+                        alert(res.message);
+                    }
+                },
+                error: function () {
+                    alert("Lỗi kết nối server!");
+                }
+            });
+        }
+    }
+</script>
+
+<script>
+    function deleteItem(id) {
+        if (confirm('Bạn có chắc muốn xóa lớp học này?\n(Lưu ý: Chỉ xóa được nếu lớp chưa có học viên đăng ký).')) {
+            $.ajax({
+                url: '/AdminClass/Delete',
+                type: 'POST',
+                data: { id: id },
+                success: function (res) {
+                    if (res.success) {
+                        alert(res.message);
+                        location.reload();
+                    } else {
+                        alert("KHÔNG THỂ XÓA: " + res.message);
+                    }
+                },
+                error: function () {
+                    alert("Lỗi kết nối server!");
+                }
+            });
+        }
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        function loadData() {
+            var keyword = document.getElementById('txtSearch').value;
+            var maCM = document.getElementById('ddlMaCM').value;
+            var container = document.getElementById('tableContent');
+            container.style.opacity = '0.5';
+            var url = `/AdminClass/Filter?search=${encodeURIComponent(keyword)}&maCM=${maCM}`;
+            fetch(url)
+                .then(response => {
+                    if (!response.ok) throw new Error("Lỗi mạng");
+                    return response.text();
+                })
+                .then(html => {
+                    container.innerHTML = html;
+                    container.style.opacity = '1';
+                })
+                .catch(error => {
+                    console.error('Lỗi:', error);
+                    alert('Không thể tải dữ liệu.');
+                    container.style.opacity = '1';
+                });
+        }
+
+        document.getElementById('ddlMaCM').addEventListener('change', loadData);
+        document.getElementById('btnSearch').addEventListener('click', loadData);
+        document.getElementById('txtSearch').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') loadData();
+        });
+        document.getElementById('btnReset').addEventListener('click', function () {
+            document.getElementById('txtSearch').value = '';
+            document.getElementById('ddlMaCM').value = '0';
+            loadData();
+        });
+    });
+</script>
