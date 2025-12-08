@@ -2,111 +2,185 @@
 @{
     ViewBag.Title = "Thông tin tài khoản";
     Layout = "~/Views/Shared/_LayoutMember.cshtml";
+
+    // Xử lý địa chỉ hiển thị
+    var diaChiMacDinhObj = Model.DiaChis.FirstOrDefault(dc => dc.LaDiaChiMacDinh == true);
+
+    // Tạo chuỗi địa chỉ hiển thị ở phần thông tin
+    string diaChiHienThi = diaChiMacDinhObj != null
+        ? string.Join(", ", new[] { diaChiMacDinhObj.DiaChiCuThe, diaChiMacDinhObj.PhuongXa, diaChiMacDinhObj.QuanHuyen, diaChiMacDinhObj.TinhThanhPho }.Where(x => !string.IsNullOrWhiteSpace(x)))
+        : "-";
+
+    // Xử lý danh sách địa chỉ cho Dropdown
+    var listDiaChiDropdown = Model.DiaChis
+        .Where(dc => dc.MaKH == (int)Session["MaKH"])
+        .OrderByDescending(dc => dc.LaDiaChiMacDinh)
+        .Select(dc => new SelectListItem
+        {
+            Value = dc.MaDC.ToString(),
+            Text = string.Join(", ", new[] { dc.DiaChiCuThe, dc.PhuongXa, dc.QuanHuyen, dc.TinhThanhPho }.Where(x => !string.IsNullOrWhiteSpace(x))),
+            Selected = dc.LaDiaChiMacDinh == true
+        })
+        .ToList();
 }
 
-<div class="bg-white rounded-3 shadow-sm p-4 h-100">
-    <h5 class="fw-bold text-uppercase mb-4 pb-2 border-bottom">Hồ sơ cá nhân</h5>
-
-    <form class="mb-5">
-        <div class="row mb-3">
-            <div class="col-md-6">
-                <label class="form-label small fw-bold text-muted">Họ và tên</label>
-                <div class="input-group">
-                    <span class="input-group-text bg-light"><i class="fas fa-user"></i></span>
-                    <input type="text" class="form-control bg-light" value="@Model.TenKH" readonly>
-                </div>
-            </div>
-            <div class="col-md-6">
-                <label class="form-label small fw-bold text-muted">Số điện thoại</label>
-                <div class="input-group">
-                    <span class="input-group-text bg-light"><i class="fas fa-phone"></i></span>
-                    <input type="text" class="form-control bg-light" value="@Model.SDT" readonly>
-                </div>
-            </div>
-        </div>
-
-        <div class="row mb-3">
-            <div class="col-md-6">
-                <label class="form-label small fw-bold text-muted">Email</label>
-                <div class="input-group">
-                    <span class="input-group-text bg-light"><i class="fas fa-envelope"></i></span>
-                    <input type="text" class="form-control bg-light" value="@Model.Email" readonly>
-                </div>
-            </div>
-            <div class="col-md-6">
-                <label class="form-label small fw-bold text-muted">Ngày sinh</label>
-                <div class="input-group">
-                    <span class="input-group-text bg-light"><i class="fas fa-calendar"></i></span>
-                    <input type="text" class="form-control bg-light" value="@(Model.NgaySinh.HasValue ? Model.NgaySinh.Value.ToString("dd/MM/yyyy") : "Chưa cập nhật")" readonly>
-                </div>
-            </div>
-        </div>
-
-        <div class="row mb-3">
-            <div class="col-md-6">
-                <label class="form-label small fw-bold text-muted">Giới tính</label>
-                <div class="input-group">
-                    <span class="input-group-text bg-light"><i class="fas fa-venus-mars"></i></span>
-                    <input type="text" class="form-control bg-light" value="@Model.GioiTinh" readonly>
-                </div>
-            </div>
-            <div class="col-md-6">
-                <label class="form-label small fw-bold text-muted">Hạng thành viên</label>
-                <div class="input-group">
-                    <span class="input-group-text bg-light"><i class="fas fa-crown text-warning"></i></span>
-                    <input type="text" class="form-control bg-light fw-bold text-primary" value="@(Model.LoaiKhachHang != null ? Model.LoaiKhachHang.TenLoai : "Thành viên mới")" readonly>
-                </div>
-            </div>
-        </div>
-    </form>
-
-    <h5 class="fw-bold text-uppercase mb-4 pb-2 border-bottom text-danger">
-        <i class="fas fa-lock me-2"></i>Thay đổi mật khẩu
-    </h5>
-
-    @using (Html.BeginForm("DoiMatKhau", "Member", FormMethod.Post, new { id = "formDoiMatKhau" }))
-    {
-        @Html.AntiForgeryToken()
-        <div class="row">
-            <div class="col-md-12 mb-3">
-                <label class="form-label small fw-bold">Mật khẩu hiện tại <span class="text-danger">*</span></label>
-                <input type="password" name="MatKhauCu" class="form-control" placeholder="Nhập mật khẩu đang sử dụng" required>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-md-6 mb-3">
-                <label class="form-label small fw-bold">Mật khẩu mới <span class="text-danger">*</span></label>
-                <input type="password" name="MatKhauMoi" id="MatKhauMoi" class="form-control" placeholder="Nhập mật khẩu mới" required>
-            </div>
-            <div class="col-md-6 mb-3">
-                <label class="form-label small fw-bold">Xác nhận mật khẩu mới <span class="text-danger">*</span></label>
-                <input type="password" id="XacNhanMatKhau" class="form-control" placeholder="Nhập lại mật khẩu mới" required>
-                <small id="msgError" class="text-danger d-none">Mật khẩu xác nhận không khớp!</small>
-            </div>
-        </div>
-
-        <div class="text-end mt-3">
-            <button type="submit" class="btn btn-danger px-4 fw-bold" onclick="return validatePassword()">
-                <i class="fas fa-save me-2"></i> Cập nhật mật khẩu
-            </button>
-        </div>
+<style>
+    .hide-scrollbar::-webkit-scrollbar {
+        display: none;
     }
+
+    .hide-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+</style>
+
+<div class="rounded-2 p-4 bg-white">
+    <div class="d-flex justify-content-between w-100 align-items-center mb-3">
+        <span class="fs-5 fw-bold">Thông tin cá nhân</span>
+        <button class="text-decoration-none text-info small d-flex align-items-center gap-1 bg-transparent border-0" data-bs-toggle="modal" data-bs-target="#updateInfo">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-pencil-square" viewBox="0 0 16 16">
+                <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z" />
+                <path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5v11z" />
+            </svg>
+            Cập nhật
+        </button>
+    </div>
+    <div class="w-100 d-flex p-0 gap-5">
+        <div class="w-50 d-flex flex-column ">
+            <div class="d-flex justify-content-between boder border-bottom border-1 py-3" style="border-color: #dddddd">
+                <span class="text-muted small">Họ và tên</span>
+                <span class="fw-bold small">@Model.TenKH</span>
+            </div>
+            <div class="d-flex justify-content-between boder border-bottom border-1 py-3" style="border-color: #dddddd">
+                <span class="text-muted small">Giới tính</span>
+                <span class="fw-bold small">@Model.GioiTinh</span>
+            </div>
+            <div class="d-flex justify-content-between boder border-bottom border-1 py-3" style="border-color: #dddddd">
+                <span class="text-muted small">Ngày sinh</span>
+                <span class="fw-bold small">@(Model.NgaySinh.HasValue ? Model.NgaySinh.Value.ToString("dd/MM/yyyy") : "Chưa cập nhật")</span>
+            </div>
+        </div>
+        <div class="w-50 d-flex flex-column ">
+            <div class="d-flex justify-content-between boder border-bottom border-1 py-3" style="border-color: #dddddd">
+                <span class="text-muted small">Số điện thoại</span>
+                <span class="fw-bold small">@Model.SDT</span>
+            </div>
+            <div class="d-flex justify-content-between boder border-bottom border-1 py-3" style="border-color: #dddddd">
+                <span class="text-muted small">Email</span>
+                <span class="fw-bold small">@Model.Email</span>
+            </div>
+            <div class="d-flex justify-content-between boder border-bottom border-1 py-3" style="border-color: #dddddd">
+                <span class="text-muted small text-break">Địa chỉ mặc định</span>
+                <span class="fw-bold small">@diaChiHienThi</span>
+            </div>
+        </div>
+    </div>
 </div>
 
-<script>
-    function validatePassword() {
-        var pass = document.getElementById("MatKhauMoi").value;
-        var confirm = document.getElementById("XacNhanMatKhau").value;
-        var msg = document.getElementById("msgError");
+<div class="rounded-2 p-4 bg-white mt-3">
+    <div class="d-flex justify-content-between w-100 align-items-center mb-3">
+        <span class="fs-5 fw-bold">Sổ địa chỉ</span>
+        <button class="text-decoration-none text-info small border-0 bg-transparent" data-bs-toggle="modal" data-bs-target="#loginModal">+ Thêm địa chỉ</button>
+    </div>
 
-        if (pass !== confirm) {
-            msg.classList.remove("d-none");
-            document.getElementById("XacNhanMatKhau").classList.add("is-invalid");
-            return false; =
-        } else {
-            msg.classList.add("d-none");
-            document.getElementById("XacNhanMatKhau").classList.remove("is-invalid");
-            return true;=
+    <div class="row g-3">
+        @foreach (var item in Model.DiaChis.Where(dc => dc.MaKH == (int)Session["MaKH"]).OrderByDescending(dc => dc.LaDiaChiMacDinh))
+        {
+            <div class="col-12 col-md-6">
+                <div class="p-3 rounded-2 h-100 d-flex flex-column" style="background-color: #f8f9fa;">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <div class="d-flex flex-column flex-xl-row">
+                            <span class="fw-bold text-dark pe-3 border-2 py-0 border-end">@Model.TenKH</span>
+                            <span class="text-dark ps-3">@Model.SDT</span>
+                        </div>
+
+                        <div class="d-flex gap-1 align-items-center">
+                            <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle d-flex align-items-center gap-1">
+                                <i class="fa fa-home"></i> Nhà
+                            </span>
+                            @if (item.LaDiaChiMacDinh == true)
+                            {
+                                <span class="badge bg-primary-subtle text-primary border border-primary-subtle">Mặc định</span>
+                            }
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <span class="text-secondary small text-break">
+                            @(string.Join(", ", new[] { item.DiaChiCuThe, item.PhuongXa, item.QuanHuyen, item.TinhThanhPho }.Where(x => !string.IsNullOrWhiteSpace(x))))
+                        </span>
+                    </div>
+                    <div class="d-flex justify-content-end gap-3 mt-auto">
+                        <a href="#" class="text-decoration-none text-danger small">Xóa</a>
+                        <a href="#" class="text-decoration-none text-info small">Cập nhật</a>
+                    </div>
+                </div>
+            </div>
         }
-    }
-</script>
+    </div>
+</div>
+
+<div class="modal fade" id="updateInfo" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable ms-auto me-3 modal-dialog-centered" style="max-width: 550px;">
+        @using (Html.BeginForm("CapNhatThongTin", "KhachHang", FormMethod.Post, new { @class = "modal-content rounded-4 shadow-lg border-0 position-relative", @style = "height: 670px" }))
+        {
+            @Html.HiddenFor(m => m.MaKH)
+
+            <div class="modal-body p-0 d-flex flex-column hide-scrollbar">
+
+                <div class="fw-bold fs-6 border-bottom border-1 p-3 mb-3 position-sticky top-0 bg-white"
+                     style="border-color: #e2e2e2; z-index: 100;">
+                    Cập nhật thông tin cá nhân
+                </div>
+
+                <div class="px-4 pb-4">
+                    <div class="d-flex flex-column mb-3">
+                        <label class="fs-6 mb-2">Họ và tên </label>
+                        @Html.TextBoxFor(m => m.TenKH, new { @class = "px-3 py-2 w-100 form-control" })
+                    </div>
+
+                    <div class="d-flex flex-column mb-3">
+                        <label class="fs-6 mb-2">Giới tính </label>
+                        @{ Model.GioiTinh = Model.GioiTinh?.Trim(); }
+                        @Html.DropDownListFor(model => model.GioiTinh, new List<SelectListItem>
+                        {
+                            new SelectListItem { Text = "Nam", Value = "Nam" },
+                            new SelectListItem { Text = "Nữ", Value = "Nữ" },
+                            new SelectListItem { Text = "Khác", Value = "Khác" }
+                        }, "-- Chọn giới tính --", new { @class = "form-select px-3 py-2 w-100", @id = "GioiTinh" })
+                    </div>
+
+                    <div class="d-flex flex-column mb-3">
+                        <label class="fs-6 mb-2">Ngày sinh</label>
+                        <input type="date"
+                               class="form-control px-3 py-2 w-100"
+                               name="NgaySinh"
+                               onclick="this.showPicker()"
+                               value="@(Model.NgaySinh.HasValue ? Model.NgaySinh.Value.ToString("yyyy-MM-dd") : "")" />
+                    </div>
+
+                    <div class="d-flex flex-column mb-3">
+                        <label class="fs-6 mb-2">Số điện thoại</label>
+                        @Html.TextBoxFor(m => m.SDT, new { @class = "px-3 py-2 w-100 form-control" })
+                    </div>
+
+                    <div class="d-flex flex-column mb-3">
+                        <label class="fs-6 mb-2">Email</label>
+                        @Html.TextBoxFor(m => m.Email, new { @class = "px-3 py-2 w-100 form-control" })
+                    </div>
+
+                    <div class="d-flex flex-column mb-3">
+                        <label class="fs-6 mb-2">Địa chỉ mặc định<span class="text-danger"> *</span></label>
+                        @Html.DropDownList("MaDC", listDiaChiDropdown, new { @class = "form-select px-3 py-2 w-100", required = "required" })
+                    </div>
+
+                    <div class="mt-4 text-center">
+                        <button type="submit" class="btn btn-primary w-100 py-2 fw-bold">Cập nhật thông</button>
+                    </div>
+                </div>
+            </div>
+
+            <button type="button" class="btn-close position-absolute mt-3 me-3" data-bs-dismiss="modal" style="right: 0; top: 0; z-index: 105; font-size: 11px" aria-label="Đóng"></button>
+        }
+    </div>
+</div>

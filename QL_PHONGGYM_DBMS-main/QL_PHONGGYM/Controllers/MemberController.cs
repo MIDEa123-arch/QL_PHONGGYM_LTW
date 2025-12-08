@@ -147,13 +147,11 @@ namespace QL_PHONGGYM.Controllers
             return View(resultList);
         }
 
-        public ActionResult SoDiaChi()
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult CapNhatThongTin(FormCollection form)
         {
-            if (!KiemTraDangNhap()) return RedirectToAction("Login", "Account");
-            ViewBag.ActiveMenu = "diachi";
-            int maKH = (int)Session["MaKH"];
-            var listDiaChi = _cusRepo.GetAllDiaChi(maKH);
-            return View(listDiaChi);
+            return RedirectToAction("ThongTinTaiKhoan");
         }
 
         public ActionResult ThongTinTaiKhoan()
@@ -161,7 +159,7 @@ namespace QL_PHONGGYM.Controllers
             if (!KiemTraDangNhap()) return RedirectToAction("Login", "Account");
             ViewBag.ActiveMenu = "taikhoan";
             int maKH = (int)Session["MaKH"];
-            var khachHang = _cusRepo.ThongTinKH(maKH);
+            var khachHang = _cusRepo.ThongTinKH(maKH);            
             return View(khachHang);
         }
 

@@ -62,12 +62,9 @@
         </div>
     </div>
 
-    @* --- CẤU TRÚC FLEXBOX ĐỒNG BỘ CHIỀU CAO --- *@
     <div class="bg-transparent d-flex w-100 p-0 gap-3 align-items-stretch">
-
-        @* CỘT TRÁI (Chứa 2 hộp nhỏ) *@
-        <div class="w-50 bg-transparent p-0 d-flex flex-column gap-3">
-            @* Hộp 1: Thông tin khách hàng *@
+        
+        <div class="w-50 bg-transparent p-0 d-flex flex-column gap-3">            
             <div class="py-3 px-2 bg-white rounded-3 px-3">
                 <div class="fw-bold fs-5 mb-3">Thông tin khách hàng</div>
                 <div class="d-flex flex-column">
@@ -81,7 +78,7 @@
                         <span class="text-muted">Địa chỉ:: </span>
                         <div class="w-75 text-end">
                             <span class="fw-bold text-break" style="word-break: break-word;">
-                                @(string.Join(" ", new[] { Model.DonHang.DiaChi.TinhThanhPho, Model.DonHang.DiaChi.QuanHuyen, Model.DonHang.DiaChi.PhuongXa, Model.DonHang.DiaChi.DiaChiCuThe }.Where(x => !string.IsNullOrWhiteSpace(x))))
+                                @(string.Join(", ", new[] { Model.DonHang.DiaChi.TinhThanhPho, Model.DonHang.DiaChi.QuanHuyen, Model.DonHang.DiaChi.PhuongXa, Model.DonHang.DiaChi.DiaChiCuThe }.Where(x => !string.IsNullOrWhiteSpace(x))))
                             </span>
                         </div>
                     </div>
@@ -98,9 +95,6 @@
                     </div>
                 </div>
             </div>
-
-            @* Hộp 2: Thông tin hỗ trợ *@
-            @* QUAN TRỌNG: flex-grow-1 ở đây sẽ đẩy hộp này dài xuống đáy nếu cột phải dài hơn *@
             <div class="py-3 px-3 bg-white rounded-3 flex-grow-1">
                 <div class="fw-bold fs-5 mb-2">Thông tin hỗ trợ</div>
                 <div class="d-flex flex-column">
@@ -136,9 +130,7 @@
             </div>
         </div>
 
-        @* CỘT PHẢI (Chứa 1 hộp lớn) *@
         <div class="w-50 bg-transparent p-0 d-flex flex-column">
-            @* QUAN TRỌNG: h-100 ở đây để hộp này luôn cao bằng wrapper cha *@
             <div class="py-3 px-2 bg-white rounded-3 px-3 h-100">
                 <div class="fw-bold fs-5 mb-3">Thông tin thanh toán</div>
                 <div class="fw-bold mb-1 p-2 rounded-2" style="background-color: #f4f4f4; font-size: 17px">Sản phẩm</div>
@@ -259,13 +251,9 @@ else
             </div>
         </div>
     </div>
-
-    @* --- CẤU TRÚC FLEXBOX PHẦN DỊCH VỤ --- *@
     <div class="bg-transparent d-flex w-100 p-0 gap-3 align-items-stretch">
 
-        @* CỘT TRÁI *@
         <div class="w-50 bg-transparent p-0 d-flex flex-column gap-3">
-            @* Hộp 1 *@
             <div class="py-3 px-2 bg-white rounded-3 px-3">
                 <div class="fw-bold fs-5 mb-3">Thông tin khách hàng</div>
                 <div class="d-flex flex-column">
@@ -281,8 +269,7 @@ else
                     </div>
                 </div>
             </div>
-
-            @* Hộp 2: flex-grow-1 để tự lấp đầy khoảng trống *@
+            
             <div class="py-3 px-3 bg-white rounded-3 flex-grow-1">
                 <div class="fw-bold fs-5 mb-2">Thông tin hỗ trợ</div>
                 <div class="d-flex flex-column">
@@ -317,8 +304,7 @@ else
                 </div>
             </div>
         </div>
-
-        @* CỘT PHẢI *@
+        
         <div class="w-50 bg-transparent p-0 d-flex flex-column">
             @* h-100 để hộp này tự giãn bằng chiều cao của cột trái nếu cột trái dài hơn *@
             <div class="py-3 px-2 bg-white rounded-3 px-3 h-100">
