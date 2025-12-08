@@ -84,112 +84,86 @@ namespace QL_PHONGGYM.Controllers
 
         }
 
-        public ActionResult Product(string loaisp, string hang, string xuatXu, decimal? maxPrice, decimal? minPrice, int? sapXepTheoTen, int? sapXepTheoGia)
+        public ActionResult Product(string loaisp, string hang, string xuatXu, decimal? maxPrice, decimal? minPrice, int? sapXepTheoTen, int? sapXepTheoGia, int? page)
         {
-            List<SanPhamViewModel> list;
 
-            if (loaisp != null || hang != null || xuatXu != null || maxPrice != null || minPrice != null)
-            {
-                TempData["CurrentList"] = null;
-            }    
+            IQueryable<SanPhamViewModel> query = _productRepo.GetSanPhams().AsQueryable();
 
-            if (TempData["CurrentList"] != null)
-            {
-                list = TempData["CurrentList"] as List<SanPhamViewModel>;
-            }
-            else
-            {
-                list = _productRepo.GetSanPhams().ToList();
-            }
             if (!string.IsNullOrEmpty(xuatXu))
-                list = list.Where(p => p.XuatXu.Contains(xuatXu)).ToList();
+                query = query.Where(p => p.XuatXu.Contains(xuatXu));
 
             if (!string.IsNullOrEmpty(loaisp))
-                list = list.Where(p => p.LoaiSP.Contains(loaisp)).ToList();
+                query = query.Where(p => p.LoaiSP.Contains(loaisp));
 
             if (!string.IsNullOrEmpty(hang))
-                list = list.Where(p => p.Hang.Contains(hang)).ToList();
+                query = query.Where(p => p.Hang.Contains(hang));
 
             if (minPrice.HasValue)
-                list = list.Where(p => p.DonGia >= minPrice.Value).ToList();
+                query = query.Where(p => p.DonGia >= minPrice.Value);
 
             if (maxPrice.HasValue)
-                list = list.Where(p => p.DonGia <= maxPrice.Value).ToList();
+                query = query.Where(p => p.DonGia <= maxPrice.Value);
 
             if (sapXepTheoTen != null)
             {
-                if (sapXepTheoTen == 0)
-                    list = list.OrderBy(p => p.TenSP).ToList();
-                else
-                    list = list.OrderByDescending(p => p.TenSP).ToList();
+                query = sapXepTheoTen == 0 ? query.OrderBy(p => p.TenSP) : query.OrderByDescending(p => p.TenSP);
             }
-
-            if (sapXepTheoGia != null)
+            else if (sapXepTheoGia != null)
             {
-                if (sapXepTheoGia == 0)
-                    list = list.OrderBy(p => p.DonGia).ToList();
-                else
-                    list = list.OrderByDescending(p => p.DonGia).ToList();
+                query = sapXepTheoGia == 0 ? query.OrderBy(p => p.DonGia) : query.OrderByDescending(p => p.DonGia);
+            }
+            else
+            {
+                query = query.OrderBy(p => p.MaSP);
             }
 
+            int pageSize = 12;
+            int pageNumber = (page ?? 1);
+
+            int totalItems = query.Count();
+            ViewBag.TotalPages = (int)Math.Ceiling((double)totalItems / pageSize);
+            ViewBag.CurrentPage = pageNumber;
+            List<SanPhamViewModel> list = query.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToList();
             ViewBag.LoaiSP = _productRepo.GetLoaiSanPhams().ToList();
             var allProducts = _productRepo.GetSanPhams();
             ViewBag.Hang = allProducts.Where(p => p.Hang != null).Select(p => p.Hang).Distinct().ToList();
 
-            TempData["CurrentList"] = list;
 
             return View(list);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Product(FormCollection form, int? sapXepTheoTen, int? sapXepTheoGia)
+        public ActionResult Product(FormCollection form)
         {
-            var list = _productRepo.GetSanPhams().AsEnumerable();
+            
+            string loaiList = string.Join(",", form.GetValues("loaisanpham") ?? new string[] { });
+            string hangList = string.Join(",", form.GetValues("hang") ?? new string[] { });
+            string giaRange = form["gia"];
 
-            string keyword = form["search"];
-            if (!string.IsNullOrEmpty(keyword))
+            decimal? minPrice = null;
+            decimal? maxPrice = null;
+
+            if (!string.IsNullOrEmpty(giaRange))
             {
-                list = list.Where(sp => sp.TenSP.ToLower().Contains(keyword.ToLower()));
+                var parts = giaRange.Split('-');
+                if (parts.Length == 2)
+                {
+                    minPrice = Convert.ToDecimal(parts[0]);
+                    maxPrice = Convert.ToDecimal(parts[1]);
+                }
             }
 
             bool khuyenMai = form["khuyenmai"] == "on";
             bool conHang = form["conhang"] == "on";
-
-            if (khuyenMai) list = list.Where(p => p.GiaKhuyenMai != null);
-            if (conHang) list = list.Where(p => p.SoLuongTon > 0);
-
-            string gia = form["gia"];
-            if (!string.IsNullOrEmpty(gia))
+            return RedirectToAction("Product", new
             {
-                var parts = gia.Split('-');
-                decimal min = Convert.ToDecimal(parts[0]);
-                decimal max = Convert.ToDecimal(parts[1]);
-                list = list.Where(p => p.DonGia >= min && p.DonGia <= max);
-            }
-
-            var loaiList = form.GetValues("loaisanpham");
-            var hangList = form.GetValues("hang");
-
-            if (loaiList != null) list = list.Where(p => loaiList.Contains(p.LoaiSP));
-            if (hangList != null) list = list.Where(p => hangList.Contains(p.Hang));
-
-            if (sapXepTheoTen != null)
-                list = sapXepTheoTen == 0 ? list.OrderBy(p => p.TenSP) : list.OrderByDescending(p => p.TenSP);
-
-            if (sapXepTheoGia != null)
-                list = sapXepTheoGia == 0 ? list.OrderBy(p => p.DonGia) : list.OrderByDescending(p => p.DonGia);
-
-            ViewBag.LoaiSP = _productRepo.GetLoaiSanPhams().ToList();
-            ViewBag.Hang = _productRepo.GetSanPhams()
-                                       .Where(p => p.Hang != null)
-                                       .Select(p => p.Hang)
-                                       .Distinct()
-                                       .ToList();
-
-            TempData["CurrentList"] = list.ToList();
-
-            return View(list.ToList());
+                loaisp = loaiList,
+                hang = hangList,
+                minPrice = minPrice,
+                maxPrice = maxPrice,
+                page = 1 
+            });
         }
 
 
