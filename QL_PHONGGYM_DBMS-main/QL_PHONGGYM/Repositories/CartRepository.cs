@@ -311,10 +311,10 @@ namespace QL_PHONGGYM.Repositories
                     _context.SaveChanges();
                     tran.Commit();
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
                     tran.Rollback();
-                    throw;
+                    throw ex;
                 }
             }
         }
@@ -449,10 +449,10 @@ namespace QL_PHONGGYM.Repositories
 
                     return true;
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
                     transaction.Rollback();
-                    throw;
+                    throw ex;
                 }
             }
         }

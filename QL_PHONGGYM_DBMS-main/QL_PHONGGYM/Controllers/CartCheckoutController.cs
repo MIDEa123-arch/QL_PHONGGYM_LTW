@@ -203,25 +203,37 @@ namespace QL_PHONGGYM.Controllers
         [HttpPost]
         public JsonResult AddToCartAjax(int maSP, int soLuong)
         {
-            if (Session["MaKH"] == null)
-                return Json(new { success = false, needLogin = true });
-
-            int maKH = (int)Session["MaKH"];
-
-            bool added = _cartRepo.AddToCart(maKH, maSP, soLuong);
-
-            if (!added)
+            try
             {
-                return Json(new { success = false, message = "Không thể thêm vào giỏ hàng!" });
+                if (Session["MaKH"] == null)
+                {
+                    return Json(new { success = false, needLogin = true });
+                }
+
+                int maKH = (int)Session["MaKH"];
+
+                bool added = _cartRepo.AddToCart(maKH, maSP, soLuong);
+
+                if (!added)
+                {
+                    return Json(new { success = false, message = "Thêm vào giỏ thất bại (Lỗi không xác định)." });
+                }
+
+  
+                int newCount = _accountRepo.GetCartCount(maKH);
+                Session["GioHang"] = newCount;
+
+                return Json(new { success = true, cartCount = newCount });
             }
-
-            int newCount = _accountRepo.GetCartCount(maKH);            
-            Session["GioHang"] = newCount;
-
-            return Json(new { success = true, cartCount = newCount });
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = ex.Message
+                });
+            }
         }
-
-
 
         [HttpPost]
         [ValidateAntiForgeryToken]
