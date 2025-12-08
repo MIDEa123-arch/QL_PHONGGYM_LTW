@@ -35,6 +35,25 @@
     }
 </style>
 
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+        @TempData["ErrorMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i>
+        @TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+
 <div class="rounded-2 p-4 bg-white">
     <div class="d-flex justify-content-between w-100 align-items-center mb-3">
         <span class="fs-5 fw-bold">Thông tin cá nhân</span>
@@ -122,8 +141,9 @@
 
 <div class="modal fade" id="updateInfo" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-scrollable ms-auto me-3 modal-dialog-centered" style="max-width: 550px;">
-        @using (Html.BeginForm("CapNhatThongTin", "KhachHang", FormMethod.Post, new { @class = "modal-content rounded-4 shadow-lg border-0 position-relative", @style = "height: 670px" }))
+        @using (Html.BeginForm("CapNhatThongTin", "Member", FormMethod.Post, new { @class = "modal-content rounded-4 shadow-lg border-0 position-relative", @style = "height: 670px" }))
         {
+            @Html.AntiForgeryToken()
             @Html.HiddenFor(m => m.MaKH)
 
             <div class="modal-body p-0 d-flex flex-column hide-scrollbar">
@@ -136,7 +156,7 @@
                 <div class="px-4 pb-4">
                     <div class="d-flex flex-column mb-3">
                         <label class="fs-6 mb-2">Họ và tên </label>
-                        @Html.TextBoxFor(m => m.TenKH, new { @class = "px-3 py-2 w-100 form-control" })
+                        @Html.TextBoxFor(m => m.TenKH, new { @class = "px-3 py-2 w-100 form-control", required = "required" })
                     </div>
 
                     <div class="d-flex flex-column mb-3">
@@ -145,9 +165,8 @@
                         @Html.DropDownListFor(model => model.GioiTinh, new List<SelectListItem>
                         {
                             new SelectListItem { Text = "Nam", Value = "Nam" },
-                            new SelectListItem { Text = "Nữ", Value = "Nữ" },
-                            new SelectListItem { Text = "Khác", Value = "Khác" }
-                        }, "-- Chọn giới tính --", new { @class = "form-select px-3 py-2 w-100", @id = "GioiTinh" })
+                            new SelectListItem { Text = "Nữ", Value = "Nữ" }
+                        }, new { @class = "form-select px-3 py-2 w-100", @id = "GioiTinh" })
                     </div>
 
                     <div class="d-flex flex-column mb-3">
@@ -161,12 +180,12 @@
 
                     <div class="d-flex flex-column mb-3">
                         <label class="fs-6 mb-2">Số điện thoại</label>
-                        @Html.TextBoxFor(m => m.SDT, new { @class = "px-3 py-2 w-100 form-control" })
+                        @Html.TextBoxFor(m => m.SDT, new { @class = "px-3 py-2 w-100 form-control", required = "required" })
                     </div>
 
                     <div class="d-flex flex-column mb-3">
                         <label class="fs-6 mb-2">Email</label>
-                        @Html.TextBoxFor(m => m.Email, new { @class = "px-3 py-2 w-100 form-control" })
+                        @Html.TextBoxFor(m => m.Email, new { @class = "px-3 py-2 w-100 form-control", required = "required" })
                     </div>
 
                     <div class="d-flex flex-column mb-3">

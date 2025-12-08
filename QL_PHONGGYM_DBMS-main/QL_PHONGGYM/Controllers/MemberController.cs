@@ -150,8 +150,18 @@ namespace QL_PHONGGYM.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult CapNhatThongTin(FormCollection form)
-        {
-            return RedirectToAction("ThongTinTaiKhoan");
+        {            
+            try
+            {
+                bool ketQua = _cusRepo.CapNhatTt(form);
+                TempData["Success"] = "Cập nhật thông tin thành công";
+                return RedirectToAction("ThongTinTaiKhoan");
+            }
+            catch(Exception ex)
+            {
+                TempData["ErrorMessage"] = ex.Message;
+                return RedirectToAction("ThongTinTaiKhoan");
+            }            
         }
 
         public ActionResult ThongTinTaiKhoan()
@@ -189,19 +199,7 @@ namespace QL_PHONGGYM.Controllers
                 else TempData["ThongBao"] = "Mật khẩu cũ không chính xác.";
             }
             return RedirectToAction("ThongTinTaiKhoan");
-        }
-        public ActionResult ChonDiaChiMacDinh(int id)
-        {
-            if (Session["MaKH"] == null) return RedirectToAction("Login", "Account");
-
-            int maKH = (int)Session["MaKH"];
-
-            _cusRepo.ThietLapMacDinh(maKH, id);
-
-            TempData["ThongBao"] = "Đã cập nhật địa chỉ mặc định!";
-
-            return RedirectToAction("SoDiaChi");
-        }
+        }      
 
     }
 }

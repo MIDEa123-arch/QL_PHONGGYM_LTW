@@ -9,12 +9,85 @@ using System.Data.Entity;
 namespace QL_PHONGGYM.Repositories
 {
     public class KhachHangRepository
-    {     
+    {
         private readonly QL_PHONGGYMEntities _context;
 
         public KhachHangRepository(QL_PHONGGYMEntities context)
         {
             _context = context;
+        }
+
+        public bool CapNhatTt(FormCollection form)
+        {
+            var makhStr = form["MaKH"];
+            var hoten = form["TenKH"];
+            var gioiTinh = form["GioiTinh"];
+            var ngaySinhStr = form["NgaySinh"];
+            var sdt = form["SDT"];
+            var email = form["Email"];
+            var madcStr = form["MaDC"];
+
+            if (string.IsNullOrEmpty(makhStr) || string.IsNullOrEmpty(hoten) ||
+                string.IsNullOrEmpty(gioiTinh) || string.IsNullOrEmpty(ngaySinhStr) ||
+                string.IsNullOrEmpty(sdt) || string.IsNullOrEmpty(email) ||
+                string.IsNullOrEmpty(madcStr))
+            {
+                return false;
+            }
+
+            try
+            {
+                int id = int.Parse(makhStr);
+                int maDCNew = int.Parse(madcStr);
+                var kh = _context.KhachHangs.FirstOrDefault(k => k.MaKH == id && k.TrangThaiTaiKhoan == 1);
+
+                if (kh == null)
+                {
+                    throw new Exception("Tài khoản không tồn tại hoặc đã bị khóa.");
+                }
+
+                bool daTonTaiSDT = _context.KhachHangs.Any(k => k.SDT == sdt && k.MaKH != id);
+                if (daTonTaiSDT)
+                {
+                    throw new Exception("Số điện thoại này đã được sử dụng bởi tài khoản khác.");
+                }
+
+                bool daTonTaiEmail = _context.KhachHangs.Any(k => k.Email == email && k.MaKH != id);
+                if (daTonTaiEmail)
+                {
+                    throw new Exception("Email này đã được sử dụng bởi tài khoản khác.");
+                }
+
+                kh.TenKH = hoten;
+                kh.GioiTinh = gioiTinh;
+                kh.SDT = sdt;
+                kh.Email = email;
+                kh.NgaySinh = DateTime.Parse(ngaySinhStr);
+
+                var diachiMoi = _context.DiaChis.FirstOrDefault(dc => dc.MaKH == kh.MaKH && dc.MaDC == maDCNew);
+
+                if (diachiMoi == null)
+                {
+                    throw new Exception("Địa chỉ đã chọn không tồn tại.");
+                }
+
+
+                diachiMoi.LaDiaChiMacDinh = true;
+
+                var diachiCu = _context.DiaChis.FirstOrDefault(dc => dc.MaKH == kh.MaKH && dc.LaDiaChiMacDinh == true && dc.MaDC != diachiMoi.MaDC);
+
+                if (diachiCu != null)
+                {
+                    diachiCu.LaDiaChiMacDinh = false;
+                }
+                
+                _context.SaveChanges();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
         }
         public KhachHang ThongTinKH(int makh)
         {
