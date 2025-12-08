@@ -12,34 +12,105 @@ namespace QL_PHONGGYM.Controllers
     {
         private readonly QL_PHONGGYMEntities _context = new QL_PHONGGYMEntities();
 
-        public ActionResult Index()
+        public ActionResult Index(string search = "", int status = -1)
         {
             if (Session["AdminUser"] == null) return RedirectToAction("Login", "Auth");
 
-            var listSP = _context.SanPhams
+            var query = _context.SanPhams
                 .Include(s => s.LoaiSanPham)
                 .OrderByDescending(s => s.MaSP)
                 .ToList();
-
-            return View(listSP);
+            if (!string.IsNullOrEmpty(search))
+            {
+                query=query.Where(t=>t.TenSP.ToLower().Contains(search.ToLower())).ToList();
+            }
+            if (status != -1)
+            {
+                query = query.Where(x => x.TrangThai == status).ToList();
+            }
+            ViewBag.CurrentSearch = search;
+            ViewBag.CurrentStatus = status;
+            var list = query.OrderByDescending(x => x.MaSP).ToList();
+            return View(list);
         }
         public ActionResult Create()
         {
             if (Session["AdminUser"] == null) return RedirectToAction("Login", "Auth");
 
             ViewBag.MaLoaiSP = new SelectList(_context.LoaiSanPhams, "MaLoaiSP", "TenLoaiSP");
-            return View();
+            return View(new SanPham { SoLuongTon = 100, DonGia = 0 });
         }
 
         [HttpPost]
         [ValidateInput(false)]
         [ValidateAntiForgeryToken]
-        public ActionResult Create(SanPham model, HttpPostedFileBase[] images)
+        public ActionResult Create(SanPham model, HttpPostedFileBase[] images, string strDonGia, string strGiaKhuyenMai)
         {
+            if (!string.IsNullOrEmpty(strDonGia))
+            {
+                string cleanGia = strDonGia.Replace(".", "").Replace(",", "").Trim();
+                if (decimal.TryParse(cleanGia, out decimal donGia))
+                {
+                    model.DonGia = donGia;
+                }
+                else
+                {
+                    ModelState.AddModelError("DonGia", "Giá bán không hợp lệ");
+                }
+            }
+            else
+            {
+                ModelState.AddModelError("DonGia", "Vui lòng nhập giá bán");
+            }
+            if (!string.IsNullOrEmpty(strGiaKhuyenMai))
+            {
+                string cleanGiaKM = strGiaKhuyenMai.Replace(".", "").Replace(",", "").Trim();
+                if (decimal.TryParse(cleanGiaKM, out decimal giaKM))
+                {
+                    model.GiaKhuyenMai = giaKM;
+                }
+            }
+            if (model.GiaKhuyenMai.HasValue && model.GiaKhuyenMai.Value > 0)
+            {
+                if (model.GiaKhuyenMai.Value >= model.DonGia)
+                {
+                    ModelState.AddModelError("GiaKhuyenMai", "Giá khuyến mãi phải nhỏ hơn giá bán gốc!");
+                }
+            }
+            if (string.IsNullOrEmpty(model.TenSP))
+            {
+                ModelState.AddModelError("TenSP", "Vui lòng nhập tên sản phẩm");
+            }
+
+            if (model.MaLoaiSP == 0) 
+            {
+                ModelState.AddModelError("MaLoaiSP", "Vui lòng chọn danh mục");
+            }
+            if (string.IsNullOrEmpty(model.MoTaChung))
+            {
+                ModelState.AddModelError("MoTaChung", "Vui lòng nhập mô tả ngắn");
+            }
+            if (model.SoLuongTon == 0) 
+            {
+                ModelState.AddModelError("SoLuongTon", "Vui lòng nhập số lượng tồn");
+            }
+            if (!string.IsNullOrEmpty(model.TenSP))
+            {
+                bool isDuplicate = _context.SanPhams.Any(x => x.TenSP.ToLower() == model.TenSP.ToLower());
+                if (isDuplicate)
+                {
+                    ModelState.AddModelError("TenSP", "Tên sản phẩm này đã tồn tại, vui lòng chọn tên khác!");
+                }
+            }
             if (ModelState.IsValid)
             {
                 try
                 {
+                    if (!string.IsNullOrEmpty(model.MoTaChiTiet))
+                    {
+                        model.MoTaChiTiet = model.MoTaChiTiet.Replace("\r\n", "|").Replace("\n", "|");
+                    }
+                    model.TrangThai = 1;
                     _context.SanPhams.Add(model);
                     _context.SaveChanges();
 
@@ -95,8 +166,58 @@ namespace QL_PHONGGYM.Controllers
         [HttpPost]
         [ValidateInput(false)]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit(SanPham model, HttpPostedFileBase[] images)
+        public ActionResult Edit(SanPham model, HttpPostedFileBase[] images, string strDonGia, string strGiaKhuyenMai)
         {
+            if (string.IsNullOrEmpty(strDonGia))
+            {
+                ModelState.AddModelError("DonGia", "Vui lòng nhập giá bán!");
+            }
+            else
+            {
+                string cleanGia = strDonGia.Replace(".", "").Replace(",", "").Trim();
+                if (decimal.TryParse(cleanGia, out decimal donGia)) model.DonGia = donGia;
+                else ModelState.AddModelError("DonGia", "Giá bán không hợp lệ!");
+            }
+            if (!string.IsNullOrEmpty(strGiaKhuyenMai))
+            {
+                string cleanGiaKM = strGiaKhuyenMai.Replace(".", "").Replace(",", "").Trim();
+                if (decimal.TryParse(cleanGiaKM, out decimal giaKM)) model.GiaKhuyenMai = giaKM;
+            }
+            if (model.GiaKhuyenMai.HasValue && model.GiaKhuyenMai.Value > 0)
+            {
+                if (model.GiaKhuyenMai.Value >= model.DonGia)
+                {
+                    ModelState.AddModelError("GiaKhuyenMai", "Giá khuyến mãi phải nhỏ hơn giá bán gốc!");
+                }
+            }
+            if (string.IsNullOrEmpty(model.TenSP))
+            {
+                ModelState.AddModelError("TenSP", "Vui lòng nhập tên sản phẩm!");
+            }
+            if (model.MaLoaiSP == 0)
+            {
+                ModelState.AddModelError("MaLoaiSP", "Vui lòng chọn danh mục!");
+            }
+            if (string.IsNullOrEmpty(model.MoTaChung))
+            {
+                ModelState.AddModelError("MoTaChung", "Vui lòng nhập mô tả ngắn!");
+            }
+            if (model.SoLuongTon == 0)
+            {
+                ModelState.AddModelError("SoLuongTon", "Vui lòng nhập số lượng!");
+            }
+            if (!string.IsNullOrEmpty(model.TenSP))
+            {
+                bool isDuplicate = _context.SanPhams.Any(x =>
+                    x.TenSP.ToLower() == model.TenSP.Trim().ToLower()
+                    && x.MaSP != model.MaSP 
+                );
+
+                if (isDuplicate)
+                {
+                    ModelState.AddModelError("TenSP", "Tên sản phẩm này đã được sử dụng bởi sản phẩm khác!");
+                }
+            }
             if (ModelState.IsValid)
             {
                 try
@@ -153,22 +274,37 @@ namespace QL_PHONGGYM.Controllers
         [HttpPost]
         public JsonResult Delete(int id)
         {
+            var sp = _context.SanPhams.FirstOrDefault(t=>t.MaSP==id);
+            if (sp == null)
+            {
+                return Json(new { success = false, message = "Không tìm thấy sản phẩm!" });
+            }
+
             try
             {
-                var sp = _context.SanPhams.Find(id);
-                if (sp == null) return Json(new { success = false, message = "Không tìm thấy sản phẩm" });
+                bool daTungBan = _context.ChiTietHoaDons.Any(x => x.MaSP == id);
+                if (daTungBan)
+                {
+                    sp.TrangThai = 0;
+                    _context.SaveChanges();
+                    return Json(new { success = true, message = "Sản phẩm đã từng được bán (có trong hóa đơn). Hệ thống đã chuyển trạng thái sang 'Ngừng kinh doanh'!" });
+                }
+                else
+                {
+                    var images = _context.HINHANHs.Where(x => x.MaSP == id).ToList();
+                    if (images.Any())
+                    {
+                        _context.HINHANHs.RemoveRange(images);
+                    }
+                    _context.SanPhams.Remove(sp);
+                    _context.SaveChanges();
 
-                var images = _context.HINHANHs.Where(x => x.MaSP == id).ToList();
-                _context.HINHANHs.RemoveRange(images);
-
-                _context.SanPhams.Remove(sp);
-                _context.SaveChanges();
-
-                return Json(new { success = true });
+                    return Json(new { success = true, message = "Đã xóa vĩnh viễn sản phẩm và hình ảnh kèm theo!" });
+                }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return Json(new { success = false, message = "Không thể xóa sản phẩm này vì đã có trong hóa đơn. Hãy chỉnh số lượng tồn về 0 để ngừng bán." });
+                return Json(new { success = false, message = "Lỗi hệ thống: " + ex.Message });
             }
         }
     }

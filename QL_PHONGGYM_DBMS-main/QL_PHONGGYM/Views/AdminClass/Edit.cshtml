@@ -18,50 +18,59 @@
                 <div class="alert alert-danger">@ViewBag.Error</div>
             }
 
+            @Html.ValidationSummary(true, "", new { @class = "text-danger mb-3" })
+
             <div class="row g-3">
                 <div class="col-md-12">
-                    <label class="form-label fw-bold">Tên lớp học <span class="text-danger">*</span></label>
+                    <label class="form-label fw-bold">Tên lớp học</label>
                     @Html.TextBoxFor(m => m.TenLop, new { @class = "form-control", required = "required" })
+                    @Html.ValidationMessageFor(m => m.TenLop, "", new { @class = "text-danger" })
                 </div>
 
                 <div class="col-md-6">
-                    <label class="form-label fw-bold">Bộ môn <span class="text-danger">*</span></label>
-                    @Html.DropDownList("MaCM", null, new { @class = "form-select", required = "required" })
+                    <label class="form-label fw-bold">Bộ môn <span class="text-muted small">(Không thể thay đổi)</span></label>
+
+                    @Html.DropDownList("MaCM", null, new { @class = "form-select bg-light", disabled = "disabled" })
+
+                    @Html.HiddenFor(m => m.MaCM)
+
+                    @Html.ValidationMessageFor(m => m.MaCM, "", new { @class = "text-danger" })
                 </div>
 
                 <div class="col-md-6">
                     <label class="form-label fw-bold">Huấn luyện viên phụ trách</label>
-                    @Html.DropDownList("MaNV", null, "-- Chọn HLV --", new { @class = "form-select" })
+                    @Html.DropDownList("MaNV", null, "-- Chọn HLV --", new { @class = "form-select", id = "ddlMaNV" })
                 </div>
 
                 <div class="col-md-6">
-                    <label class="form-label fw-bold">Ngày bắt đầu</label>
-                    <input type="date"
-                           name="NgayBatDau"
-                           class="form-control"
-                           required
-                           value="@(Model.NgayBatDau.ToString("yyyy-MM-dd"))" />
+                    <label class="form-label fw-bold">Ngày bắt đầu <span class="text-muted small">(Cố định)</span></label>
+                    @Html.TextBoxFor(m => m.NgayBatDau, "{0:yyyy-MM-dd}", new { @class = "form-control bg-light", @readonly = "readonly" })
                 </div>
                 <div class="col-md-6">
-                    <label class="form-label fw-bold">Ngày kết thúc</label>
-                    <input type="date"
-                           name="NgayKetThuc"
-                           class="form-control"
-                           required
-                           value="@(Model.NgayKetThuc.ToString("yyyy-MM-dd"))" />
+                    <label class="form-label fw-bold">Ngày kết thúc <span class="text-muted small">(Cố định)</span></label>
+                    @Html.TextBoxFor(m => m.NgayKetThuc, "{0:yyyy-MM-dd}", new { @class = "form-control bg-light", @readonly = "readonly" })
                 </div>
 
                 <div class="col-md-4">
                     <label class="form-label fw-bold">Học phí (VNĐ)</label>
-                    @Html.TextBoxFor(m => m.HocPhi, new { @class = "form-control", type = "number", required = "required" })
+                    <input type="text"
+                           name="strHocPhi"
+                           class="form-control currency-input"
+                           required
+                           value="@(Model.HocPhi > 0 ? Model.HocPhi.ToString("#,##0").Replace(",",".") : "")" />
+
+                    @Html.ValidationMessageFor(m => m.HocPhi, "", new { @class = "text-danger" })
                 </div>
+
                 <div class="col-md-4">
-                    <label class="form-label fw-bold">Số buổi học</label>
-                    @Html.TextBoxFor(m => m.SoBuoi, new { @class = "form-control", type = "number", required = "required" })
+                    <label class="form-label fw-bold">Số buổi học <span class="text-muted small">(Cố định)</span></label>
+                    @Html.TextBoxFor(m => m.SoBuoi, new { @class = "form-control bg-light", @readonly = "readonly" })
                 </div>
+
                 <div class="col-md-4">
                     <label class="form-label fw-bold">Sĩ số tối đa</label>
-                    @Html.TextBoxFor(m => m.SiSoToiDa, new { @class = "form-control", type = "number", required = "required" })
+                    @Html.TextBoxFor(m => m.SiSoToiDa, new { @class = "form-control", type = "number", required = "required", min = "1" })
+                    @Html.ValidationMessageFor(m => m.SiSoToiDa, "", new { @class = "text-danger" })
                 </div>
             </div>
 
@@ -72,3 +81,51 @@
         }
     </div>
 </div>
+
+@section scripts {
+    <script>document.addEventListener("DOMContentLoaded", function () {
+            // 1. Format Tiền tệ
+            var currencyInputs = document.querySelectorAll('.currency-input');
+            function formatCurrency(input) {
+                var value = input.value.replace(/\D/g, "");
+                if (value !== "") {
+                    value = new Intl.NumberFormat('vi-VN').format(value);
+                }
+                input.value = value;
+            }
+            currencyInputs.forEach(function (input) {
+                input.addEventListener('input', function () { formatCurrency(this); });
+            });
+
+            // 2. Ajax Load HLV
+            var ddlMaCM = document.getElementById('ddlMaCM');
+            var ddlMaNV = document.getElementById('ddlMaNV');
+
+            if (ddlMaCM && ddlMaNV) {
+                ddlMaCM.addEventListener('change', function () {
+                    var selectedMaCM = this.value;
+                    ddlMaNV.innerHTML = '<option value="">-- Đang tải... --</option>';
+
+                    if (selectedMaCM) {
+                        fetch('/AdminClass/GetTrainersBySpecialty?maCM=' + selectedMaCM)
+                            .then(response => response.json())
+                            .then(data => {
+                                ddlMaNV.innerHTML = '<option value="">-- Chọn HLV --</option>';
+                                if (data.length > 0) {
+                                    data.forEach(item => {
+                                        var opt = document.createElement('option');
+                                        opt.value = item.MaNV;
+                                        opt.text = item.TenNV;
+                                        ddlMaNV.appendChild(opt);
+                                    });
+                                } else {
+                                    ddlMaNV.innerHTML = '<option value="">-- Không có HLV --</option>';
+                                }
+                            });
+                    } else {
+                        ddlMaNV.innerHTML = '<option value="">-- Vui lòng chọn bộ môn --</option>';
+                    }
+                });
+            }
+        });</script>
+}

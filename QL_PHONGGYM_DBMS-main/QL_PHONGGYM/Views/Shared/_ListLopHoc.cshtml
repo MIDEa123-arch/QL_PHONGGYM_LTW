@@ -1,0 +1,48 @@
+﻿@model IEnumerable<QL_PHONGGYM.Models.LopHoc>
+
+@if (Model != null && Model.Any())
+{
+    foreach (var item in Model)
+    {
+        <tr>
+            <td class="ps-4 fw-bold">@item.TenLop</td>
+            <td>
+                <span class="badge bg-info text-dark">
+                    @(item.ChuyenMon != null ? item.ChuyenMon.TenChuyenMon : "Chưa cập nhật")
+                </span>
+            </td>
+            <td>@(item.NhanVien != null ? item.NhanVien.TenNV : "Chưa phân công")</td>
+            <td class="small">
+                <div>@item.NgayBatDau.ToString("dd/MM/yyyy")</div>
+                <div class="text-muted">đến @item.NgayKetThuc.ToString("dd/MM/yyyy")</div>
+            </td>
+            <td class="text-danger fw-bold">@string.Format("{0:N0}đ", item.HocPhi)</td>
+            <td>
+                <span class="badge bg-light text-dark border">
+                    @item.SiSoHienTai / @item.SiSoToiDa
+                </span>
+            </td>
+            <td class="text-end pe-4">
+                <button onclick="viewSchedule(@item.MaLop)" class="btn btn-outline-info btn-sm me-1" title="Xem lịch chi tiết">
+                    <i class="fas fa-calendar-alt"></i>
+                </button>
+
+                <a href="@Url.Action("Edit", new { id = item.MaLop })" class="btn btn-outline-primary btn-sm me-1" title="Sửa lớp">
+                    <i class="fas fa-edit"></i>
+                </a>
+
+                <button onclick="deleteItem(@item.MaLop)" class="btn btn-outline-danger btn-sm" title="Xóa lớp">
+                    <i class="fas fa-trash-alt"></i>
+                </button>
+            </td>
+        </tr>
+    }
+}
+else
+{
+    <tr>
+        <td colspan="7" class="text-center py-4 text-muted">
+            <i class="fas fa-search me-2"></i> Không tìm thấy lớp học nào phù hợp.
+        </td>
+    </tr>
+}

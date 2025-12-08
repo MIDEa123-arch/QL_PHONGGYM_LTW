@@ -18,23 +18,43 @@
                 <div class="alert alert-danger">@ViewBag.Error</div>
             }
 
+            @Html.ValidationSummary(true, "", new { @class = "text-danger mb-3" })
+
             <div class="row g-3">
                 <div class="col-md-6">
                     <label class="form-label fw-bold">Họ và tên <span class="text-danger">*</span></label>
                     @Html.TextBoxFor(m => m.TenNV, new { @class = "form-control", required = "required" })
+                    @Html.ValidationMessageFor(m => m.TenNV, "", new { @class = "text-danger" })
                 </div>
                 <div class="col-md-6">
                     <label class="form-label fw-bold">Chức vụ <span class="text-danger">*</span></label>
                     @Html.DropDownList("MaChucVu", null, "-- Chọn chức vụ --", new { @class = "form-select", required = "required" })
+                    @Html.ValidationMessageFor(m => m.MaChucVu, "", new { @class = "text-danger" })
                 </div>
 
                 <div class="col-md-6">
-                    <label class="form-label fw-bold">Số điện thoại</label>
-                    @Html.TextBoxFor(m => m.SDT, new { @class = "form-control", required = "required" })
+                    <label class="form-label fw-bold">Số điện thoại <span class="text-danger">*</span></label>
+
+                    @Html.TextBoxFor(m => m.SDT, new
+                    {
+                        @class = "form-control",
+                        required = "required",
+                        maxlength = "10",
+                        oninput = "this.value = this.value.replace(/[^0-9]/g, '')",
+                        placeholder = "(Tối đa 10 số)"
+                    })
+
+                    @Html.ValidationMessageFor(m => m.SDT, "", new { @class = "text-danger" })
                 </div>
                 <div class="col-md-6">
                     <label class="form-label fw-bold">Ngày sinh</label>
-                    <input type="date" name="NgaySinh" class="form-control" />
+                    <input type="date"
+                           name="NgaySinh"
+                           class="form-control"
+                           max="@DateTime.Now.ToString("yyyy-MM-dd")"
+                           value="@(Model.NgaySinh.HasValue ? Model.NgaySinh.Value.ToString("yyyy-MM-dd") : "")" />
+
+                    @Html.ValidationMessageFor(m => m.NgaySinh, "", new { @class = "text-danger" })
                 </div>
 
                 <div class="col-md-6">
@@ -52,11 +72,30 @@
                 <div class="col-md-6">
                     <label class="form-label fw-bold">Tên đăng nhập <span class="text-danger">*</span></label>
                     @Html.TextBoxFor(m => m.TenDangNhap, new { @class = "form-control", required = "required" })
-                    @Html.ValidationMessageFor(m => m.TenDangNhap, "", new { @class = "text-danger small" })
+                    @Html.ValidationMessageFor(m => m.TenDangNhap, "", new { @class = "text-danger" })
                 </div>
+
                 <div class="col-md-6">
                     <label class="form-label fw-bold">Mật khẩu <span class="text-danger">*</span></label>
-                    @Html.TextBoxFor(m => m.MatKhau, new { @class = "form-control", type = "password", required = "required" })
+
+                    <div class="position-relative">
+                        @Html.TextBoxFor(m => m.MatKhau, new
+                        {
+                            @class = "form-control pe-5",
+                            type = "password",
+                            required = "required",
+                            id = "txtMatKhau",
+                            placeholder = "Nhập mật khẩu..."
+                        })
+
+                        <span class="position-absolute top-50 end-0 translate-middle-y me-3"
+                              id="btnTogglePass"
+                              style="cursor: pointer; z-index: 10;">
+                            <i class="fas fa-eye text-secondary" id="iconEye"></i>
+                        </span>
+                    </div>
+
+                    @Html.ValidationMessageFor(m => m.MatKhau, "", new { @class = "text-danger" })
                 </div>
             </div>
 
@@ -67,3 +106,29 @@
         }
     </div>
 </div>
+
+@section scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            // Xử lý ẩn/hiện mật khẩu
+            var btnToggle = document.getElementById('btnTogglePass');
+
+            if (btnToggle) {
+                btnToggle.addEventListener('click', function () {
+                    var inputPass = document.getElementById('txtMatKhau');
+                    var icon = document.getElementById('iconEye');
+
+                    if (inputPass.type === "password") {
+                        inputPass.type = "text"; // Hiện mật khẩu
+                        icon.classList.remove("fa-eye");
+                        icon.classList.add("fa-eye-slash"); // Đổi icon thành gạch chéo
+                    } else {
+                        inputPass.type = "password"; // Ẩn mật khẩu
+                        icon.classList.remove("fa-eye-slash");
+                        icon.classList.add("fa-eye"); // Đổi lại icon thường
+                    }
+                });
+            }
+        });
+    </script>
+}

@@ -45,7 +45,15 @@
 
                     @Html.ValidationMessageFor(m => m.Gia, "", new { @class = "text-danger small" })
                 </div>
-
+                <div class="col-md-12">
+                    <label class="form-label fw-bold">Trạng thái kinh doanh</label>
+                    @Html.DropDownListFor(m => m.TrangThai, new List<SelectListItem>
+                    {
+                        new SelectListItem { Text = "Đang kinh doanh", Value = "1" },
+                        new SelectListItem { Text = "Ngừng kinh doanh", Value = "0" }
+                    }, new { @class = "form-control form-select" })
+                    @Html.ValidationMessageFor(m => m.TrangThai, "", new { @class = "text-danger" })
+                </div>
                 <div class="col-md-12">
                     <label class="form-label fw-bold">Mô tả quyền lợi</label>
                     @Html.TextAreaFor(m => m.MoTa, new { @class = "form-control", rows = "4" })

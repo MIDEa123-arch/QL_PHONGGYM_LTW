@@ -4,12 +4,36 @@
     Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
 }
 <div class="card border-0 shadow-sm">
-    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
-        <h5 class="mb-0 fw-bold text-primary"><i class="fas fa-user-tie me-2"></i> Danh sách nhân viên</h5>
-        <a href="@Url.Action("Create")" class="btn btn-primary btn-sm">
-            <i class="fas fa-plus me-1"></i> Thêm nhân viên
-        </a>
+    <div class="card-header bg-white py-3">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="mb-0 fw-bold text-primary"><i class="fas fa-user-tie me-2"></i> Danh sách nhân viên</h5>
+            <a href="@Url.Action("Create")" class="btn btn-primary btn-sm">
+                <i class="fas fa-plus me-1"></i> Thêm nhân viên
+            </a>
+        </div>
+
+        @using (Html.BeginForm("Index", "AdminStaff", FormMethod.Get, new { @class = "row g-3" }))
+        {
+            <div class="col-md-5">
+                <div class="input-group">
+                    <span class="input-group-text bg-light"><i class="fas fa-search"></i></span>
+                    <input type="text" name="search" value="@ViewBag.CurrentSearch" class="form-control" placeholder="Tìm theo tên, SĐT hoặc tài khoản..." />
+                </div>
+            </div>
+            <div class="col-md-3">
+                @Html.DropDownList("MaChucVu", (SelectList)ViewBag.ListChucVu, "-- Tất cả chức vụ --", new { @class = "form-select", onchange = "this.form.submit()" })
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary w-100"><i class="fas fa-filter me-1"></i> Lọc</button>
+            </div>
+            <div class="col-md-2">
+                <a href="@Url.Action("Index")" class="btn btn-outline-secondary ms-1" title="Tải lại / Xóa bộ lọc">
+                    <i class="fas fa-sync-alt"></i>
+                </a>
+            </div>
+        }
     </div>
+
     <div class="card-body p-0">
         <div class="table-responsive">
             <table class="table table-hover align-middle mb-0">
@@ -19,6 +43,7 @@
                         <th>Chức vụ</th>
                         <th>Liên hệ</th>
                         <th>Tài khoản</th>
+                        <th>Trạng thái</th>
                         <th class="text-end pe-4">Hành động</th>
                     </tr>
                 </thead>
@@ -30,42 +55,71 @@
                             <tr>
                                 <td class="ps-4">
                                     <div class="fw-bold">@item.TenNV</div>
-                                    <small class="text-muted">@item.GioiTinh - @(item.NgaySinh.HasValue ? item.NgaySinh.Value.ToString("dd/MM/yyyy") : "")</small>
+                                    <small class="text-muted">
+                                        @item.GioiTinh
+                                        @if (item.NgaySinh.HasValue)
+                                        {
+                                            <span> - @item.NgaySinh.Value.ToString("dd/MM/yyyy")</span>
+                                        }
+                                    </small>
                                 </td>
                                 <td>
-                                    @if (item.ChucVu.TenChucVu == "Quản lý")
+                                    @if (item.ChucVu != null)
                                     {
-                                        <span class="badge bg-danger">@item.ChucVu.TenChucVu</span>
+                                        if (item.ChucVu.TenChucVu.Contains("Quản lý"))
+                                        {
+                                            <span class="badge bg-danger">@item.ChucVu.TenChucVu</span>
+                                        }
+                                        else if (item.ChucVu.TenChucVu == "PT")
+                                        {
+                                            <span class="badge bg-warning text-dark">@item.ChucVu.TenChucVu</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-info text-dark">@item.ChucVu.TenChucVu</span>
+                                        }
                                     }
-                                    else if (item.ChucVu.TenChucVu == "PT")
+                                </td>
+                                <td>
+                                    <div class="small"><i class="fas fa-phone me-1 text-muted"></i> @item.SDT</div>
+                                </td>
+                                <td class="fw-bold text-primary">@item.TenDangNhap</td>
+
+                                <td>
+                                    @if (item.TrangThaiTaiKhoan == 1 || item.TrangThaiTaiKhoan == null)
                                     {
-                                        <span class="badge bg-success">@item.ChucVu.TenChucVu</span>
+                                        <span class="badge bg-success">Đang làm việc</span>
                                     }
                                     else
                                     {
-                                        <span class="badge bg-secondary">@item.ChucVu.TenChucVu</span>
+                                        <span class="badge bg-secondary">Đã nghỉ việc</span>
                                     }
                                 </td>
-                                <td>
-                                    <i class="fas fa-phone me-1 text-muted"></i> @item.SDT
-                                </td>
-                                <td>
-                                    <span class="text-primary fw-bold">@item.TenDangNhap</span>
-                                </td>
+
                                 <td class="text-end pe-4">
-                                    <a href="@Url.Action("Edit", new { id = item.MaNV })" class="btn btn-outline-primary btn-sm me-1">
+                                    <a href="@Url.Action("Edit", new { id = item.MaNV })" class="btn btn-outline-primary btn-sm me-1" title="Sửa">
                                         <i class="fas fa-user-edit"></i>
                                     </a>
-                                    <button onclick="deleteStaff(@item.MaNV)" class="btn btn-outline-danger btn-sm">
-                                        <i class="fas fa-trash-alt"></i>
-                                    </button>
+
+                                    @if (item.TrangThaiTaiKhoan == 1 || item.TrangThaiTaiKhoan == null)
+                                    {
+                                        <button onclick="deleteStaff(@item.MaNV)" class="btn btn-outline-danger btn-sm" title="Xóa/Khóa">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </button>
+                                    }
+                                    else
+                                    {
+                                        <button class="btn btn-secondary btn-sm" disabled title="Đã bị khóa">
+                                            <i class="fas fa-lock"></i>
+                                        </button>
+                                    }
                                 </td>
                             </tr>
                         }
                     }
                     else
                     {
-                        <tr><td colspan="5" class="text-center py-4">Chưa có dữ liệu</td></tr>
+                        <tr><td colspan="6" class="text-center py-4 text-muted">Không tìm thấy nhân viên nào.</td></tr>
                     }
                 </tbody>
             </table>
@@ -73,22 +127,27 @@
     </div>
 </div>
 
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script>
-    function deleteStaff(id) {
-        if (confirm('Bạn có chắc muốn xóa nhân viên này?')) {
-            $.ajax({
-                url: '@Url.Action("Delete", "AdminStaff")',
-                type: 'POST',
-                data: { id: id },
-                success: function (res) {
-                    if (res.success) {
-                        location.reload();
-                    } else {
-                        alert(res.message);
+@section scripts {
+    <script>
+        function deleteStaff(id) {
+            if (confirm('Bạn có chắc muốn xóa nhân viên này?\n(Nếu nhân viên đã có lịch sử làm việc, hệ thống sẽ chuyển sang trạng thái "Đã nghỉ việc" thay vì xóa vĩnh viễn).')) {
+                $.ajax({
+                    url: '/AdminEmployee/Delete',
+                    type: 'POST',
+                    data: { id: id },
+                    success: function (res) {
+                        if (res.success) {
+                            alert(res.message);
+                            location.reload();
+                        } else {
+                            alert(res.message); 
+                        }
+                    },
+                    error: function () {
+                        alert("Lỗi kết nối server!");
                     }
-                }
-            });
+                });
+            }
         }
-    }
-</script>
+    </script>
+}
