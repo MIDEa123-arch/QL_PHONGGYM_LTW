@@ -624,7 +624,6 @@
     <Content Include="Views\Member\Index.cshtml" />
     <Content Include="Views\Member\LichTap.cshtml" />
     <Content Include="Views\Member\LichSuMuaHang.cshtml" />
-    <Content Include="Views\Member\SoDiaChi.cshtml" />
     <Content Include="Views\Member\ThongTinTaiKhoan.cshtml" />
     <Content Include="Views\Class\Index.cshtml" />
     <Content Include="Views\Shared\_LayoutClass.cshtml" />
