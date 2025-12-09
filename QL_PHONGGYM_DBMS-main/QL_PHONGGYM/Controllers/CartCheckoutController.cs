@@ -104,6 +104,8 @@ namespace QL_PHONGGYM.Controllers
 
         public ActionResult ThanhToanfinal()
         {
+            try
+            { 
             if (!KiemTraDangNhap())
                 return RedirectToAction("Login", "Account");
 
@@ -116,6 +118,12 @@ namespace QL_PHONGGYM.Controllers
 
             var cart = (List<GioHangViewModel>)Session["thanhtoan"];
             return View(cart.OrderByDescending(sp => sp.NgayThem));
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = ex.Message;
+                return RedirectToAction("ThanhToanfinal");
+            }
         }
 
         public ActionResult ThanhToanThanhCong()
@@ -133,7 +141,9 @@ namespace QL_PHONGGYM.Controllers
             if (!KiemTraDangNhap())
                 return RedirectToAction("Login", "Account");
 
-            int maKH = (int)Session["MaKH"];                        
+            try
+            {
+                int maKH = (int)Session["MaKH"];
 
                 string tinh = form["province"];
                 string huyen = form["district"];
@@ -151,11 +161,17 @@ namespace QL_PHONGGYM.Controllers
                     NgayThem = DateTime.Now
                 };
                 Session["Diachi"] = diaChiMoi;
-            
 
-            var cart = (List<GioHangViewModel>)Session["thanhtoan"];
 
-            return RedirectToAction("ThanhToanfinal");
+                var cart = (List<GioHangViewModel>)Session["thanhtoan"];
+
+                return RedirectToAction("ThanhToanfinal");
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = ex.Message;
+                return RedirectToAction("ThanhToanfinal");
+            }
         }
 
         public ActionResult GiamSoLuong(int id)
@@ -211,23 +227,30 @@ namespace QL_PHONGGYM.Controllers
             if (!KiemTraDangNhap())
                 return RedirectToAction("Login", "Account");
 
-            int maKH = (int)Session["MaKH"];
-
-            if (actionType == "delete")
+            try
             {
-                _cartRepo.XoaDaChon(form, maKH);
-                Session["GioHang"] = _accountRepo.GetCartCount(maKH);
+                int maKH = (int)Session["MaKH"];
+
+                if (actionType == "delete")
+                {
+                    _cartRepo.XoaDaChon(form, maKH);
+                    Session["GioHang"] = _accountRepo.GetCartCount(maKH);
+                    return RedirectToAction("ToCheckOut");
+                }
+                else if (actionType == "checkout")
+                {
+
+                    var list = _cartRepo.ChonSanPham(form, maKH);
+                    Session["thanhtoan"] = list;
+                    return RedirectToAction("ThanhToan");
+                }
                 return RedirectToAction("ToCheckOut");
             }
-            else if (actionType == "checkout")
+            catch (Exception ex) 
             {
-
-                var list = _cartRepo.ChonSanPham(form, maKH);
-                Session["thanhtoan"] = list;
-                return RedirectToAction("ThanhToan");
+                TempData["ErrorMessage"] = ex.Message;
+                return RedirectToAction("ToCheckOut");
             }
-
-            return RedirectToAction("ToCheckOut");
         }
 
         public ActionResult ThanhToan()

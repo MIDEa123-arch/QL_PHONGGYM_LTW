@@ -13,14 +13,16 @@ namespace QL_PHONGGYM.Controllers
     {
         private readonly ProductRepository _productRepo;
         private readonly AccountRepository _accountRepo;
+        private readonly GoiTapRepository _goiTapRepo;
         public HomeController()
         {
             _productRepo = new ProductRepository(new QL_PHONGGYMEntities());
             _accountRepo = new AccountRepository(new QL_PHONGGYMEntities());
+            _goiTapRepo = new GoiTapRepository(new QL_PHONGGYMEntities());
         }
         public ActionResult Index()
         {
-            var list = _productRepo.GetGoiTaps();
+            var list = _goiTapRepo.goiTaps().Where(gt => gt.Gia == 1499000m || gt.Gia == 10000000m);
             ViewBag.usaProducts = _productRepo.GetSanPhams().Where(sp => sp.XuatXu == "USA" && sp.LoaiSP == "Thực phẩm bổ sung").OrderByDescending(sp => sp.SoLuongTon).Take(10).ToList();
             ViewBag.nikeProducts = _productRepo.GetSanPhams().Where(sp => sp.Hang == "Nike").OrderByDescending(sp => sp.SoLuongTon).Take(10).ToList();
             ViewBag.Class = _productRepo.GetChuyenMons().Take(5).ToList();

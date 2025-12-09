@@ -19,9 +19,36 @@ namespace QL_PHONGGYM.Controllers
             var db = new QL_PHONGGYMEntities();
             _productRepo = new ProductRepository(db);
             _cartRepo = new CartRepository(db);
-            _khachhangRepo = new KhachHangRepository(db);
+            _khachhangRepo = new KhachHangRepository(db);            
         }
+        private bool KiemTraDangNhap()
+        {
+            if (Session["MaKH"] == null)
+                return false;
 
+
+            if (!int.TryParse(Session["MaKH"].ToString(), out int maKH))
+                return false;
+
+            var kh = _khachhangRepo.ThongTinKH(maKH);
+
+            if (kh == null)
+            {
+                TempData["ErrorMessage"] = "Tài khoản không tồn tại";
+                return false;
+            }
+
+            if (kh.TrangThaiTaiKhoan == 0)
+            {
+                Session["MaKH"] = null;
+                TempData["ErrorMessage"] = "Tài khoản đã bị khóa. Vui lòng liên hệ hỗ trợ.";
+                return false;
+            }
+
+            Session["KhachHang"] = kh;
+
+            return true;
+        }
         public ActionResult Index(string search = "", int? chuyenMonId = null, string filterType = "", int? page = 1)
         {
             int? maKH = null;
@@ -44,13 +71,15 @@ namespace QL_PHONGGYM.Controllers
             ViewBag.TotalPages = (int)Math.Ceiling((double)totalItems / pageSize);
             ViewBag.CurrentPage = pageNumber;
 
-            var pagedList = listLop.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToList();
+            var pagedList = listLop.OrderBy(l => l.BiTrungLich).Skip((pageNumber - 1) * pageSize).Take(pageSize).ToList();
 
             return View(pagedList);
         }
 
         public ActionResult CheckOutLopHoc(int maLop, string url)
         {
+            if (!KiemTraDangNhap())
+                return RedirectToAction("Login", "Account");
             try
             {
                 var maKH = (int)Session["MaKH"];
@@ -69,7 +98,7 @@ namespace QL_PHONGGYM.Controllers
 
             catch (Exception ex)
             {
-                TempData["Error"] = ex.Message;
+                TempData["ErrorMessage"] = ex.Message;
                 return RedirectToAction("Index");
             }
         }
@@ -78,6 +107,9 @@ namespace QL_PHONGGYM.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult TaoHoaDonLopHoc(FormCollection form)
         {
+            if (!KiemTraDangNhap())
+                return RedirectToAction("Login", "Account");
+
             var lop = (int)Session["Lop"];
             int maKH = (int)Session["MaKH"];
 

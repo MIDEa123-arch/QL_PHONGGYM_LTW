@@ -11,17 +11,31 @@
         ? string.Join(", ", new[] { diaChiMacDinhObj.DiaChiCuThe, diaChiMacDinhObj.PhuongXa, diaChiMacDinhObj.QuanHuyen, diaChiMacDinhObj.TinhThanhPho }.Where(x => !string.IsNullOrWhiteSpace(x)))
         : "-";
 
-    // Xử lý danh sách địa chỉ cho Dropdown
     var listDiaChiDropdown = Model.DiaChis
-        .Where(dc => dc.MaKH == (int)Session["MaKH"])
-        .OrderByDescending(dc => dc.LaDiaChiMacDinh)
-        .Select(dc => new SelectListItem
-        {
-            Value = dc.MaDC.ToString(),
-            Text = string.Join(", ", new[] { dc.DiaChiCuThe, dc.PhuongXa, dc.QuanHuyen, dc.TinhThanhPho }.Where(x => !string.IsNullOrWhiteSpace(x))),
-            Selected = dc.LaDiaChiMacDinh == true
-        })
-        .ToList();
+      .Where(dc => dc.MaKH == (int)Session["MaKH"])
+      .OrderByDescending(dc => dc.LaDiaChiMacDinh)
+      .Select(dc =>
+      {
+          // 1. Tạo chuỗi địa chỉ đầy đủ trước
+          string fullText = (dc.LaDiaChiMacDinh == true ? "✔ " : "") +
+                            string.Join(", ", new[] { dc.DiaChiCuThe, dc.PhuongXa, dc.QuanHuyen, dc.TinhThanhPho }
+                            .Where(x => !string.IsNullOrWhiteSpace(x)));
+
+          // 2. Giới hạn độ dài (Ví dụ: 60 ký tự thì cắt)
+          int maxLength = 55;
+          string displayText = fullText.Length > maxLength
+                               ? fullText.Substring(0, maxLength - 3) + "..."
+                               : fullText;
+
+          // 3. Trả về item cho dropdown
+          return new SelectListItem
+          {
+              Value = dc.MaDC.ToString(),
+              Text = displayText,
+              Selected = dc.LaDiaChiMacDinh == true
+          };
+      })
+      .ToList();
 }
 
 <style>
@@ -140,8 +154,10 @@
 </div>
 
 <div class="modal fade" id="updateInfo" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-scrollable ms-auto me-3 modal-dialog-centered" style="max-width: 550px;">
-        @using (Html.BeginForm("CapNhatThongTin", "Member", FormMethod.Post, new { @class = "modal-content rounded-4 shadow-lg border-0 position-relative", @style = "height: 670px" }))
+    <div class="modal-dialog modal-dialog-scrollable ms-auto me-3 my-3 w-100"
+         style="max-width: 550px; height: calc(100% - 2rem);">
+
+        @using (Html.BeginForm("CapNhatThongTin", "Member", FormMethod.Post, new { @class = "modal-content h-100 rounded-4 shadow-lg border-0 position-relative" }))
         {
             @Html.AntiForgeryToken()
             @Html.HiddenFor(m => m.MaKH)
@@ -163,7 +179,7 @@
                         <label class="fs-6 mb-2">Giới tính </label>
                         @{ Model.GioiTinh = Model.GioiTinh?.Trim(); }
                         @Html.DropDownListFor(model => model.GioiTinh, new List<SelectListItem>
-                        {
+                                {
                             new SelectListItem { Text = "Nam", Value = "Nam" },
                             new SelectListItem { Text = "Nữ", Value = "Nữ" }
                         }, new { @class = "form-select px-3 py-2 w-100", @id = "GioiTinh" })
@@ -190,11 +206,11 @@
 
                     <div class="d-flex flex-column mb-3">
                         <label class="fs-6 mb-2">Địa chỉ mặc định<span class="text-danger"> *</span></label>
-                        @Html.DropDownList("MaDC", listDiaChiDropdown, new { @class = "form-select px-3 py-2 w-100", required = "required" })
+                        @Html.DropDownList("MaDC", listDiaChiDropdown as IEnumerable<SelectListItem>, new { @class = "form-select px-3 py-2 w-100", required = "required" })
                     </div>
 
                     <div class="mt-4 text-center">
-                        <button type="submit" class="btn btn-primary w-100 py-2 fw-bold">Cập nhật thông</button>
+                        <button type="submit" class="btn btn-primary w-100 py-2 fw-bold">Cập nhật thông tin</button>
                     </div>
                 </div>
             </div>

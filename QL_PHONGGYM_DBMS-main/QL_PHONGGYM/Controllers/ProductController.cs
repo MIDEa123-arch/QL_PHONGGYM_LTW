@@ -44,15 +44,19 @@ namespace QL_PHONGGYM.Controllers
             }
         }
 
-        public ActionResult ProductDetail(int id, string url)
+        public ActionResult ProductDetail(int? id, string url)
         {
-
+            if (id == null)
+            {
+                return RedirectToAction("Product");
+            }
+                
             var list = _productRepo.GetSanPhams().ToList();
-            var sanpham = list.FirstOrDefault(sp => sp.MaSP == id && sp.TrangThai == 1);
+            var sanpham = list.FirstOrDefault(sp => sp.MaSP == id);
 
             if (sanpham == null)
             {
-                TempData["Error"] = "Sản phẩm này hiện đã ngừng bán!";
+                TempData["ErrorMessage"] = "Sản phẩm này hiện đã ngừng bán!";
                 if (url != null)
                 {
                     return Redirect(url);
@@ -60,7 +64,7 @@ namespace QL_PHONGGYM.Controllers
                 else
                     return RedirectToAction("Index", "Home");
             }
-            ViewBag.SpDiCung = list.Where(sp => sp.LoaiSP == sanpham.LoaiSP && sp.MaSP != sanpham.MaSP).Take(5).ToList();
+            ViewBag.SpDiCung = list.Where(sp => sp.LoaiSP == sanpham.LoaiSP && sp.MaSP != sanpham.MaSP && sanpham.TrangThai == 1).Take(5).ToList();
             decimal giaHienTai = sanpham.GiaKhuyenMai ?? sanpham.DonGia;
             decimal giaMin, giaMax;
 
@@ -76,7 +80,7 @@ namespace QL_PHONGGYM.Controllers
             }
 
             ViewBag.SpCungPhanKhuc = list.Where(sp =>
-                sp.MaSP != sanpham.MaSP &&
+                sp.MaSP != sanpham.MaSP && sanpham.TrangThai == 1 &&
                 ((sp.GiaKhuyenMai ?? sp.DonGia) >= giaMin && (sp.GiaKhuyenMai ?? sp.DonGia) <= giaMax)
             ).Take(5).ToList();
             return View(sanpham);
@@ -123,7 +127,7 @@ namespace QL_PHONGGYM.Controllers
             int totalItems = query.Count();
             ViewBag.TotalPages = (int)Math.Ceiling((double)totalItems / pageSize);
             ViewBag.CurrentPage = pageNumber;
-            List<SanPhamViewModel> list = query.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToList();
+            List<SanPhamViewModel> list = query.OrderByDescending(sp => sp.SoLuongTon).Skip((pageNumber - 1) * pageSize).Take(pageSize).ToList();
             ViewBag.LoaiSP = _productRepo.GetLoaiSanPhams().ToList();
             var allProducts = _productRepo.GetSanPhams();
             ViewBag.Hang = allProducts.Where(p => p.Hang != null).Select(p => p.Hang).Distinct().ToList();

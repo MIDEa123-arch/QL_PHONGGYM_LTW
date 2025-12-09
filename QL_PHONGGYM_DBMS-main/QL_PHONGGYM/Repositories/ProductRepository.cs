@@ -54,17 +54,12 @@ namespace QL_PHONGGYM.Repositories
         {
             return _context.SanPhams.Where(sp => sp.XuatXu != null && sp.TrangThai == 1).Select(sp => sp.XuatXu).Distinct().ToList();
         }
-
-        public List<GoiTap> GetGoiTaps()
-        {   
-            return _context.GoiTaps.Where(sp => sp.Gia == 399000.00m || sp.Gia == 10000000.00m && sp.TrangThai == 1).ToList();
-        }
+      
 
         public List<SanPhamViewModel> GetSanPhams()
         {
             var list = (from sp in _context.SanPhams
-                        join ha in _context.HINHANHs on sp.MaSP equals ha.MaSP into haGroup
-                        where sp.TrangThai == 1
+                        join ha in _context.HINHANHs on sp.MaSP equals ha.MaSP into haGroup                        
                         select new SanPhamViewModel
                         {
                             MaSP = sp.MaSP,

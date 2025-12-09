@@ -199,11 +199,17 @@ namespace QL_PHONGGYM.Repositories
                         {
                             var sp = _context.SanPhams.Find(item.MaSP);
 
+                            _context.Entry(sp).Reload();
+
                             if (sp == null)
                                 throw new Exception("Sản phẩm không tồn tại!");
 
-                            if (sp.TrangThai == 0)
+                            if (sp.TrangThai == 0)                                                           
                                 throw new Exception($"Sản phẩm '{sp.TenSP}' đã ngừng bán!");
+
+
+                            if (sp.SoLuongTon < item.SoLuong)
+                                throw new Exception($"Sản phẩm '{sp.TenSP}' đã hết hàng");                            
 
                             ChiTietHoaDon ct = new ChiTietHoaDon
                             {
@@ -214,6 +220,7 @@ namespace QL_PHONGGYM.Repositories
                             };
 
                             _context.ChiTietHoaDons.Add(ct);
+                            sp.SoLuongTon = sp.SoLuongTon - item.SoLuong;
 
                             var list = _context.ChiTietGioHangs
                                 .Where(x => x.MaKH == maKH && x.MaSP == item.MaSP);
@@ -395,15 +402,44 @@ namespace QL_PHONGGYM.Repositories
         public List<GioHangViewModel> ChonSanPham(FormCollection form, int makh)
         {
             string[] selected = form.GetValues("selectedItems");
+            if (selected == null || selected.Length == 0)
+            {
+                return new List<GioHangViewModel>();
+            }
+
             List<int> selectedIds = selected.Select(int.Parse).ToList();
             List<GioHangViewModel> list = new List<GioHangViewModel>();
+
             var cart = GetCart(makh);
 
             foreach (var id in selectedIds)
             {
                 var item = cart.FirstOrDefault(c => c.MaKH == makh && c.MaSP == id);
+
                 if (item != null)
+                {
+
+                    var spDB = _context.SanPhams.AsNoTracking().FirstOrDefault(p => p.MaSP == id);
+
+                    if (spDB == null)
+                    {
+                        throw new Exception($"Sản phẩm (ID: {id}) không tồn tại trong hệ thống!");
+                    }
+
+                    if (spDB.TrangThai == 0)
+                    {
+                        throw new Exception($"Sản phẩm '{spDB.TenSP}' hiện đã ngừng kinh doanh. Vui lòng bỏ chọn!");
+                    }
+
+                    if (spDB.SoLuongTon < item.SoLuong)
+                    {
+                        if (spDB.SoLuongTon == 0)
+                            throw new Exception($"Sản phẩm '{spDB.TenSP}' đã hết hàng!");
+                        else
+                            throw new Exception($"Sản phẩm '{spDB.TenSP}' chỉ còn lại {spDB.SoLuongTon} sản phẩm, không đủ số lượng bạn yêu cầu!");
+                    }
                     list.Add(item);
+                }
             }
 
             return list;
@@ -469,9 +505,9 @@ namespace QL_PHONGGYM.Repositories
         public List<GioHangViewModel> GetCart(int maKH)
         {
             try
-            {
+            {                  
                 var cart = _context.ChiTietGioHangs
-                    .Where(c => c.MaKH == maKH && c.SanPham.TrangThai == 1)
+                    .Where(c => c.MaKH == maKH)
                     .Select(c => new GioHangViewModel
                     {
                         MaChiTietGH = c.MaChiTietGH,
@@ -484,13 +520,13 @@ namespace QL_PHONGGYM.Repositories
                         TenMonHang = c.SanPham.TenSP,
                         AnhDaiDienSP = c.SanPham.HINHANHs.FirstOrDefault(a => a.IsMain.HasValue && a.IsMain.Value == true).Url,
                         SoLuongTon = c.SanPham.SoLuongTon
-                    }).ToList();
+                    }).ToList();                
 
                 return cart;
             }
-            catch
+            catch (Exception ex)
             {
-                throw;
+                throw ex;
             }
         }
         public bool DangKyLop(int maKH, int maLop)

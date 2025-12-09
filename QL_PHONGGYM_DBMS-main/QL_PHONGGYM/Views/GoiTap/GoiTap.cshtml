@@ -40,7 +40,7 @@
             content: '';
             position: absolute;
             bottom: 0;
-            right: 0%;            
+            right: 0%;
             width: 60%;
             height: 100%;
             background: url('../../content/images/adobestock_728899813.jpeg') center repeat;
@@ -92,22 +92,28 @@
             bottom: 0;
             right: 0%;
             width: 60%;
-            height: 100%;            
+            height: 100%;
             background: url('../../content/images/adobestock_725186100.jpeg') center repeat;
             background-size: 100%;
             clip-path: polygon(25% 0, 100% 0, 100% 100%, 0% 100%);
             opacity: 0.9;
         }
-
 </style>
-
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+        @TempData["ErrorMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
 <div class="gym-page">
     @{
         var allPackages = Model.OrderBy(x => x.ThoiHan).ToList();
         var shortTermPackages = allPackages.Where(x => x.ThoiHan <= 1).ToList();
         var longTermPackages = allPackages.Where(x => x.ThoiHan > 1).ToList();
     }
-    
+
     @if (shortTermPackages.Any())
     {
         <section class="packages-section">
@@ -163,7 +169,7 @@
 
         <div class="section-divider"></div>
     }
-    
+
     @if (longTermPackages.Any())
     {
         <section class="packages-section">
