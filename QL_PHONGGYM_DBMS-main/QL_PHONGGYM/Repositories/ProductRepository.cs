@@ -59,7 +59,8 @@ namespace QL_PHONGGYM.Repositories
         public List<SanPhamViewModel> GetSanPhams()
         {
             var list = (from sp in _context.SanPhams
-                        join ha in _context.HINHANHs on sp.MaSP equals ha.MaSP into haGroup                        
+                        join ha in _context.HINHANHs on sp.MaSP equals ha.MaSP into haGroup           
+                        where sp.TrangThai == 1
                         select new SanPhamViewModel
                         {
                             MaSP = sp.MaSP,
