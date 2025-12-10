@@ -637,27 +637,6 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Function Name="fn_TimKiemSanPham" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="true" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
-          <Parameter Name="MaSP" Type="int" Mode="In" />
-          <Parameter Name="TenSP" Type="nvarchar" Mode="In" />
-          <ReturnType>
-            <CollectionType>
-              <RowType>
-                <Property Name="MaSP" Type="int" Nullable="false" />
-                <Property Name="TenSP" Type="nvarchar" MaxLength="100" />
-                <Property Name="MaLoaiSP" Type="int" />
-                <Property Name="DonGia" Type="decimal" Precision="12" Scale="2" Nullable="false" />
-                <Property Name="SoLuongTon" Type="int" Nullable="false" />
-                <Property Name="GiaKhuyenMai" Type="decimal" Precision="12" Scale="2" />
-                <Property Name="Hang" Type="nvarchar" MaxLength="100" />
-                <Property Name="XuatXu" Type="nvarchar" MaxLength="100" />
-                <Property Name="BaoHanh" Type="nvarchar" MaxLength="50" />
-                <Property Name="MoTaChung" Type="nvarchar" MaxLength="1000" />
-                <Property Name="MoTaChiTiet" Type="nvarchar(max)" />
-              </RowType>
-            </CollectionType>
-          </ReturnType>
-        </Function>
         <Function Name="sp_DangKyLop_KiemTra" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
           <Parameter Name="MaKH" Type="int" Mode="In" />
           <Parameter Name="MaLop" Type="int" Mode="In" />

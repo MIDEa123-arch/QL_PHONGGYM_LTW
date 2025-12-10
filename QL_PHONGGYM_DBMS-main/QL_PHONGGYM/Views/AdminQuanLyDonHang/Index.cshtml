@@ -1,0 +1,143 @@
+﻿@model List<QL_PHONGGYM.Models.DonHang>
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+}
+<div class="card border-0 shadow-sm">
+    <div class="card-header bg-white py-3">
+        <h5 class="mb-0 fw-bold text-primary"><i class="fas fa-box-open me-2"></i> Quản lý Đơn hàng</h5>
+        <div class="row g-2 mt-3">
+            <div class="col-md-4">
+                <input type="text" id="txtSearch" class="form-control" placeholder="Tìm mã đơn hoặc tên khách..." onkeyup="FilterOrders()">
+            </div>
+            <div class="col-md-3">
+                <select id="ddlStatus" class="form-select" onchange="FilterOrders()">
+                    <option value="">-- Tất cả trạng thái --</option>
+                    <option value="Chờ xác nhận">Chờ xác nhận</option>
+                    <option value="Chờ giao hàng">Chờ giao hàng</option>
+                    <option value="Đã giao hàng">Đã giao hàng</option>
+                    <option value="Đã hủy">Đã hủy</option>
+                </select>
+            </div>
+        </div>
+    </div>
+    <div class="card-body p-0">
+        <div id="orderTableContainer">
+            @Html.Partial("DanhSachDonHang", Model)
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="orderModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Chi tiết đơn hàng</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="modalContent"></div>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <script>
+        // --- HÀM 1: LỌC DỮ LIỆU ---
+        function FilterOrders() {
+            var search = $('#txtSearch').val();
+            var status = $('#ddlStatus').val();
+
+            $.ajax({
+                url: '/AdminQuanLyDonHang/Index',
+                type: 'GET',
+                data: {
+                    search: search,
+                    status: status,
+                    isAjax: true // <--- DÒNG NÀY RẤT QUAN TRỌNG
+                },
+                success: function (res) {
+                    // Sau khi sửa Controller, 'res' lúc này chỉ là nội dung của bảng
+                    $('#orderTableContainer').html(res);
+                },
+                error: function () {
+                    alert("Lỗi tải dữ liệu!");
+                }
+            });
+        }
+
+        // --- HÀM 2: XỬ LÝ TRẠNG THÁI (Đặt ở đây để không bị lỗi 'is not defined') ---
+        function updateOrderStatus(id, action, e) {
+            // 1. Chặn submit form (Sửa lỗi load lại trang)
+            if (e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+
+            var msg = "Bạn có chắc chắn muốn thực hiện hành động này?";
+            if (action == 'cancel') msg = "CẢNH BÁO: Bạn có chắc muốn HỦY đơn hàng này không?";
+
+            if (!confirm(msg)) return;
+
+            // Hiệu ứng nút bấm
+            var btn = e ? e.target : null;
+            if (btn && btn.tagName === 'I') btn = btn.parentElement;
+
+            var oldHtml = "";
+            if (btn) {
+                oldHtml = btn.innerHTML;
+                btn.innerHTML = '...';
+                btn.disabled = true;
+            }
+
+            $.ajax({
+                url: '/AdminQuanLyDonHang/UpdateOrderStatus',
+                type: 'POST',
+                data: { id: id, action: action },
+                success: function (res) {
+                    if (res.success) {
+                        alert(res.message);
+                        // Gọi lại hàm Filter để cập nhật bảng
+                        FilterOrders();
+                    } else {
+                        alert("Lỗi: " + res.message);
+                        if (btn) {
+                            btn.innerHTML = oldHtml;
+                            btn.disabled = false;
+                        }
+                    }
+                },
+                error: function () {
+                    alert("Lỗi kết nối Server!");
+                    if (btn) {
+                        btn.innerHTML = oldHtml;
+                        btn.disabled = false;
+                    }
+                }
+            });
+        }
+        function viewOrder(id) {
+            // 1. Hiển thị text "Đang tải..." trong modal trước
+            $('#modalContent').html('<div class="text-center py-4"><div class="spinner-border text-primary"></div><br>Đang tải dữ liệu...</div>');
+
+            // 2. Mở Modal
+            var myModal = new bootstrap.Modal(document.getElementById('orderModal'));
+            myModal.show();
+
+            // 3. Gọi AJAX lấy nội dung chi tiết
+            $.ajax({
+                url: '/AdminQuanLyDonHang/Details',
+                type: 'GET',
+                data: { id: id },
+                success: function (res) {
+                    // Nhét HTML nhận được vào bụng Modal
+                    $('#modalContent').html(res);
+                },
+                error: function () {
+                    $('#modalContent').html('<div class="text-danger text-center">Không thể tải chi tiết đơn hàng.</div>');
+                }
+            });
+        }
+    </script>
+}

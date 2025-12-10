@@ -55,8 +55,19 @@ namespace QL_PHONGGYM.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create(LopHoc model, string strHocPhi, TimeSpan? GioBatDau, TimeSpan? GioKetThuc, int[] SelectedDays)
+        public ActionResult Create(LopHoc model, string strHocPhi, int GioBatDauHour, int GioBatDauMinute, int GioKetThucHour, int GioKetThucMinute, int[] SelectedDays)
         {
+            TimeSpan? GioBatDau = null;
+            TimeSpan? GioKetThuc = null;
+            try
+            {
+                GioBatDau = new TimeSpan(GioBatDauHour, GioBatDauMinute, 0);
+                GioKetThuc = new TimeSpan(GioKetThucHour, GioKetThucMinute, 0);
+            }
+            catch
+            {
+                ModelState.AddModelError("GioBatDau", "Giờ học không hợp lệ.");
+            }
             if (SelectedDays == null || SelectedDays.Length == 0)
             {
                 ModelState.AddModelError("SelectedDays", "Vui lòng chọn ít nhất một thứ trong tuần (T2-CN)!");
@@ -166,11 +177,11 @@ namespace QL_PHONGGYM.Controllers
                             bool isTrung = _context.LichLops.Any(l =>
                                 l.MaNV == model.MaNV
                         && l.NgayHoc == ngay
-                        && l.TrangThai != "Đã hủy" 
+                        && l.TrangThai != "Đã hủy"
                         && (
-                            (GioBatDau >= l.GioBatDau && GioBatDau < l.GioKetThuc) || 
-                            (GioKetThuc > l.GioBatDau && GioKetThuc <= l.GioKetThuc) || 
-                            (GioBatDau <= l.GioBatDau && GioKetThuc >= l.GioKetThuc)  
+                            (GioBatDau >= l.GioBatDau && GioBatDau < l.GioKetThuc) ||
+                            (GioKetThuc > l.GioBatDau && GioKetThuc <= l.GioKetThuc) ||
+                            (GioBatDau <= l.GioBatDau && GioKetThuc >= l.GioKetThuc)
                             ));
 
                             if (isTrung)
@@ -224,9 +235,9 @@ namespace QL_PHONGGYM.Controllers
         public ActionResult GetSchedule(int id)
         {
             var listLich = _context.LichLops
-                                   .Include("NhanVien") 
+                                   .Include("NhanVien")
                                    .Where(x => x.MaLop == id)
-                                   .OrderBy(x => x.NgayHoc) 
+                                   .OrderBy(x => x.NgayHoc)
                                    .ThenBy(x => x.GioBatDau)
                                    .ToList();
             var tenLop = _context.LopHocs.Find(id)?.TenLop ?? "Lớp học";
@@ -283,7 +294,7 @@ namespace QL_PHONGGYM.Controllers
                     bool isBusy = false;
                     var lichDayCuaNV = _context.LichLops
                                                .Where(l => l.MaNV == nv.MaNV && l.TrangThai != "Đã hủy" && l.TrangThai != "Đã diễn ra")
-                                               .ToList(); 
+                                               .ToList();
                     foreach (var lich in lichDayCuaNV)
                     {
                         if (listNgayHoc.Contains(lich.NgayHoc))
@@ -291,7 +302,7 @@ namespace QL_PHONGGYM.Controllers
                             if (startT < lich.GioKetThuc && endT > lich.GioBatDau)
                             {
                                 isBusy = true;
-                                break; 
+                                break;
                             }
                         }
                     }
@@ -360,7 +371,7 @@ namespace QL_PHONGGYM.Controllers
                 ModelState.AddModelError("TenLop", "Vui lòng nhập tên lớp học!");
             }
 
-           
+
             if (model.HocPhi <= 0)
             {
                 ModelState.AddModelError("HocPhi", "Vui lòng nhập học phí");
@@ -374,14 +385,59 @@ namespace QL_PHONGGYM.Controllers
             {
                 try
                 {
-                    var lop = _context.LopHocs.FirstOrDefault(t => t.MaLop == model.MaLop);
-                    if (lop != null)
+                    var existingLop = _context.LopHocs.Include("ChuyenMon").FirstOrDefault(t => t.MaLop == model.MaLop);
+                    if (existingLop == null) return HttpNotFound();
+                    if (model.MaNV.HasValue && model.MaNV != existingLop.MaNV)
                     {
-                        lop.TenLop = model.TenLop;
-                        lop.MaNV = model.MaNV;
-                        lop.HocPhi = model.HocPhi;
-                        lop.SiSoToiDa = model.SiSoToiDa;
+                        var nvMoi = _context.NhanViens.Include("ChuyenMons").FirstOrDefault(x => x.MaNV == model.MaNV.Value);
+                        if (nvMoi != null && !nvMoi.ChuyenMons.Any(cm => cm.MaCM == existingLop.MaCM))
+                        {
+                            ModelState.AddModelError("MaNV", $"HLV {nvMoi.TenNV} không có chuyên môn [{existingLop.ChuyenMon.TenChuyenMon}]! Vui lòng chọn HLV khác.");
+                        }
+                        if (ModelState.IsValid)
+                        {
+                            var futureLichLop = _context.LichLops
+                                .Where(l => l.MaLop == model.MaLop && l.NgayHoc >= DateTime.Today && l.TrangThai != "Đã hủy")
+                                .ToList();
 
+                            foreach (var lich in futureLichLop)
+                            {
+                                bool isTrungLich = _context.LichLops.Any(l =>
+                                    l.MaNV == model.MaNV.Value
+                                    && l.MaLichLop != lich.MaLichLop 
+                                    && l.NgayHoc == lich.NgayHoc 
+                                    && l.TrangThai != "Đã hủy"
+                                    && (
+                                        (l.GioBatDau < lich.GioKetThuc) && (l.GioKetThuc > lich.GioBatDau)
+                                    )
+                                );
+
+                                if (isTrungLich)
+                                {
+                                    var lopTrung = _context.LichLops
+                                        .Where(l => l.MaNV == model.MaNV.Value && l.NgayHoc == lich.NgayHoc && l.GioBatDau < lich.GioKetThuc && l.GioKetThuc > lich.GioBatDau)
+                                        .Select(l => l.LopHoc.TenLop).FirstOrDefault();
+
+                                    ModelState.AddModelError("MaNV", $"HLV {nvMoi.TenNV} bị trùng lịch với lớp [{lopTrung}] vào ngày {lich.NgayHoc.ToString("dd/MM/yyyy")}!");
+                                    break; 
+                                }
+                            }
+                        }
+                    }
+                    if (ModelState.IsValid)
+                    {
+                        existingLop.TenLop = model.TenLop;
+                        existingLop.MaNV = model.MaNV;
+                        existingLop.HocPhi = model.HocPhi;
+                        existingLop.SiSoToiDa = model.SiSoToiDa;
+                        if (model.MaNV != existingLop.MaNV) 
+                        {
+                            var lichLopCanUpdate = _context.LichLops.Where(l => l.MaLop == existingLop.MaLop).ToList();
+                            foreach (var lich in lichLopCanUpdate)
+                            {
+                                lich.MaNV = model.MaNV;
+                            }
+                        }
                         _context.SaveChanges();
                         TempData["ThongBao"] = "Cập nhật lớp học thành công!";
                         return RedirectToAction("Index");
@@ -389,15 +445,15 @@ namespace QL_PHONGGYM.Controllers
                 }
                 catch (Exception ex)
                 {
-                    ViewBag.Error = "Lỗi: " + ex.Message;
+                    ViewBag.Error = "Lỗi hệ thống: " + ex.Message;
                 }
             }
             ViewBag.MaCM = new SelectList(_context.ChuyenMons, "MaCM", "TenChuyenMon", model.MaCM);
-
             var listNVLoad = _context.NhanViens
-                                     .Where(nv => nv.ChuyenMons.Any(cm => cm.MaCM == model.MaCM))
-                                     .ToList();
+                .Where(nv => nv.ChuyenMons.Any(cm => cm.MaCM == model.MaCM))
+                .ToList();
             ViewBag.MaNV = new SelectList(listNVLoad, "MaNV", "TenNV", model.MaNV);
+
             return View(model);
         }
 
@@ -449,28 +505,121 @@ namespace QL_PHONGGYM.Controllers
             var model = query.OrderByDescending(x => x.MaLop).ToList();
             return PartialView("_ListLopHoc", model);
         }
+        public ActionResult Calendar(DateTime? date, int? id)
+        {
+            if (Session["AdminUser"] == null) return RedirectToAction("Login", "Auth");
+            DateTime selectedDate = date ?? DateTime.Today;
+            int delta = DayOfWeek.Monday - selectedDate.DayOfWeek;
+            if (delta > 0) delta -= 7;
+            DateTime startOfWeek = selectedDate.AddDays(delta);
+            DateTime endOfWeek = startOfWeek.AddDays(6);
+            var lichHoc = _context.LichLops
+                .Include("LopHoc")
+                .Include("NhanVien")
+                .Include("LopHoc.ChuyenMon")
+                .Where(l => l.NgayHoc >= startOfWeek && l.NgayHoc <= endOfWeek)
+                .OrderBy(l => l.NgayHoc)
+                .ThenBy(l => l.GioBatDau)
+                .ToList();
+            if (id.HasValue && id.Value > 0)
+            {
+                lichHoc = lichHoc.Where(l => l.MaLop == id.Value).ToList();
+                var lop = _context.LopHocs.Find(id.Value);
+                ViewBag.TitleHeader = $"LỊCH HỌC: {lop?.TenLop.ToUpper()}";
+            }
+            else
+            {
+                ViewBag.TitleHeader = "THỜI KHÓA BIỂU TOÀN TRUNG TÂM";
+            }
+            var lichHoc1 = lichHoc.OrderBy(l => l.NgayHoc).ThenBy(l => l.GioBatDau).ToList();
+            ViewBag.StartOfWeek = startOfWeek;
+            ViewBag.EndOfWeek = endOfWeek;
+            ViewBag.ListNV = _context.NhanViens.Where(x => x.MaChucVu != 4).ToList();
+
+            return View(lichHoc1);
+        }
+
+        public JsonResult GetSessionDetail(int maLichLop)
+        {
+            var lich = _context.LichLops.Find(maLichLop);
+            if (lich == null) return Json(new { success = false }, JsonRequestBehavior.AllowGet);
+            var listHocVien = _context.DangKyLops
+                .Where(dk => dk.MaLop == lich.MaLop && dk.TrangThai == "Còn hiệu lực")
+                .Select(dk => new
+                {
+                    dk.KhachHang.TenKH,
+                    dk.KhachHang.GioiTinh,
+                    dk.KhachHang.SDT
+                }).ToList();
+            int maCM = lich.LopHoc.MaCM;
+
+            var listHLVPhuHop = _context.NhanViens
+                .Where(nv => nv.ChuyenMons.Any(cm => cm.MaCM == maCM))
+                .Select(nv => new
+                {
+                    nv.MaNV,
+                    nv.TenNV
+                }).ToList();
+
+            return Json(new
+            {
+                success = true,
+                tenLop = lich.LopHoc.TenLop,
+                ngayHoc = lich.NgayHoc.ToString("dd/MM/yyyy"),
+                gioHoc = lich.GioBatDau + " - " + lich.GioKetThuc,
+                maNV = lich.MaNV, // HLV hiện tại
+                hocViens = listHocVien,
+                listHLV = listHLVPhuHop // Danh sách để đổ vào dropdown
+            }, JsonRequestBehavior.AllowGet);
+        }
+
+
         [HttpPost]
-        public JsonResult CancelSession(int id)
+        public JsonResult UpdateSessionInstructor(int maLichLop, int maNV)
         {
             try
             {
-                var lich = _context.LichLops.Find(id);
-                if (lich == null)
+                var lich = _context.LichLops.Find(maLichLop);
+                if (lich == null) return Json(new { success = false, message = "Lỗi dữ liệu!" });
+
+                var lop = _context.LopHocs.Find(lich.MaLop);
+
+                // A. KIỂM TRA CHUYÊN MÔN (Check lại lần nữa cho an toàn)
+                var nvMoi = _context.NhanViens.FirstOrDefault(x => x.MaNV == maNV);
+                bool coChuyenMon = nvMoi.ChuyenMons.Any(cm => cm.MaCM == lop.MaCM);
+                if (!coChuyenMon)
                 {
-                    return Json(new { success = false, message = "Không tìm thấy lịch học!" });
+                    return Json(new { success = false, message = $"HLV {nvMoi.TenNV} không có chuyên môn [{lop.ChuyenMon.TenChuyenMon}]. Không thể dạy thay!" });
                 }
 
-                // Chỉ cho phép hủy những buổi chưa diễn ra
-                if (lich.TrangThai == "Đã diễn ra")
+                // B. KIỂM TRA TRÙNG LỊCH
+                // Tìm xem HLV này có đang dạy lớp nào khác trong khung giờ đó không
+                bool isTrungLich = _context.LichLops.Any(l =>
+                    l.MaNV == maNV // Cùng giáo viên
+                    && l.MaLichLop != maLichLop // Không phải buổi đang sửa
+                    && l.NgayHoc == lich.NgayHoc // Cùng ngày
+                    && l.TrangThai != "Đã hủy"
+                    && (
+                        // Logic giao nhau của 2 khoảng thời gian
+                        (l.GioBatDau < lich.GioKetThuc) && (l.GioKetThuc > lich.GioBatDau)
+                    )
+                );
+
+                if (isTrungLich)
                 {
-                    return Json(new { success = false, message = "Buổi học này đã diễn ra, không thể hoãn/hủy!" });
+                    // Lấy tên lớp bị trùng để báo lỗi
+                    var tenLopTrung = _context.LichLops
+                        .Where(l => l.MaNV == maNV && l.NgayHoc == lich.NgayHoc && l.GioBatDau < lich.GioKetThuc && l.GioKetThuc > lich.GioBatDau)
+                        .Select(l => l.LopHoc.TenLop).FirstOrDefault();
+
+                    return Json(new { success = false, message = $"HLV {nvMoi.TenNV} đang bận dạy lớp [{tenLopTrung}] vào khung giờ này!" });
                 }
 
-                // Cập nhật trạng thái
-                lich.TrangThai = "Đã hủy"; // Hoặc "Tạm hoãn" tùy bạn quy định
+                // C. LƯU THAY ĐỔI
+                lich.MaNV = maNV;
                 _context.SaveChanges();
 
-                return Json(new { success = true, message = "Đã hủy buổi học thành công!" });
+                return Json(new { success = true, message = "Đổi giáo viên thành công!" });
             }
             catch (Exception ex)
             {

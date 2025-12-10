@@ -16,8 +16,7 @@
             {
                 <div class="alert alert-danger">@ViewBag.Error</div>
             }
-
-            @Html.ValidationSummary(true, "", new { @class = "text-danger mb-3" })
+            @Html.ValidationSummary(true, "Vui lòng kiểm tra các lỗi sau:", new { @class = "alert alert-danger mb-3" }) @Html.ValidationSummary(true, "", new { @class = "text-danger mb-3" })
 
             <div class="row g-3">
                 <div class="col-md-12">
@@ -98,13 +97,42 @@
                         <h6 class="fw-bold text-primary mb-3">Cấu hình lịch học & Kiểm tra trùng HLV</h6>
 
                         <div class="row g-3">
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold">Giờ vào lớp <span class="text-danger">*</span></label>
-                                <input type="time" name="GioBatDau" class="form-control" required />
+                            <div class="col-md-3">
+                                <label class="form-label fw-bold">Giờ Bắt Đầu</label>
+                                <div class="d-flex gap-1">
+                                    <select class="form-select form-select-sm" id="ddlGioBD" name="GioBatDauHour">
+                                        @for (int h = 0; h < 24; h++)
+                                        {
+                                            <option value="@h.ToString("00")">@h.ToString("00") giờ</option>
+                                        }
+                                    </select>
+                                    <select class="form-select form-select-sm" id="ddlPhutBD" name="GioBatDauMinute">
+                                        <option value="00">00 phút</option>
+                                        <option value="15">15 phút</option>
+                                        <option value="30">30 phút</option>
+                                        <option value="45">45 phút</option>
+                                    </select>
+                                </div>
+                                @Html.ValidationMessage("GioBatDau", new { @class = "text-danger small mt-1" }) 
                             </div>
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold">Giờ tan lớp <span class="text-danger">*</span></label>
-                                <input type="time" name="GioKetThuc" class="form-control" required />
+
+                            <div class="col-md-3">
+                                <label class="form-label fw-bold">Giờ Kết Thúc</label>
+                                <div class="d-flex gap-1">
+                                    <select class="form-select form-select-sm" id="ddlGioKT" name="GioKetThucHour">
+                                        @for (int h = 0; h < 24; h++)
+                                        {
+                                            <option value="@h.ToString("00")">@h.ToString("00") giờ</option>
+                                        }
+                                    </select>
+                                    <select class="form-select form-select-sm" id="ddlPhutKT" name="GioKetThucMinute">
+                                        <option value="00">00 phút</option>
+                                        <option value="15">15 phút</option>
+                                        <option value="30">30 phút</option>
+                                        <option value="45">45 phút</option>
+                                    </select>
+                                </div>
+                                @Html.ValidationMessage("GioKetThuc", new { @class = "text-danger small mt-1" })
                             </div>
 
                             <div class="col-md-12">
@@ -151,35 +179,74 @@
 @section scripts {
     <script>
         document.addEventListener("DOMContentLoaded", function () {
+            // Định nghĩa các biến mới (Lấy từ ID của các dropdown giờ/phút)
             const ddlMaCM = document.getElementById('ddlMaCM');
             const ddlMaNV = document.getElementById('ddlMaNV');
             const inpNgayBD = document.querySelector('input[name="NgayBatDau"]');
             const inpNgayKT = document.querySelector('input[name="NgayKetThuc"]');
-            const inpGioBD = document.querySelector('input[name="GioBatDau"]');
-            const inpGioKT = document.querySelector('input[name="GioKetThuc"]');
+
+            const ddlGioBD = document.getElementById('ddlGioBD');
+            const ddlPhutBD = document.getElementById('ddlPhutBD');
+            const ddlGioKT = document.getElementById('ddlGioKT');
+            const ddlPhutKT = document.getElementById('ddlPhutKT');
+
             const checkboxes = document.querySelectorAll('input[name="SelectedDays"]');
             const currencyInputs = document.querySelectorAll('.currency-input');
+
+            // --- HÀM TÍNH PHÚT VÀ KIỂM TRA LOGIC (FIXED) ---
+            function checkTimeDifference() {
+                // Lấy giá trị giờ và phút (luôn có giá trị vì là dropdown)
+                const gioBD = parseInt(ddlGioBD.value);
+                const phutBD = parseInt(ddlPhutBD.value);
+                const gioKT = parseInt(ddlGioKT.value);
+                const phutKT = parseInt(ddlPhutKT.value);
+
+                // Chuyển thành tổng số phút từ 00:00
+                var startMinutes = gioBD * 60 + phutBD;
+                var endMinutes = gioKT * 60 + phutKT;
+
+                // 1. KIỂM TRA LOGIC CƠ BẢN (Giờ kết thúc > Giờ bắt đầu)
+                if (endMinutes <= startMinutes) {
+                    alert("Lỗi: Giờ kết thúc phải lớn hơn Giờ bắt đầu!");
+                    // Không cho phép chạy tiếp
+                    return;
+                }
+
+                // 2. KIỂM TRA THỜI LƯỢNG TỐI THIỂU (30 phút)
+                if (endMinutes - startMinutes < 30) {
+                    alert("Lỗi: Thời lượng buổi học phải ít nhất 30 phút!");
+                    return;
+                }
+
+                // 3. Nếu hợp lệ, tiến hành load HLV
+                loadAvailableTrainers();
+            }
+
 
             function loadAvailableTrainers() {
                 const maCM = ddlMaCM.value;
                 const ngayBD = inpNgayBD.value;
                 const ngayKT = inpNgayKT.value;
-                const gioBD = inpGioBD.value;
-                const gioKT = inpGioKT.value;
+
+                // Lấy giờ phút từ dropdown và ghép thành chuỗi HH:mm (QUAN TRỌNG CHO CONTROLLER)
+                const gioBD_str = ddlGioBD.value + ":" + ddlPhutBD.value;
+                const gioKT_str = ddlGioKT.value + ":" + ddlPhutKT.value;
+
 
                 let selectedDays = [];
                 checkboxes.forEach(cb => { if (cb.checked) selectedDays.push(cb.value); });
 
                 ddlMaNV.innerHTML = '';
 
-                if (maCM && ngayBD && ngayKT && gioBD && gioKT && selectedDays.length > 0) {
+                if (maCM && ngayBD && ngayKT && selectedDays.length > 0) {
+                    // (Giữ nguyên logic gọi API load Available Trainers)
 
                     let defaultOpt = document.createElement('option');
                     defaultOpt.text = "-- Đang kiểm tra lịch trống... --";
                     ddlMaNV.appendChild(defaultOpt);
                     ddlMaNV.disabled = true;
 
-                    let query = `maCM=${maCM}&ngayBatDau=${ngayBD}&ngayKetThuc=${ngayKT}&gioBatDau=${gioBD}&gioKetThuc=${gioKT}`;
+                    let query = `maCM=${maCM}&ngayBatDau=${ngayBD}&ngayKetThuc=${ngayKT}&gioBatDau=${gioBD_str}&gioKetThuc=${gioKT_str}`;
                     selectedDays.forEach(d => query += `&selectedDays=${d}`);
 
                     fetch('/AdminClass/GetAvailableTrainers?' + query)
@@ -213,17 +280,18 @@
                         });
                 }
                 else if (maCM) {
+                    // Nếu thiếu thông tin ngày giờ, chỉ load danh sách theo chuyên môn
                     ddlMaNV.innerHTML = '<option>-- Đang tải danh sách... --</option>';
                     fetch('/AdminClass/GetTrainersBySpecialty?maCM=' + maCM)
                         .then(res => res.json())
                         .then(data => {
+                            // ... (Logic đổ HLV cơ bản) ...
                             ddlMaNV.innerHTML = '';
                             if (data.length > 0) {
                                 let prompt = document.createElement('option');
                                 prompt.value = "";
                                 prompt.text = "-- Chọn HLV (Chưa check lịch) --";
                                 ddlMaNV.appendChild(prompt);
-
                                 data.forEach(item => {
                                     let opt = document.createElement('option');
                                     opt.value = item.MaNV;
@@ -240,41 +308,31 @@
                 }
             }
 
-            function checkTimeDifference() {
-                if (inpGioBD.value && inpGioKT.value) {
-                    var startParts = inpGioBD.value.split(':');
-                    var endParts = inpGioKT.value.split(':');
-                    var startMinutes = parseInt(startParts[0]) * 60 + parseInt(startParts[1]);
-                    var endMinutes = parseInt(endParts[0]) * 60 + parseInt(endParts[1]);
 
-                    if (endMinutes - startMinutes < 30) {
-                        alert("Lỗi: Thời lượng buổi học phải ít nhất 30 phút!");
-                        inpGioKT.value = "";
-                    } else {
-                        loadAvailableTrainers();
-                    }
-                }
-            }
-
+            // Hàm format tiền tệ (giữ nguyên)
             function formatCurrency(input) {
                 var value = input.value.replace(/\D/g, "");
                 if (value !== "") value = new Intl.NumberFormat('vi-VN').format(value);
                 input.value = value;
             }
 
+            // --- GÁN SỰ KIỆN (Cập nhật để lắng nghe 4 dropdown) ---
             if (ddlMaCM) {
                 ddlMaCM.addEventListener('change', loadAvailableTrainers);
                 inpNgayBD.addEventListener('change', loadAvailableTrainers);
                 inpNgayKT.addEventListener('change', loadAvailableTrainers);
                 checkboxes.forEach(cb => cb.addEventListener('change', loadAvailableTrainers));
 
-                inpGioBD.addEventListener('change', checkTimeDifference);
-                inpGioKT.addEventListener('change', checkTimeDifference);
+                // Lắng nghe sự kiện của 4 dropdown giờ/phút
+                ddlGioBD.addEventListener('change', checkTimeDifference);
+                ddlPhutBD.addEventListener('change', checkTimeDifference);
+                ddlGioKT.addEventListener('change', checkTimeDifference);
+                ddlPhutKT.addEventListener('change', checkTimeDifference);
             }
 
             currencyInputs.forEach(input => {
                 input.addEventListener('input', function () { formatCurrency(this); });
-                formatCurrency(input); 
+                formatCurrency(input);
             });
         });
     </script>

@@ -22,6 +22,7 @@ namespace QL_PHONGGYM.Models
     
         public int MaDonHang { get; set; }
         public int MaKH { get; set; }
+        public string DiaChi_Full { get; set; }
         public System.DateTime NgayDat { get; set; }
         public decimal TongTien { get; set; }
         public decimal PhiShip { get; set; }
