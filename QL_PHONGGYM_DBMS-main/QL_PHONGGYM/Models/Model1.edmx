@@ -2235,24 +2235,7 @@
             <EndProperty Name="NhanVien">
               <ScalarProperty Name="MaNV" ColumnName="MaNV" />
             </EndProperty>
-          </AssociationSetMapping>
-          <FunctionImportMapping FunctionName="QL_PHONGGYMEntities.Store.fn_TimKiemSanPham" FunctionImportName="fn_TimKiemSanPham">
-            <ResultMapping>
-              <ComplexTypeMapping TypeName="QL_PHONGGYMEntities.fn_TimKiemSanPham_Result">
-                <ScalarProperty Name="MaSP" ColumnName="MaSP" />
-                <ScalarProperty Name="TenSP" ColumnName="TenSP" />
-                <ScalarProperty Name="MaLoaiSP" ColumnName="MaLoaiSP" />
-                <ScalarProperty Name="DonGia" ColumnName="DonGia" />
-                <ScalarProperty Name="SoLuongTon" ColumnName="SoLuongTon" />
-                <ScalarProperty Name="GiaKhuyenMai" ColumnName="GiaKhuyenMai" />
-                <ScalarProperty Name="Hang" ColumnName="Hang" />
-                <ScalarProperty Name="XuatXu" ColumnName="XuatXu" />
-                <ScalarProperty Name="BaoHanh" ColumnName="BaoHanh" />
-                <ScalarProperty Name="MoTaChung" ColumnName="MoTaChung" />
-                <ScalarProperty Name="MoTaChiTiet" ColumnName="MoTaChiTiet" />
-              </ComplexTypeMapping>
-            </ResultMapping>
-          </FunctionImportMapping>
+          </AssociationSetMapping>          
           <FunctionImportMapping FunctionImportName="sp_DangKyLop_KiemTra" FunctionName="QL_PHONGGYMEntities.Store.sp_DangKyLop_KiemTra" />
           <FunctionImportMapping FunctionImportName="sp_GanChuyenMonChoNhanVien" FunctionName="QL_PHONGGYMEntities.Store.sp_GanChuyenMonChoNhanVien" />
           <FunctionImportMapping FunctionImportName="sp_HinhAnh_Sua" FunctionName="QL_PHONGGYMEntities.Store.sp_HinhAnh_Sua" />
