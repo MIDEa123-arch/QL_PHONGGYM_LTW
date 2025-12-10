@@ -258,19 +258,18 @@
 
     @Scripts.Render("~/bundles/jquery")
     @Scripts.Render("~/bundles/bootstrap")
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>    
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 
     @if (TempData["ThongBao"] != null)
     {
         <script>
-            Swal.fire({
-                icon: 'success',
-                title: 'Thông báo',
-                text: '@TempData["ThongBao"]',
-                timer: 3000,
-                showConfirmButton: false
-            });
+             Swal.fire({
+                 icon: 'success',
+                 title: '@TempData["ThongBao"]',
+                 showConfirmButton: false,
+                 timer: 3000
+             });
         </script>
     }
     @RenderSection("scripts", required: false)

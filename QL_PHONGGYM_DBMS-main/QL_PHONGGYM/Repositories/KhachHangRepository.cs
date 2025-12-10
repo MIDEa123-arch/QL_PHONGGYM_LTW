@@ -119,42 +119,70 @@ namespace QL_PHONGGYM.Repositories
 
         public void ThemDiaChi(int makh, FormCollection form)
         {
-            string tinh = form["province"];
-            string huyen = form["district"];
-            string xa = form["ward"];
-            string diaChiCuThe = form["address"];
+            string tinh = form["TinhThanhPho"];
+            string huyen = form["QuanHuyen"];
+            string xa = form["PhuongXa"];
+            string diaChiCuThe = form["DiaChiCuThe"];
+            string datMacDinh = form["isDefault"];
 
-            if (string.IsNullOrEmpty(tinh) || string.IsNullOrEmpty(huyen) || string.IsNullOrEmpty(xa)) return;
+            try
+            { 
+                if (string.IsNullOrEmpty(tinh) || string.IsNullOrEmpty(huyen) || string.IsNullOrEmpty(xa)) return;
 
-            var diaChiTonTai = _context.DiaChis
-                .FirstOrDefault(dc =>
-                    dc.MaKH == makh &&
-                    dc.TinhThanhPho == tinh &&
-                    dc.QuanHuyen == huyen &&
-                    dc.PhuongXa == xa &&
-                    dc.DiaChiCuThe == diaChiCuThe);
+                var diaChiTonTai = _context.DiaChis
+                    .FirstOrDefault(dc =>
+                        dc.MaKH == makh &&
+                        dc.TinhThanhPho == tinh &&
+                        dc.QuanHuyen == huyen &&
+                        dc.PhuongXa == xa &&
+                        dc.DiaChiCuThe == diaChiCuThe);
 
-            if (diaChiTonTai == null)
-            {
-                var diaChiMoi = new DiaChi
+                if (diaChiTonTai == null)
                 {
-                    MaKH = makh,
-                    TinhThanhPho = tinh,
-                    QuanHuyen = huyen,
-                    PhuongXa = xa,
-                    DiaChiCuThe = diaChiCuThe,
-                    LaDiaChiMacDinh = false,
-                    NgayThem = DateTime.Now
-                };
+                    DiaChi diaChiMoi;
+                    if (String.IsNullOrEmpty(datMacDinh))
+                    { 
+                        diaChiMoi = new DiaChi
+                        {
+                            MaKH = makh,
+                            TinhThanhPho = tinh,
+                            QuanHuyen = huyen,
+                            PhuongXa = xa,
+                            DiaChiCuThe = diaChiCuThe,
+                            LaDiaChiMacDinh = false,
+                            NgayThem = DateTime.Now
+                        };
+                    }
+                    else
+                    {
+                        var diaChiMacDinh = _context.DiaChis.FirstOrDefault(dc => dc.LaDiaChiMacDinh);
+                        diaChiMacDinh.LaDiaChiMacDinh = false;
 
-                _context.DiaChis.Add(diaChiMoi);
+                        diaChiMoi = new DiaChi
+                        {
+                            MaKH = makh,
+                            TinhThanhPho = tinh,
+                            QuanHuyen = huyen,
+                            PhuongXa = xa,
+                            DiaChiCuThe = diaChiCuThe,
+                            LaDiaChiMacDinh = true,
+                            NgayThem = DateTime.Now
+                        };
+                    }
+
+                    _context.DiaChis.Add(diaChiMoi);
+                }
+                else
+                {
+                    throw new Exception("Địa chỉ đã tồn tại");
+                }
+                _context.SaveChanges();
             }
-            else
+            catch(Exception ex)
             {
-                diaChiTonTai.NgayThem = DateTime.Now;
-                _context.Entry(diaChiTonTai).State = EntityState.Modified;
+                throw ex;
             }
-            _context.SaveChanges();
+            
         }
         public List<DangKyGoiTap> GetGoiTapHienTai(int maKH)
         {

@@ -14,12 +14,6 @@ namespace QL_PHONGGYM.Models
     
     public partial class DiaChi
     {
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
-        public DiaChi()
-        {
-            this.DonHangs = new HashSet<DonHang>();
-        }
-    
         public int MaDC { get; set; }
         public int MaKH { get; set; }
         public string TinhThanhPho { get; set; }
@@ -30,7 +24,5 @@ namespace QL_PHONGGYM.Models
         public System.DateTime NgayThem { get; set; }
     
         public virtual KhachHang KhachHang { get; set; }
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<DonHang> DonHangs { get; set; }
     }
 }

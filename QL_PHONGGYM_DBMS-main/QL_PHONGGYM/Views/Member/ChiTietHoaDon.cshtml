@@ -86,7 +86,7 @@
                         <span class="text-muted">Địa chỉ:: </span>
                         <div class="w-75 text-end">
                             <span class="fw-bold text-break" style="word-break: break-word;">
-                                @(string.Join(", ", new[] { Model.DonHang.DiaChi.TinhThanhPho, Model.DonHang.DiaChi.QuanHuyen, Model.DonHang.DiaChi.PhuongXa, Model.DonHang.DiaChi.DiaChiCuThe }.Where(x => !string.IsNullOrWhiteSpace(x))))
+                                @Model.DonHang.DiaChi_Full
                             </span>
                         </div>
                     </div>

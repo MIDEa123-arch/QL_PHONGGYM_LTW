@@ -133,6 +133,8 @@ namespace QL_PHONGGYM.Repositories
                 DonHang donHang = null;
                 try
                 {
+                    string snapshotDiaChiFull = "";
+
                     if (cart != null)
                     {
                         var checkDiaChi = _context.DiaChis.FirstOrDefault(x =>
@@ -143,7 +145,7 @@ namespace QL_PHONGGYM.Repositories
                             x.DiaChiCuThe == diaChi.DiaChiCuThe
                         );
 
-                        int maDiaChiFinal;
+                        int? maDiaChiFinal = null;
 
                         if (checkDiaChi != null)
                         {                            
@@ -166,11 +168,13 @@ namespace QL_PHONGGYM.Repositories
 
                             maDiaChiFinal = newDC.MaDC;
                         }
-                        
+
+                        snapshotDiaChiFull = $"{diaChi.DiaChiCuThe}, {diaChi.PhuongXa}, {diaChi.QuanHuyen}, {diaChi.TinhThanhPho}";
+
                         donHang = new DonHang
                         {
                             MaKH = maKH,
-                            MaDC = maDiaChiFinal, 
+                            DiaChi_Full = snapshotDiaChiFull, 
                             NgayDat = DateTime.Now,
                             TrangThaiDonHang = "Chờ xác nhận",
                             TongTien = Convert.ToDecimal(form["thanhTien"])

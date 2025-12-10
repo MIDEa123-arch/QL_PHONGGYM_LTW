@@ -211,11 +211,18 @@ namespace QL_PHONGGYM.Controllers
             {
                 if (!KiemTraDangNhap())
                     return RedirectToAction("Login", "Account");
-                int maKH = (int)Session["MaKH"];
-                _cusRepo.ThemDiaChi(maKH, form);
-                TempData["ThongBao"] = "Thêm địa chỉ thành công!";
-
-                return RedirectToAction("SoDiaChi");
+                try
+                {
+                    int maKH = (int)Session["MaKH"];
+                    _cusRepo.ThemDiaChi(maKH, form);
+                    TempData["ThongBao"] = "Thêm địa chỉ thành công!";
+                    return RedirectToAction("ThongTinTaiKhoan");
+                }
+                catch (Exception ex)
+                {
+                    TempData["ErrorMessage"] = ex.Message;
+                    return RedirectToAction("ThongTinTaiKhoan");
+                }
             }
             catch (Exception ex)
             {

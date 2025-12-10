@@ -22,15 +22,14 @@ namespace QL_PHONGGYM.Models
     
         public int MaDonHang { get; set; }
         public int MaKH { get; set; }
-        public Nullable<int> MaDC { get; set; }
         public System.DateTime NgayDat { get; set; }
         public decimal TongTien { get; set; }
         public decimal PhiShip { get; set; }
         public string TrangThaiDonHang { get; set; }
         public string GhiChu { get; set; }
+        public string DiaChi_Full { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<HoaDon> HoaDons { get; set; }
-        public virtual DiaChi DiaChi { get; set; }
     }
 }
