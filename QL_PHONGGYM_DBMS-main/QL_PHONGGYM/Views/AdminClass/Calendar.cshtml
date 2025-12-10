@@ -1,0 +1,315 @@
+﻿
+@model List<QL_PHONGGYM.Models.LichLop>
+@{
+    ViewBag.Title = "Thời khóa biểu";
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+
+    DateTime startOfWeek = ViewBag.StartOfWeek;
+    DateTime endOfWeek = ViewBag.EndOfWeek;
+    var listNV = ViewBag.ListNV as List<QL_PHONGGYM.Models.NhanVien>;
+    int? currentClassId = ViewBag.CurrentClassId as int?;
+}
+
+<style>
+    .table-schedule th {
+        background-color: #e3f2fd;
+        text-align: center;
+        vertical-align: middle;
+        color: #0d6efd;
+    }
+
+    .table-schedule td {
+        vertical-align: top;
+        height: 150px;
+        padding: 5px;
+        border: 1px solid #dee2e6;
+    }
+
+    /* Style cho ô ca học (Sáng/Chiều/Tối) */
+    .ca-hoc {
+        background-color: #fff3cd;
+        font-weight: bold;
+        text-align: center;
+        vertical-align: middle;
+        color: #856404;
+        width: 80px;
+    }
+
+    /* Style cho cục lịch học */
+    .class-item {
+        background-color: #d1e7dd;
+        border-left: 4px solid #198754;
+        color: #0f5132;
+        padding: 8px;
+        margin-bottom: 5px;
+        border-radius: 4px;
+        font-size: 0.85rem;
+        cursor: pointer;
+        transition: 0.2s;
+    }
+
+        .class-item:hover {
+            background-color: #badbcc;
+            transform: translateY(-2px);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+    /* Màu riêng cho trạng thái */
+    .status-cancelled {
+        background-color: #f8d7da;
+        border-left-color: #dc3545;
+        color: #842029;
+    }
+
+    .status-finished {
+        background-color: #e2e3e5;
+        border-left-color: #6c757d;
+        color: #41464b;
+    }
+</style>
+
+<div class="card border-0 shadow-sm">
+    <div class="card-header bg-white py-3">
+        <div class="d-flex justify-content-between align-items-center">
+            <h5 class="fw-bold text-primary mb-0"><i class="fas fa-calendar-alt me-2"></i> THỜI KHÓA BIỂU TUẦN</h5>
+
+            <div class="d-flex align-items-center gap-2">
+                <a href="@Url.Action("Calendar", new { date = startOfWeek.AddDays(-7).ToString("yyyy-MM-dd") })" class="btn btn-outline-primary btn-sm">
+                    <i class="fas fa-chevron-left"></i> Tuần trước
+                </a>
+                <span class="fw-bold mx-2">
+                    @startOfWeek.ToString("dd/MM") - @endOfWeek.ToString("dd/MM/yyyy")
+                </span>
+                <a href="@Url.Action("Calendar", new { date = startOfWeek.AddDays(7).ToString("yyyy-MM-dd") })" class="btn btn-outline-primary btn-sm">
+                    Tuần sau <i class="fas fa-chevron-right"></i>
+                </a>
+                <a href="@Url.Action("Calendar", new { date = DateTime.Today.ToString("yyyy-MM-dd") })" class="btn btn-primary btn-sm ms-2">
+                    Hiện tại
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-bordered table-schedule mb-0 w-100">
+                <thead>
+                    <tr>
+                        <th class="ca-hoc">Ca học</th>
+                        @for (int i = 0; i < 7; i++)
+                        {
+                            var date = startOfWeek.AddDays(i);
+                            <th>
+                                <div>Thứ @(i == 6 ? "CN" : (i + 2).ToString())</div>
+                                <div class="small text-muted">@date.ToString("dd/MM")</div>
+                            </th>
+                        }
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="ca-hoc bg-light">SÁNG</td>
+                        @RenderWeekRow(startOfWeek, Model, 0, 12)
+                    </tr>
+
+                    <tr>
+                        <td class="ca-hoc bg-light">CHIỀU</td>
+                        @RenderWeekRow(startOfWeek, Model, 12, 18)
+                    </tr>
+
+                    <tr>
+                        <td class="ca-hoc bg-light">TỐI</td>
+                        @RenderWeekRow(startOfWeek, Model, 18, 24)
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@helper RenderWeekRow(DateTime startOfWeek, List<QL_PHONGGYM.Models.LichLop> allLich, int startHour, int endHour)
+{
+    for (int i = 0; i < 7; i++)
+    {
+        var currentDate = startOfWeek.AddDays(i);
+        // Lọc ra các lớp học trong ngày này và trong khung giờ này
+        var lichTrongNgay = allLich.Where(x => x.NgayHoc == currentDate
+                                            && x.GioBatDau.Hours >= startHour
+                                            && x.GioBatDau.Hours < endHour).ToList();
+        <td>
+            @foreach (var item in lichTrongNgay)
+            {
+                string statusClass = "";
+                if (item.TrangThai == "Đã hủy") { statusClass = "status-cancelled"; }
+                else if (item.TrangThai == "Đã diễn ra") { statusClass = "status-finished"; }
+
+                <div class="class-item @statusClass" onclick="openSessionModal(@item.MaLichLop)">
+                    <div class="fw-bold">@item.LopHoc.TenLop</div>
+                    <div class="small"><i class="far fa-clock"></i> @item.GioBatDau.ToString(@"hh\:mm") - @item.GioKetThuc.ToString(@"hh\:mm")</div>
+                    <div class="small"><i class="fas fa-chalkboard-teacher"></i> @(item.NhanVien?.TenNV ?? "Chưa gán")</div>
+                    <div class="small mt-1 text-muted fst-italic">@item.LopHoc.ChuyenMon.TenChuyenMon</div>
+                </div>
+            }
+        </td>
+    }
+}
+
+<div class="modal fade" id="sessionModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title"><i class="fas fa-edit me-2"></i> Quản lý buổi học</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-light border mb-3">
+                    <div class="row">
+                        <div class="col-md-6"><strong>Lớp:</strong> <span id="lblClass" class="text-primary">...</span></div>
+                        <div class="col-md-6"><strong>Thời gian:</strong> <span id="lblTime" class="text-danger">...</span></div>
+                    </div>
+                </div>
+
+                <ul class="nav nav-tabs mb-3" id="myTab" role="tablist">
+                    <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-hv">Danh sách học viên</button></li>
+                    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-hlv">Đổi giáo viên</button></li>
+                </ul>
+
+                <div class="tab-content">
+                    <div class="tab-pane fade show active" id="tab-hv">
+                        <div class="table-responsive" style="max-height: 250px; overflow-y: auto;">
+                            <table class="table table-sm table-striped mb-0">
+                                <thead class="table-light sticky-top"><tr><th>Họ tên</th><th>Giới tính</th><th>SĐT</th></tr></thead>
+                                <tbody id="tableHocVien"></tbody>
+                            </table>
+                        </div>
+                        <div id="emptyHocVien" class="text-center text-muted py-3 d-none">Lớp chưa có học viên nào.</div>
+                    </div>
+
+                    <div class="tab-pane fade" id="tab-hlv">
+                        <form id="formChangeInst">
+                            <input type="hidden" id="hddMaLichLop" />
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Chọn Giáo viên dạy thay:</label>
+                                <select class="form-select" id="ddlNhanVien">
+                                    <option value="">-- Đang tải danh sách... --</option>
+                                </select>
+                                <div class="form-text text-success small mt-1">
+                                    <i class="fas fa-check-circle"></i> Chỉ hiển thị HLV có đúng chuyên môn.
+                                </div>
+                            </div>
+                            <div class="text-end">
+                                <button type="button" onclick="saveInstructorChange()" class="btn btn-success">
+                                    <i class="fas fa-save me-1"></i> Lưu thay đổi
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        var modalSessionElement = document.getElementById('sessionModal');
+        var modalSession = new bootstrap.Modal(modalSessionElement);
+        function openSessionModal(maLichLop) {
+            console.log("Đang mở lịch: " + maLichLop); 
+            $('#tableHocVien').html('<tr><td colspan="3" class="text-center py-3">Đang tải dữ liệu...</td></tr>');
+            $('#hddMaLichLop').val(maLichLop);
+            $('#ddlNhanVien').html('<option value="">Đang tải danh sách...</option>');
+            $('#emptyHocVien').addClass('d-none');
+            $.ajax({
+                url: '@Url.Action("GetSessionDetail", "AdminClass")', 
+                type: 'GET',
+                data: { maLichLop: maLichLop },
+                success: function (res) {
+                    console.log("Dữ liệu nhận về:", res); 
+                    if (res.success) {
+                        $('#lblClass').text(res.tenLop);
+                        $('#lblTime').text(res.ngayHoc + " (" + res.gioHoc + ")");
+                        var ddl = $('#ddlNhanVien');
+                        ddl.empty(); 
+                        ddl.append('<option value="">-- Chọn giáo viên thay thế --</option>');
+
+                        if (res.listHLV && res.listHLV.length > 0) {
+                            $.each(res.listHLV, function(index, nv) {
+                                var selected = (nv.MaNV == res.maNV) ? "selected" : "";
+                                var text = nv.TenNV + (nv.MaNV == res.maNV ? " (Hiện tại)" : "");
+                                ddl.append(`<option value="${nv.MaNV}" ${selected}>${text}</option>`);
+                            });
+                        } else {
+                            ddl.append('<option value="">Không có HLV nào có chuyên môn này</option>');
+                        }
+                        var htmlHV = '';
+                        if (res.hocViens && res.hocViens.length > 0) {
+                            $.each(res.hocViens, function(index, hv) {
+                                htmlHV += `<tr>
+                                    <td>${hv.TenKH}</td>
+                                    <td>${hv.GioiTinh || ''}</td>
+                                    <td>${hv.SDT || ''}</td>
+                                </tr>`;
+                            });
+                            $('#tableHocVien').html(htmlHV);
+                            $('#emptyHocVien').addClass('d-none');
+                        } else {
+                            $('#tableHocVien').html('');
+                            $('#emptyHocVien').removeClass('d-none');
+                        }
+                        modalSession.show();
+                    } else {
+                        alert("Lỗi server: " + (res.message || "Không lấy được dữ liệu"));
+                    }
+                },
+                error: function (err) {
+                    console.error("Lỗi Ajax:", err);
+                    alert("Không thể kết nối đến server. Vui lòng nhấn F12 xem lỗi.");
+                }
+            });
+        }
+        function saveInstructorChange() {
+            var maLich = $('#hddMaLichLop').val();
+            var maNV = $('#ddlNhanVien').val();
+
+            if (!maNV) {
+                alert("Vui lòng chọn một giáo viên trong danh sách!");
+                return;
+            }
+
+            if (confirm('Bạn có chắc chắn muốn đổi giáo viên cho buổi này?')) {
+                var btn = event.target; 
+                var oldText = btn.innerHTML;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang lưu...';
+                btn.disabled = true;
+
+                $.ajax({
+                    url: '@Url.Action("UpdateSessionInstructor", "AdminClass")',
+                    type: 'POST',
+                    data: { maLichLop: maLich, maNV: maNV },
+                    success: function (res) {
+                        btn.innerHTML = oldText;
+                        btn.disabled = false;
+
+                        if (res.success) {
+                            alert(res.message);
+                            modalSession.hide();
+                            location.reload(); 
+                        } else {
+                            alert("KHÔNG THÀNH CÔNG:\n" + res.message);
+                        }
+                    },
+                    error: function (err) {
+                        btn.innerHTML = oldText;
+                        btn.disabled = false;
+                        console.error(err);
+                        alert("Lỗi hệ thống khi lưu dữ liệu.");
+                    }
+                });
+            }
+        }
+    </script>
+}

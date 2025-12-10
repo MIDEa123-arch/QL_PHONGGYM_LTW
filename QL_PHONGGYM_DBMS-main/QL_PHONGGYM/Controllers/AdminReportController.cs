@@ -77,5 +77,72 @@ namespace QL_PHONGGYM.Controllers
 
             return Json(new { success = true, data = monthlyData, year = year });
         }
+        [HttpGet] // Dùng GET để có thể tải file qua đường dẫn URL
+        public ActionResult ExportToExcel(string fromDate, string toDate)
+        {
+            try
+            {
+                DateTime start = DateTime.Parse(fromDate);
+                DateTime end = DateTime.Parse(toDate).AddDays(1).AddSeconds(-1);
+
+                // 1. Lấy dữ liệu chi tiết (Kèm theo các bảng liên quan để lấy tên sản phẩm/gói)
+                var listHoaDon = _context.ChiTietHoaDons
+                    .Include(ct => ct.HoaDon)
+                    .Include(ct => ct.SanPham)
+                    .Include(ct => ct.DangKyGoiTap.GoiTap)
+                    .Include(ct => ct.DangKyLop.LopHoc)
+                    .Where(ct => ct.HoaDon.TrangThai == "Đã thanh toán"
+                                && ct.HoaDon.NgayLap >= start
+                                && ct.HoaDon.NgayLap <= end)
+                    .ToList();
+
+                // 2. Tạo nội dung file CSV (Dùng StringBuilder)
+                var sb = new System.Text.StringBuilder();
+
+                // Dòng tiêu đề
+                sb.AppendLine("Mã HĐ,Ngày Lập,Nội Dung Chi Tiết,Loại Hình,Số Lượng,Đơn Giá,Thành Tiền");
+
+                foreach (var item in listHoaDon)
+                {
+                    // Xác định loại hình
+                    string loaiHinh = item.SanPham != null ? "Bán hàng & Dụng cụ" :
+                                      item.DangKyGoiTap != null ? "Gói tập Gym" :
+                                      item.DangKyPT != null ? "Huấn luyện viên (PT)" :
+                                      item.DangKyLop != null ? "Lớp học" : "Khác";
+
+                    // Xác định tên nội dung (Tên SP / Tên Gói / Tên Lớp)
+                    string noiDung = "Dịch vụ khác";
+                    if (item.SanPham != null) noiDung = item.SanPham.TenSP;
+                    else if (item.DangKyGoiTap != null && item.DangKyGoiTap.GoiTap != null) noiDung = item.DangKyGoiTap.GoiTap.TenGoi;
+                    else if (item.DangKyLop != null && item.DangKyLop.LopHoc != null) noiDung = item.DangKyLop.LopHoc.TenLop;
+                    else if (item.DangKyPT != null) noiDung = "Thuê PT";
+
+                    // Xử lý dấu phẩy trong nội dung để không bị vỡ cột CSV (Bao quanh bằng ngoặc kép)
+                    noiDung = "\"" + (noiDung ?? "").Replace("\"", "\"\"") + "\"";
+
+                    // Format dòng dữ liệu
+                    var line = string.Format("{0},{1},{2},{3},{4},{5},{6}",
+                        item.HoaDon.MaHD,
+                        item.HoaDon.NgayLap.Value.ToString("dd/MM/yyyy HH:mm"),
+                        noiDung,
+                        loaiHinh,
+                        item.SoLuong ?? 1,
+                        (item.DonGia).ToString("0.##"), // Format số không có số 0 vô nghĩa
+                        (item.DonGia * (item.SoLuong ?? 1)).ToString("0.##")
+                    );
+                    sb.AppendLine(line);
+                }
+
+                // 3. Trả về file (Thêm BOM để Excel nhận diện đúng tiếng Việt)
+                byte[] buffer = System.Text.Encoding.UTF8.GetPreamble()
+                    .Concat(System.Text.Encoding.UTF8.GetBytes(sb.ToString())).ToArray();
+
+                return File(buffer, "text/csv", $"BaoCaoDoanhThu_{start:ddMMyyyy}_{end:ddMMyyyy}.csv");
+            }
+            catch (Exception ex)
+            {
+                return Content("Lỗi khi xuất file: " + ex.Message);
+            }
+        }
     }
 }

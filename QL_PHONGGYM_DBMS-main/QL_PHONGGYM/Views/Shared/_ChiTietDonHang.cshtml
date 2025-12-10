@@ -1,0 +1,92 @@
+﻿@model QL_PHONGGYM.Models.DonHang
+
+@{
+    Layout = null; /* QUAN TRỌNG: Để không bị lặp Layout trong Modal */
+
+    // Lấy hóa đơn đầu tiên (Theo logic 1 Đơn - 1 Hóa đơn)
+    var hoaDon = Model.HoaDons.FirstOrDefault();
+}
+
+<div class="container-fluid p-0">
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <h6 class="text-primary fw-bold text-uppercase border-bottom pb-2">Thông tin khách hàng</h6>
+            <p class="mb-1"><strong>Họ tên:</strong> @Model.HoaDons.FirstOrDefault().KhachHang.TenKH</p>
+            <p class="mb-1"><strong>SĐT:</strong> @Model.HoaDons.FirstOrDefault().KhachHang.SDT</p>
+            <p class="mb-1"><strong>Email:</strong> @(Model.HoaDons.FirstOrDefault().KhachHang.Email ?? "Chưa cập nhật")</p>
+        </div>
+        <div class="col-md-6">
+            <h6 class="text-primary fw-bold text-uppercase border-bottom pb-2">Thông tin giao hàng</h6>
+            <p class="mb-1"><strong>Mã đơn:</strong> <span class="badge bg-info">#@Model.MaDonHang</span></p>
+            <p class="mb-1"><strong>Ngày đặt:</strong> @Model.NgayDat.ToString("dd/MM/yyyy HH:mm")</p>
+            <p class="mb-1"><strong>Địa chỉ:</strong> @(Model.DiaChi_Full ?? "Nhận tại phòng tập")</p>
+            <p class="mb-1">
+                <strong>Trạng thái:</strong>
+                <span class="badge @(Model.TrangThaiDonHang == "Đã giao hàng" ? "bg-success" : "bg-warning text-dark")">
+                    @Model.TrangThaiDonHang
+                </span>
+            </p>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <h6 class="text-primary fw-bold text-uppercase border-bottom pb-2">Chi tiết sản phẩm</h6>
+
+            @if (hoaDon != null && hoaDon.ChiTietHoaDons != null && hoaDon.ChiTietHoaDons.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-bordered align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th style="width: 50px;">Ảnh</th>
+                                <th>Tên sản phẩm</th>
+                                <th class="text-center">SL</th>
+                                <th class="text-end">Đơn giá</th>
+                                <th class="text-end">Thành tiền</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var ct in hoaDon.ChiTietHoaDons)
+                            {
+                                var img = ct.SanPham?.HINHANHs?.FirstOrDefault(x => x.IsMain == true)?.Url ?? "no-image.png";
+                                <tr>
+                                    <td>
+                                        <img src="~/Content/Images/Products/@img" alt="SP" style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px;" onerror="this.src='/Content/Images/no-image.png'" />
+                                    </td>
+                                    <td>
+                                        <div class="fw-bold">@ct.SanPham.TenSP</div>
+                                        <small class="text-muted">Mã SP: @ct.MaSP</small>
+                                    </td>
+                                    <td class="text-center">@ct.SoLuong</td>
+                                    <td class="text-end">@ct.DonGia.ToString("#,##0") đ</td>
+                                    <td class="text-end fw-bold">@((ct.SoLuong * ct.DonGia)?.ToString("#,##0")) đ</td>
+                                </tr>
+                            }
+                        </tbody>
+                        <tfoot class="bg-light">
+                            <tr>
+                                <td colspan="4" class="text-end">Tổng tiền hàng:</td>
+                                <td class="text-end fw-bold">@((hoaDon.ThanhTien ?? 0).ToString("#,##0")) đ</td>
+                            </tr>
+                            <tr>
+                                <td colspan="4" class="text-end">Phí vận chuyển:</td>
+                                <td class="text-end fw-bold">@Model.PhiShip.ToString("#,##0") đ</td>
+                            </tr>
+                            <tr class="text-primary h5">
+                                <td colspan="4" class="text-end fw-bold">TỔNG THANH TOÁN:</td>
+                                <td class="text-end fw-bold">@Model.TongTien.ToString("#,##0") đ</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-warning text-center">
+                    Chưa có thông tin hóa đơn hoặc sản phẩm cho đơn hàng này.
+                </div>
+            }
+        </div>
+    </div>
+</div>

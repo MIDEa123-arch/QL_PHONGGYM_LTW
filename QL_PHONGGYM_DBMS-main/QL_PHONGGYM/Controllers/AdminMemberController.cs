@@ -25,8 +25,15 @@ namespace QL_PHONGGYM.Controllers
             {
                 query = query.Where(h => h.MaLoaiKH == maLoai);
             }
+            var model = query.OrderByDescending(k => k.MaKH).ToList();
+            ViewBag.DanhSachLoai = _context.LoaiKhachHangs.ToList();
             ViewBag.CurrentSearch = search;
             ViewBag.CurrentStatus = maLoai;
+            if (Request.IsAjaxRequest())
+            {
+                // Trả về PartialView chứa bảng dữ liệu đã được lọc
+                return PartialView("_DanhSachHoiVien", model);
+            }
             return View(query.OrderByDescending(k => k.MaKH).ToList());
         }
 
@@ -88,32 +95,6 @@ namespace QL_PHONGGYM.Controllers
             }
             ViewBag.MaLoaiKH = new SelectList(_context.LoaiKhachHangs, "MaLoaiKH", "TenLoai", model.MaLoaiKH);
             return View(model);
-        }
-
-        [HttpPost]
-        public JsonResult Delete(int id)
-        {
-            try
-            {
-                var kh = _context.KhachHangs.Find(id);
-                if (kh == null) return Json(new { success = false, message = "Không tìm thấy khách hàng" });
-
-                _context.KhachHangs.Remove(kh);
-                _context.SaveChanges();
-                TempData["ThongBao"] = "Đã xóa khách hàng thành công!";
-                return Json(new { success = true });
-            }
-            catch
-            {
-                TempData["ThongBao"] = null;
-                return Json(new { success = false, message = "Khách hàng này đã có dữ liệu giao dịch/đăng ký, không thể xóa!" });
-            }
-        }
-        public ActionResult Create()
-        {
-            if (Session["AdminUser"] == null) return RedirectToAction("Login", "Auth");
-            ViewBag.MaLoaiKH = new SelectList(_context.LoaiKhachHangs, "MaLoaiKH", "TenLoai");
-            return View();
         }
 
         [HttpPost]
@@ -187,6 +168,38 @@ namespace QL_PHONGGYM.Controllers
             }
 
             return View(model);
+        }
+        [HttpPost]
+        public JsonResult ToggleAccountStatus(int id)
+        {
+            // 1. Tìm hội viên
+            var kh = _context.KhachHangs.Find(id);
+            if (kh == null) return Json(new { success = false, message = "Không tìm thấy thông tin hội viên!" });
+
+            try
+            {
+                // 2. Xử lý trạng thái (Nếu null coi như là 1 - Đang hoạt động)
+                int trangThaiHienTai = kh.TrangThaiTaiKhoan ?? 1;
+
+                if (trangThaiHienTai == 1)
+                {
+                    // --- Đang hoạt động -> KHÓA ---
+                    kh.TrangThaiTaiKhoan = 0;
+                    _context.SaveChanges();
+                    return Json(new { success = true, message = $"Đã KHÓA tài khoản hội viên {kh.TenKH} thành công." });
+                }
+                else
+                {
+                    // --- Đang khóa -> MỞ LẠI ---
+                    kh.TrangThaiTaiKhoan = 1;
+                    _context.SaveChanges();
+                    return Json(new { success = true, message = $"Đã MỞ KHÓA cho hội viên {kh.TenKH} thành công." });
+                }
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Lỗi hệ thống: " + ex.Message });
+            }
         }
     }
 }

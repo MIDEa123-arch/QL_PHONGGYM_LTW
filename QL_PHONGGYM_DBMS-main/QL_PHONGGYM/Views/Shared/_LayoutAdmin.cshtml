@@ -178,7 +178,12 @@
             </li>
             <li>
                 <a href="@Url.Action("Index", "AdminOrder", new { area = "Admin" })" class="@(ViewContext.RouteData.Values["controller"].ToString() == "Order" ? "active" : "")">
-                    <i class="fas fa-file-invoice-dollar"></i> Quản lý Đơn hàng
+                    <i class="fas fa-file-invoice-dollar"></i> Quản lý Hóa Đơn
+                </a>
+            </li>
+            <li>
+                <a href="@Url.Action("Index", "AdminQuanLyDonHang", new { area = "Admin" })" class="@(ViewContext.RouteData.Values["controller"].ToString() == "Order" ? "active" : "")">
+                    <i class="fas fa-file-invoice-dollar"></i> Quản lý Đơn Hàng
                 </a>
             </li>
             <li class="sidebar-header text-uppercase small text-muted px-4 mt-3 mb-1">Hệ thống</li>

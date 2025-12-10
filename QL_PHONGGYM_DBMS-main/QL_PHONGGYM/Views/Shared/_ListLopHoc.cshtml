@@ -23,9 +23,9 @@
                 </span>
             </td>
             <td class="text-end pe-4">
-                <button onclick="viewSchedule(@item.MaLop)" class="btn btn-outline-info btn-sm me-1" title="Xem lịch chi tiết">
-                    <i class="fas fa-calendar-alt"></i>
-                </button>
+                <a href="@Url.Action("Calendar", "AdminClass")" class="btn btn-info btn-sm text-white ms-2">
+                    <i class="fas fa-calendar-alt me-1"></i> Xem Thời Khóa Biểu
+                </a>
 
                 <a href="@Url.Action("Edit", new { id = item.MaLop })" class="btn btn-outline-primary btn-sm me-1" title="Sửa lớp">
                     <i class="fas fa-edit"></i>

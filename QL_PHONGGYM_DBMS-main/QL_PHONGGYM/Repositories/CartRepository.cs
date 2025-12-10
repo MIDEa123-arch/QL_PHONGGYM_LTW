@@ -165,7 +165,7 @@ namespace QL_PHONGGYM.Repositories
                         donHang = new DonHang
                         {
                             MaKH = maKH,
-                            MaDC = maDiaChiFinal, 
+                            //MaDC = maDiaChiFinal, 
                             NgayDat = DateTime.Now,
                             TrangThaiDonHang = "Chờ xác nhận",
                             TongTien = Convert.ToDecimal(form["thanhTien"])

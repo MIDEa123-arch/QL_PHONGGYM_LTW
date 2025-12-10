@@ -7,20 +7,42 @@
 <div id="ketQuaTimKiem">
     @Html.Partial("_DanhSachHoiVien", Model)
 </div>
+<div class="modal fade" id="scheduleModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title fw-bold">
+                    <i class="fas fa-calendar-week me-2"></i> Chi tiết lịch học
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
 
+            <div class="modal-body p-0" id="modalScheduleContent">
+                <div class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status"></div>
+                    <p class="mt-2">Đang tải dữ liệu...</p>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+            </div>
+        </div>
+    </div>
+</div>
 @section scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
     <script>
+        // --- HÀM 1: LỌC DỮ LIỆU ---
         function FilterData() {
             var tuKhoa = $('#txtTuKhoa').val();
             var maLoai = $('#ddlMaLoai').val();
 
             $.ajax({
-                url: '/HoiVien/Index',
+                url: '/AdminMember/Index', // Hoặc '/HoiVien/Index' tùy Route của bạn
                 type: 'GET',
-                data: {
-                    tuKhoa: tuKhoa,
-                    maLoai: maLoai
-                },
+                data: { tuKhoa: tuKhoa, maLoai: maLoai },
                 success: function (res) {
                     $('#ketQuaTimKiem').html(res);
                 },
@@ -30,30 +52,80 @@
             });
         }
 
+        // --- HÀM 2: KHÓA / MỞ TÀI KHOẢN ---
+        function confirmToggleMember(id, action, e) {
+
+            // 1. CHẶN ĐỨNG việc submit form ngầm (Khắc phục lỗi báo 2 lần)
+            if (e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+
+            if (confirm(`Bạn có chắc chắn muốn ${action} tài khoản hội viên này không?`)) {
+
+                var btn = e ? e.target : null;
+                if (btn && btn.tagName === 'I') btn = btn.parentElement;
+
+                var oldHtml = "";
+                if (btn) {
+                    oldHtml = btn.innerHTML;
+                    btn.innerHTML = '...';
+                    btn.disabled = true; // Khóa nút ngay lập tức
+                }
+
+                $.ajax({
+                    url: '/AdminMember/ToggleAccountStatus',
+                    type: 'POST',
+                    data: { id: id },
+                    success: function (res) {
+                        if (res.success) {
+                            alert(res.message);
+
+                            // Gọi hàm FilterData để load lại bảng đúng chuẩn AJAX
+                            if (typeof FilterData === 'function') {
+                                FilterData();
+                            } else {
+                                location.reload();
+                            }
+                        } else {
+                            alert("Thất bại: " + res.message);
+                            if (btn) {
+                                btn.innerHTML = oldHtml;
+                                btn.disabled = false;
+                            }
+                        }
+                    },
+                    error: function (xhr) {
+                        alert("Lỗi kết nối server!");
+                        if (btn) {
+                            btn.innerHTML = oldHtml;
+                            btn.disabled = false;
+                        }
+                    }
+                });
+            }
+        }
+
+        // --- HÀM 3: XÓA HỘI VIÊN (Nếu cần) ---
+        function deleteMember(id) {
+            if (confirm('Bạn có chắc muốn xóa hội viên này?')) {
+                $.ajax({
+                    url: '/AdminMember/Delete',
+                    type: 'POST',
+                    data: { id: id },
+                    success: function (res) {
+                        if (res.success) {
+                            alert("Xóa thành công!");
+                            FilterData(); // Load lại bảng mượt mà
+                        } else {
+                            alert(res.message);
+                        }
+                    },
+                    error: function () {
+                        alert("Lỗi hệ thống!");
+                    }
+                });
+            }
+        }
     </script>
 }
-<script>
-    function deleteMember(id) {
-        if (confirm('Bạn có chắc muốn xóa hội viên này?')) {
-            $('#msgAlert').hide();
-
-            $.ajax({
-                url: '@Url.Action("Delete", "AdminMember")',
-                type: 'POST',
-                data: { id: id },
-                success: function (res) {
-                    if (res.success) {
-                        location.reload();
-                    } else {
-                        $('#msgAlert').remove();
-                        alert(res.message);
-                    }
-                },
-                error: function() {
-                    $('#msgAlert').remove();
-                    alert("Lỗi hệ thống! Vui lòng thử lại sau.");
-                }
-            });
-        }
-    }
-</script>

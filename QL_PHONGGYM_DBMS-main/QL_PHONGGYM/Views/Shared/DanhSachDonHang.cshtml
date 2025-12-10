@@ -1,0 +1,83 @@
+﻿@model List<QL_PHONGGYM.Models.DonHang>
+
+<h4>mới thêm vòa nhâhahahah</h4>
+<div class="table-responsive">
+    <table class="table table-hover align-middle mb-0 border">
+        <thead class="table-light">
+            <tr>
+                <th>Mã ĐH</th>
+                <th>Khách hàng</th>
+                <th>Ngày đặt</th>
+                <th>Tổng tiền</th>
+                <th>Trạng thái</th>
+                <th class="text-end">Xử lý</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model != null && Model.Any())
+            {
+                foreach (var item in Model)
+                {
+                    <tr>
+                        <td><span class="fw-bold text-primary">#@item.MaDonHang</span></td>
+                        <td>
+                            <div class="fw-bold">@item.HoaDons.FirstOrDefault().KhachHang.TenKH</div>
+                            <small class="text-muted">@item.HoaDons.FirstOrDefault().KhachHang.SDT</small>
+                        </td>
+                        <td>@item.NgayDat.ToString("dd/MM/yyyy HH:mm")</td>
+                        <td class="fw-bold text-success">@item.TongTien.ToString("#,##0") đ</td>
+
+                        <td>
+                            @if (item.TrangThaiDonHang == "Chờ xác nhận")
+                            {
+                                <span class="badge bg-warning text-dark">Chờ xác nhận</span>
+                            }
+                            else if (item.TrangThaiDonHang == "Chờ giao hàng")
+                            {
+                                <span class="badge bg-info text-dark">Đang giao hàng</span>
+                            }
+                            else if (item.TrangThaiDonHang == "Đã giao hàng")
+                            {
+                                <span class="badge bg-success">Hoàn tất</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-danger">Đã hủy</span>
+                            }
+                        </td>
+
+                        <td class="text-end">
+                            @if (item.TrangThaiDonHang == "Chờ xác nhận")
+                            {
+                                <button type="button" onclick="updateOrderStatus(@item.MaDonHang, 'confirm', event)" class="btn btn-primary btn-sm" title="Xác nhận đơn">
+                                    <i class="fas fa-check"></i> Xác nhận
+                                </button>
+                                <button type="button" onclick="updateOrderStatus(@item.MaDonHang, 'cancel', event)" class="btn btn-outline-danger btn-sm ms-1" title="Hủy đơn">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            }
+                            else if (item.TrangThaiDonHang == "Chờ giao hàng")
+                            {
+                                <button type="button" onclick="updateOrderStatus(@item.MaDonHang, 'ship', event)" class="btn btn-success btn-sm" title="Xác nhận đã giao xong">
+                                    <i class="fas fa-shipping-fast"></i> Đã giao
+                                </button>
+                                <button type="button" onclick="updateOrderStatus(@item.MaDonHang, 'cancel', event)" class="btn btn-outline-danger btn-sm ms-1">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            }
+                            else
+                            {
+                                <span class="text-muted small"><i class="fas fa-lock"></i> Đã khóa</span>
+                            }
+                        </td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr><td colspan="6" class="text-center py-4 text-muted">Không tìm thấy đơn hàng nào.</td></tr>
+            }
+        </tbody>
+    </table>
+</div>
+

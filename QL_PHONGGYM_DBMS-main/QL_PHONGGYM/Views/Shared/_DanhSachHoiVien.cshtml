@@ -1,5 +1,6 @@
 ﻿@model List<QL_PHONGGYM.Models.KhachHang>
 @{
+    Layout = null;
     var danhSachLoai = ViewBag.DanhSachLoai as List<QL_PHONGGYM.Models.LoaiKhachHang>;
 }
 @if (TempData["ThongBao"] != null)
@@ -22,7 +23,7 @@
                         <i class="fas fa-user-plus me-1"></i> Thêm hội viên
                     </a>
                 </div>
-                
+
                 <div class="row">
                     <div class="row mb-3 flex-grow-1 ms-4">
                         <div class="col-md-5">
@@ -67,6 +68,7 @@
                                 <th>Liên hệ</th>
                                 <th>Ngày sinh</th>
                                 <th>Loại thành viên</th>
+                                <th>Trạng thái</th>
                                 <th class="text-center pe-4">Hành động</th>
                             </tr>
                         </thead>
@@ -93,12 +95,34 @@
                                                 @(item.LoaiKhachHang != null ? item.LoaiKhachHang.TenLoai : "Chưa phân loại")
                                             </span>
                                         </td>
+                                        <td>
+                                            @if (item.TrangThaiTaiKhoan == 1 || item.TrangThaiTaiKhoan == null)
+                                            {
+                                                <span class="badge bg-success">Đang hoạt động</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-secondary">Đã bị khóa</span>
+                                            }
+                                        </td>
                                         <td class="text-center">
                                             <a href="@Url.Action("Edit", new { id = item.MaKH })" class="btn btn-outline-primary btn-sm" title="Sửa thông tin">
                                                 <i class="fas fa-user-edit"></i>
                                             </a>
+                                            @if (item.TrangThaiTaiKhoan == 1 || item.TrangThaiTaiKhoan == null)
+                                            {
+                                                <button type="button" onclick="confirmToggleMember(@item.MaKH, 'Khóa', event)" class="btn btn-outline-danger btn-sm" title="Khóa">
+                                                    <i class="fas fa-lock"></i> Khóa
+                                                </button>
+                                            }
+                                            else
+                                            {
+                                                <button type="button" onclick="confirmToggleMember(@item.MaKH, 'Mở', event)" class="btn btn-outline-success btn-sm" title="Mở">
+                                                    <i class="fas fa-lock-open"></i> Mở
+                                                </button>
+                                            }
                                         </td>
-                                        
+
                                     </tr>
                                 }
                             }
@@ -114,25 +138,3 @@
     </div>
 }
 
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script>
-    function deleteMember(id) {
-        if (confirm('Bạn có chắc muốn xóa hội viên này?')) {
-            $.ajax({
-                url: '@Url.Action("Delete", "AdminMember")',
-                type: 'POST',
-                data: { id: id },
-                success: function (res) {
-                    if (res.success) {
-                        location.reload();
-                    } else {
-                        alert(res.message);
-                    }
-                },
-                error: function() {
-                    alert("Lỗi hệ thống!");
-                }
-            });
-        }
-    }
-</script>

@@ -59,6 +59,19 @@
                         </div>
                     </div>
                 </div>
+
+                <div class="col-md-2">
+                    <a href="@Url.Action("Index")" class="btn btn-outline-secondary ms-1" title="Tải lại">
+                        <i class="fas fa-sync-alt"></i>
+                    </a>
+                </div>
+
+                <div class="col-md-2">
+                    <button type="button" class="btn btn-warning w-100 fw-bold" onclick="exportExcel()">
+                        <i class="fas fa-file-excel me-1"></i> Xuất Excel
+                    </button>
+                </div>
+
             </form>
         </div>
     </div>
@@ -141,13 +154,12 @@
     let chartMonthly = null;
 
     $(document).ready(function() {
-        initYears();         // 1. Tạo list năm
-        bindEvents();        // 2. Gán sự kiện change
-        updateDates();       // 3. Tính ngày mặc định
-        refreshAllReports(); // 4. Load data lần đầu
+        initYears();
+        bindEvents();
+        updateDates();
+        refreshAllReports();
     });
 
-    // --- 1. KHỞI TẠO NĂM (Năm nay + 2 năm trước) ---
     function initYears() {
         const currentYear = new Date().getFullYear();
         const ddlYear = $('#ddlYear');
@@ -158,44 +170,32 @@
         }
     }
 
-    // --- 2. GÁN SỰ KIỆN (AUTO LOAD KHI THAY ĐỔI) ---
     function bindEvents() {
-        // Khi đổi Loại xem -> Ẩn hiện dropdown -> Tính lại ngày -> Load Data
         $('#filterType').change(function() {
             const type = $(this).val();
-
-            // Reset UI
             $('#groupMonth, #groupQuarter, #groupYear, #dateRangeArea').addClass('d-none');
-            //$('#fromDate, #toDate').prop('readonly', true).addClass('bg-light');
-
-            // Logic hiển thị
             if (type === 'custom') {
                 $('#dateRangeArea').removeClass('d-none');
                 $('#fromDate, #toDate').prop('readonly', false).removeClass('bg-light');
             } else {
-                $('#groupYear').removeClass('d-none'); // Tháng/Quý/Năm đều cần chọn Năm
+                $('#groupYear').removeClass('d-none');
                 if (type === 'month') $('#groupMonth').removeClass('d-none');
                 if (type === 'quarter') $('#groupQuarter').removeClass('d-none');
             }
 
             updateDates();
-            // Nếu là custom thì chưa load vội, đợi người dùng chọn ngày
             if(type !== 'custom') refreshAllReports();
         });
-
-        // Khi đổi Tháng/Quý/Năm -> Tính lại ngày -> Load Data ngay lập tức
         $('#ddlMonth, #ddlQuarter, #ddlYear').change(function() {
             updateDates();
             refreshAllReports();
         });
 
-        // Khi đổi ngày ở chế độ Custom -> Load Data
         $('#fromDate, #toDate').change(function() {
             if ($('#filterType').val() === 'custom') refreshAllReports();
         });
     }
 
-    // --- 3. TÍNH NGÀY TỰ ĐỘNG ---
     function updateDates() {
         const type = $('#filterType').val();
         if (type === 'custom') return; // Bỏ qua nếu tùy chọn
@@ -232,16 +232,13 @@
         return `${year}-${month}-${day}`;
     }
 
-    // --- 4. GỌI AJAX LOAD DỮ LIỆU ---
     function refreshAllReports() {
         var from = $('#fromDate').val();
         var to = $('#toDate').val();
 
-        // Lấy năm để vẽ biểu đồ cột (ưu tiên lấy từ dropdown Năm nếu có, ko thì lấy từ ngày kết thúc)
         var year = $('#groupYear').hasClass('d-none') ? new Date(to).getFullYear() : $('#ddlYear').val();
         $('#lblYear').text(year);
 
-        // API 1: Lấy Tổng & Biểu đồ Tròn
         $.ajax({
             url: '@Url.Action("GetRevenueData", "AdminReport")',
             type: 'POST',
@@ -255,7 +252,6 @@
             }
         });
 
-        // API 2: Lấy Biểu đồ Cột (12 Tháng)
         $.ajax({
             url: '@Url.Action("GetMonthlyRevenue", "AdminReport")',
             type: 'POST',
@@ -266,7 +262,6 @@
         });
     }
 
-    // --- 5. RENDER BIỂU ĐỒ & BẢNG ---
     function renderTable(data) {
         var html = '';
         var total = data.reduce((s, i) => s + i.Value, 0);
@@ -312,4 +307,19 @@
     }
 
     function getColor(i) { return ['#0d6efd', '#198754', '#ffc107', '#dc3545', '#0dcaf0'][i % 5]; }
+    function exportExcel() {
+    // Lấy ngày đã được tính toán tự động ở các ô input
+    var from = $('#fromDate').val();
+    var to = $('#toDate').val();
+
+    if (!from || !to) {
+        alert("Vui lòng chọn khoảng thời gian hợp lệ.");
+        return;
+    }
+
+    // Chuyển hướng trình duyệt sang Action Export để tải file
+    // Sử dụng window.location.href để tải file (GET request)
+    var url = '@Url.Action("ExportToExcel", "AdminReport")' + '?fromDate=' + from + '&toDate=' + to;
+    window.location.href = url;
+}
 </script>

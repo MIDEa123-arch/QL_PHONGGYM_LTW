@@ -103,14 +103,14 @@
 
                                     @if (item.TrangThaiTaiKhoan == 1 || item.TrangThaiTaiKhoan == null)
                                     {
-                                        <button onclick="deleteStaff(@item.MaNV)" class="btn btn-outline-danger btn-sm" title="Xóa/Khóa">
-                                            <i class="fas fa-trash-alt"></i>
+                                        <button onclick="confirmToggle(@item.MaNV, 'Khóa', 'danger')" class="btn btn-outline-danger btn-sm" title="Khóa/Cho nghỉ">
+                                            <i class="fas fa-lock"></i> Khóa
                                         </button>
                                     }
                                     else
                                     {
-                                        <button class="btn btn-secondary btn-sm" disabled title="Đã bị khóa">
-                                            <i class="fas fa-lock"></i>
+                                        <button onclick="confirmToggle(@item.MaNV, 'Mở', 'success')" class="btn btn-outline-success btn-sm" title="Mở khóa">
+                                            <i class="fas fa-lock-open"></i> Mở
                                         </button>
                                     }
                                 </td>
@@ -128,23 +128,44 @@
 </div>
 
 @section scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
     <script>
-        function deleteStaff(id) {
-            if (confirm('Bạn có chắc muốn xóa nhân viên này?\n(Nếu nhân viên đã có lịch sử làm việc, hệ thống sẽ chuyển sang trạng thái "Đã nghỉ việc" thay vì xóa vĩnh viễn).')) {
+        function confirmToggle(id, action, color) {
+            if (confirm(`Bạn có chắc chắn muốn ${action} tài khoản nhân viên này không?`)) {
+
+                // --- Xử lý giao diện nút bấm ---
+                var btn = event.target;
+                // Nếu bấm vào icon <i> bên trong nút, lấy thẻ cha là <button>
+                if (btn.tagName === 'I') btn = btn.parentElement;
+
+                var oldHtml = btn.innerHTML;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ...';
+                btn.disabled = true;
+
                 $.ajax({
-                    url: '/AdminEmployee/Delete',
+                    // --- QUAN TRỌNG: Tên Controller phải là AdminStaff ---
+                    url: '@Url.Action("ToggleAccountStatus", "AdminStaff")',
                     type: 'POST',
                     data: { id: id },
                     success: function (res) {
+                        // Khôi phục nút
+                        btn.innerHTML = oldHtml;
+                        btn.disabled = false;
+
                         if (res.success) {
                             alert(res.message);
-                            location.reload();
+                            // Tải lại trang (Bỏ qua cache)
+                            window.location.href = window.location.href.split('?')[0] + "?t=" + new Date().getTime();
                         } else {
-                            alert(res.message); 
+                            alert(res.message); // Hiện thông báo lỗi ràng buộc
                         }
                     },
-                    error: function () {
-                        alert("Lỗi kết nối server!");
+                    error: function (xhr) {
+                        btn.innerHTML = oldHtml;
+                        btn.disabled = false;
+                        console.log(xhr); // Xem lỗi chi tiết trong Console
+                        alert("Lỗi kết nối! (Mã lỗi: " + xhr.status + "). Kiểm tra lại tên Controller.");
                     }
                 });
             }
