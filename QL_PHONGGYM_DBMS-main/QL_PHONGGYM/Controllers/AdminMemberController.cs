@@ -96,7 +96,20 @@ namespace QL_PHONGGYM.Controllers
             ViewBag.MaLoaiKH = new SelectList(_context.LoaiKhachHangs, "MaLoaiKH", "TenLoai", model.MaLoaiKH);
             return View(model);
         }
+        [HttpGet]
+        public ActionResult Create()
+        {
+            // Kiểm tra đăng nhập
+            if (Session["AdminUser"] == null)
+            {
+                return RedirectToAction("Login", "Auth");
+            }
 
+            ViewBag.MaLoaiKH = new SelectList(_context.LoaiKhachHangs, "MaLoaiKH", "TenLoai");
+
+            // Trả về View (Form nhập liệu)
+            return View();
+        }
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Create(QL_PHONGGYM.Models.KhachHang model)
