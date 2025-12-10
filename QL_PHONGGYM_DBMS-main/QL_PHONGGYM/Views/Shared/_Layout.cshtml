@@ -309,13 +309,31 @@
 }
 
     <script>
-        $('#btn_DangKyPT').click(function () {
+        $('#btn_DangKyPT').click(function (e) {
+            e.preventDefault(); // Ngăn chặn hành vi mặc định thẻ a/button
+
             $.ajax({
-                url: '/GoiTap/DangKyPT',
+                url: '/GoiTap/DangKyPT', // Đảm bảo Controller tên là GoiTap, Action là DangKyPT
                 type: 'GET',
                 success: function (result) {
-                    $('#DangKyPT_body').html(result);
-                    $('#DangKyPT').modal('show');
+                    // Kiểm tra xem kết quả có phải là JSON báo lỗi (chưa đăng nhập) không
+                    if (result.success === false && result.redirectUrl) {
+                        // Nếu chưa đăng nhập -> Chuyển hướng sang trang Login
+                        window.location.href = result.redirectUrl;
+                    }
+                    else {                        
+                        $('#DangKyPT_body').html(result);
+                        $('#DangKyPT').modal('show');
+                    }
+                },
+                error: function () {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Lỗi',
+                        text: 'Không thể tải form đăng ký. Vui lòng thử lại sau!',
+                        showConfirmButton: false,
+                        timer: 2000
+                    });
                 }
             });
         });

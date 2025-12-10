@@ -44,15 +44,19 @@ namespace QL_PHONGGYM.Controllers
             }
         }
 
-        public ActionResult ProductDetail(int id, string url)
+        public ActionResult ProductDetail(int? id, string url)
         {
-
+            if (id == null)
+            {
+                return RedirectToAction("Product");
+            }
+                
             var list = _productRepo.GetSanPhams().ToList();
-            var sanpham = list.FirstOrDefault(sp => sp.MaSP == id && sp.TrangThai == 1);
+            var sanpham = list.FirstOrDefault(sp => sp.MaSP == id);
 
             if (sanpham == null)
             {
-                TempData["Error"] = "Sản phẩm này hiện đã ngừng bán!";
+                TempData["ErrorMessage"] = "Sản phẩm này hiện đã ngừng bán!";
                 if (url != null)
                 {
                     return Redirect(url);
@@ -60,7 +64,7 @@ namespace QL_PHONGGYM.Controllers
                 else
                     return RedirectToAction("Index", "Home");
             }
-            ViewBag.SpDiCung = list.Where(sp => sp.LoaiSP == sanpham.LoaiSP && sp.MaSP != sanpham.MaSP).Take(5).ToList();
+            ViewBag.SpDiCung = list.Where(sp => sp.LoaiSP == sanpham.LoaiSP && sp.MaSP != sanpham.MaSP && sanpham.TrangThai == 1).Take(5).ToList();
             decimal giaHienTai = sanpham.GiaKhuyenMai ?? sanpham.DonGia;
             decimal giaMin, giaMax;
 
@@ -76,7 +80,7 @@ namespace QL_PHONGGYM.Controllers
             }
 
             ViewBag.SpCungPhanKhuc = list.Where(sp =>
-                sp.MaSP != sanpham.MaSP &&
+                sp.MaSP != sanpham.MaSP && sanpham.TrangThai == 1 &&
                 ((sp.GiaKhuyenMai ?? sp.DonGia) >= giaMin && (sp.GiaKhuyenMai ?? sp.DonGia) <= giaMax)
             ).Take(5).ToList();
             return View(sanpham);
@@ -84,19 +88,30 @@ namespace QL_PHONGGYM.Controllers
 
         }
 
-        public ActionResult Product(string loaisp, string hang, string xuatXu, decimal? maxPrice, decimal? minPrice, int? sapXepTheoTen, int? sapXepTheoGia, int? page)
+        public ActionResult Product(string search, string loaisp, string hang, string xuatXu, decimal? minPrice, decimal? maxPrice, bool? khuyenmai, bool? conhang, int? sapXepTheoTen, int? sapXepTheoGia, int? page)
         {
 
             IQueryable<SanPhamViewModel> query = _productRepo.GetSanPhams().AsQueryable();
+
+            if (!string.IsNullOrEmpty(search))
+            {
+                query = query.Where(p => p.TenSP.ToLower().Contains(search.ToLower().Trim()));
+            }
 
             if (!string.IsNullOrEmpty(xuatXu))
                 query = query.Where(p => p.XuatXu.Contains(xuatXu));
 
             if (!string.IsNullOrEmpty(loaisp))
-                query = query.Where(p => p.LoaiSP.Contains(loaisp));
+            {
+                var loaiList = loaisp.Split(',');
+                query = query.Where(p => loaiList.Contains(p.LoaiSP));
+            }
 
             if (!string.IsNullOrEmpty(hang))
-                query = query.Where(p => p.Hang.Contains(hang));
+            {
+                var hangList = hang.Split(',');
+                query = query.Where(p => hangList.Contains(p.Hang));
+            }
 
             if (minPrice.HasValue)
                 query = query.Where(p => p.DonGia >= minPrice.Value);
@@ -104,18 +119,31 @@ namespace QL_PHONGGYM.Controllers
             if (maxPrice.HasValue)
                 query = query.Where(p => p.DonGia <= maxPrice.Value);
 
-            if (sapXepTheoTen != null)
+            if (khuyenmai == true)
+                query = query.Where(p => p.GiaKhuyenMai < p.DonGia && p.GiaKhuyenMai != null);
+
+            if (conhang == true)
+                query = query.Where(p => p.SoLuongTon > 0);
+
+            if (sapXepTheoTen.HasValue)
             {
-                query = sapXepTheoTen == 0 ? query.OrderBy(p => p.TenSP) : query.OrderByDescending(p => p.TenSP);
+                if (sapXepTheoTen.Value == 0)
+                    query = query.OrderBy(p => p.SoLuongTon == 0).ThenBy(p => p.TenSP);
+                else
+                    query = query.OrderBy(p => p.SoLuongTon == 0).ThenByDescending(p => p.TenSP);
             }
-            else if (sapXepTheoGia != null)
+            else if (sapXepTheoGia.HasValue)
             {
-                query = sapXepTheoGia == 0 ? query.OrderBy(p => p.DonGia) : query.OrderByDescending(p => p.DonGia);
+                if (sapXepTheoGia.Value == 0)
+                    query = query.OrderBy(p => p.SoLuongTon == 0).ThenBy(p => p.GiaKhuyenMai ?? p.DonGia);
+                else
+                    query = query.OrderBy(p => p.SoLuongTon == 0).ThenByDescending(p => p.GiaKhuyenMai ?? p.DonGia);
             }
             else
-            {
-                query = query.OrderBy(p => p.MaSP);
+            {                
+                query = query.OrderBy(p => p.SoLuongTon == 0).ThenByDescending(p => p.SoLuongTon);
             }
+
 
             int pageSize = 12;
             int pageNumber = (page ?? 1);
@@ -140,6 +168,7 @@ namespace QL_PHONGGYM.Controllers
             string loaiList = string.Join(",", form.GetValues("loaisanpham") ?? new string[] { });
             string hangList = string.Join(",", form.GetValues("hang") ?? new string[] { });
             string giaRange = form["gia"];
+            string searchText = form["search"];
 
             decimal? minPrice = null;
             decimal? maxPrice = null;
@@ -158,11 +187,14 @@ namespace QL_PHONGGYM.Controllers
             bool conHang = form["conhang"] == "on";
             return RedirectToAction("Product", new
             {
+                search = searchText,
                 loaisp = loaiList,
                 hang = hangList,
                 minPrice = minPrice,
                 maxPrice = maxPrice,
-                page = 1 
+                khuyenmai = khuyenMai,
+                conhang = conHang,
+                page = 1
             });
         }
 

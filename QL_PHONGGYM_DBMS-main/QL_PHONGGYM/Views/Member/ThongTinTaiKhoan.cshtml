@@ -11,17 +11,31 @@
         ? string.Join(", ", new[] { diaChiMacDinhObj.DiaChiCuThe, diaChiMacDinhObj.PhuongXa, diaChiMacDinhObj.QuanHuyen, diaChiMacDinhObj.TinhThanhPho }.Where(x => !string.IsNullOrWhiteSpace(x)))
         : "-";
 
-    // Xử lý danh sách địa chỉ cho Dropdown
     var listDiaChiDropdown = Model.DiaChis
-        .Where(dc => dc.MaKH == (int)Session["MaKH"])
-        .OrderByDescending(dc => dc.LaDiaChiMacDinh)
-        .Select(dc => new SelectListItem
-        {
-            Value = dc.MaDC.ToString(),
-            Text = string.Join(", ", new[] { dc.DiaChiCuThe, dc.PhuongXa, dc.QuanHuyen, dc.TinhThanhPho }.Where(x => !string.IsNullOrWhiteSpace(x))),
-            Selected = dc.LaDiaChiMacDinh == true
-        })
-        .ToList();
+      .Where(dc => dc.MaKH == (int)Session["MaKH"])
+      .OrderByDescending(dc => dc.LaDiaChiMacDinh)
+      .Select(dc =>
+      {
+          // 1. Tạo chuỗi địa chỉ đầy đủ trước
+          string fullText = (dc.LaDiaChiMacDinh == true ? "✔ " : "") +
+                            string.Join(", ", new[] { dc.DiaChiCuThe, dc.PhuongXa, dc.QuanHuyen, dc.TinhThanhPho }
+                            .Where(x => !string.IsNullOrWhiteSpace(x)));
+
+          // 2. Giới hạn độ dài (Ví dụ: 60 ký tự thì cắt)
+          int maxLength = 55;
+          string displayText = fullText.Length > maxLength
+                               ? fullText.Substring(0, maxLength - 3) + "..."
+                               : fullText;
+
+          // 3. Trả về item cho dropdown
+          return new SelectListItem
+          {
+              Value = dc.MaDC.ToString(),
+              Text = displayText,
+              Selected = dc.LaDiaChiMacDinh == true
+          };
+      })
+      .ToList();
 }
 
 <style>
@@ -33,6 +47,76 @@
         -ms-overflow-style: none;
         scrollbar-width: none;
     }
+    /* The switch - the box around the slider */
+    .switch {
+        position: relative;
+        display: inline-block;
+        /* Dùng em để scale theo font-size fs-6 */
+        width: 2.25em; /* Khoảng 36px */
+        height: 1.25em; /* Khoảng 20px */
+        vertical-align: middle; /* Căn giữa dòng với text */
+        margin-bottom: 0; /* Fix lỗi margin trong một số framework */
+    }
+
+        /* Hide default HTML checkbox */
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+    /* The slider */
+    .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #ccc; /* Màu khi tắt */
+        -webkit-transition: .3s;
+        transition: .3s;
+    }
+
+        /* Cục tròn bên trong */
+        .slider:before {
+            position: absolute;
+            content: "";
+            /* Kích thước cục tròn nhỏ hơn khung 1 xíu */
+            height: 1em;
+            width: 1em;
+            left: 0.125em; /* Canh lề trái */
+            bottom: 0.125em; /* Canh lề dưới */
+            background-color: white;
+            -webkit-transition: .3s;
+            transition: .3s;
+        }
+
+    /* Màu khi bật (Checked) */
+    input:checked + .slider {
+        background-color: #2196F3; /* Xanh dương */
+        /* background-color: #198754; */ /* Hoặc dùng màu xanh lá (success) */
+    }
+
+    input:focus + .slider {
+        box-shadow: 0 0 1px #2196F3;
+    }
+
+    /* Di chuyển cục tròn khi bật */
+    input:checked + .slider:before {
+        -webkit-transform: translateX(1em);
+        -ms-transform: translateX(1em);
+        transform: translateX(1em);
+    }
+
+    /* Rounded sliders */
+    .slider.round {
+        border-radius: 2em; /* Bo tròn theo tỷ lệ */
+    }
+
+        .slider.round:before {
+            border-radius: 50%;
+        }
 </style>
 
 @if (TempData["ErrorMessage"] != null)
@@ -100,7 +184,7 @@
 <div class="rounded-2 p-4 bg-white mt-3">
     <div class="d-flex justify-content-between w-100 align-items-center mb-3">
         <span class="fs-5 fw-bold">Sổ địa chỉ</span>
-        <button class="text-decoration-none text-info small border-0 bg-transparent" data-bs-toggle="modal" data-bs-target="#loginModal">+ Thêm địa chỉ</button>
+        <button class="text-decoration-none text-info small border-0 bg-transparent" data-bs-toggle="modal" data-bs-target="#addAddress">+ Thêm địa chỉ</button>
     </div>
 
     <div class="row g-3">
@@ -140,8 +224,10 @@
 </div>
 
 <div class="modal fade" id="updateInfo" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-scrollable ms-auto me-3 modal-dialog-centered" style="max-width: 550px;">
-        @using (Html.BeginForm("CapNhatThongTin", "Member", FormMethod.Post, new { @class = "modal-content rounded-4 shadow-lg border-0 position-relative", @style = "height: 670px" }))
+    <div class="modal-dialog modal-dialog-scrollable ms-auto me-3 my-3 w-100"
+         style="max-width: 550px; height: calc(100% - 2rem);">
+
+        @using (Html.BeginForm("CapNhatThongTin", "Member", FormMethod.Post, new { @class = "modal-content h-100 rounded-4 shadow-lg border-0 position-relative" }))
         {
             @Html.AntiForgeryToken()
             @Html.HiddenFor(m => m.MaKH)
@@ -153,48 +239,49 @@
                     Cập nhật thông tin cá nhân
                 </div>
 
-                <div class="px-4 pb-4">
-                    <div class="d-flex flex-column mb-3">
-                        <label class="fs-6 mb-2">Họ và tên </label>
-                        @Html.TextBoxFor(m => m.TenKH, new { @class = "px-3 py-2 w-100 form-control", required = "required" })
-                    </div>
+                <div class="px-4 pb-4 h-100 d-flex flex-column justify-content-between">
+                    <div class="d-flex flex-column">
+                        <div class="d-flex flex-column mb-3">
+                            <label class="fs-6 mb-2">Họ và tên </label>
+                            @Html.TextBoxFor(m => m.TenKH, new { @class = "px-3 py-2 w-100 form-control", required = "required" })
+                        </div>
 
-                    <div class="d-flex flex-column mb-3">
-                        <label class="fs-6 mb-2">Giới tính </label>
-                        @{ Model.GioiTinh = Model.GioiTinh?.Trim(); }
-                        @Html.DropDownListFor(model => model.GioiTinh, new List<SelectListItem>
-                        {
-                            new SelectListItem { Text = "Nam", Value = "Nam" },
-                            new SelectListItem { Text = "Nữ", Value = "Nữ" }
-                        }, new { @class = "form-select px-3 py-2 w-100", @id = "GioiTinh" })
-                    </div>
+                        <div class="d-flex flex-column mb-3">
+                            <label class="fs-6 mb-2">Giới tính </label>
+                            @{ Model.GioiTinh = Model.GioiTinh?.Trim(); }
+                            @Html.DropDownListFor(model => model.GioiTinh, new List<SelectListItem>
+                                    {
+                                new SelectListItem { Text = "Nam", Value = "Nam" },
+                                new SelectListItem { Text = "Nữ", Value = "Nữ" }
+                            }, new { @class = "form-select px-3 py-2 w-100", @id = "GioiTinh" })
+                        </div>
 
-                    <div class="d-flex flex-column mb-3">
-                        <label class="fs-6 mb-2">Ngày sinh</label>
-                        <input type="date"
-                               class="form-control px-3 py-2 w-100"
-                               name="NgaySinh"
-                               onclick="this.showPicker()"
-                               value="@(Model.NgaySinh.HasValue ? Model.NgaySinh.Value.ToString("yyyy-MM-dd") : "")" />
-                    </div>
+                        <div class="d-flex flex-column mb-3">
+                            <label class="fs-6 mb-2">Ngày sinh</label>
+                            <input type="date"
+                                   class="form-control px-3 py-2 w-100"
+                                   name="NgaySinh"
+                                   onclick="this.showPicker()"
+                                   value="@(Model.NgaySinh.HasValue ? Model.NgaySinh.Value.ToString("yyyy-MM-dd") : "")" />
+                        </div>
 
-                    <div class="d-flex flex-column mb-3">
-                        <label class="fs-6 mb-2">Số điện thoại</label>
-                        @Html.TextBoxFor(m => m.SDT, new { @class = "px-3 py-2 w-100 form-control", required = "required" })
-                    </div>
+                        <div class="d-flex flex-column mb-3">
+                            <label class="fs-6 mb-2">Số điện thoại</label>
+                            @Html.TextBoxFor(m => m.SDT, new { @class = "px-3 py-2 w-100 form-control", required = "required" })
+                        </div>
 
-                    <div class="d-flex flex-column mb-3">
-                        <label class="fs-6 mb-2">Email</label>
-                        @Html.TextBoxFor(m => m.Email, new { @class = "px-3 py-2 w-100 form-control", required = "required" })
-                    </div>
+                        <div class="d-flex flex-column mb-3">
+                            <label class="fs-6 mb-2">Email</label>
+                            @Html.TextBoxFor(m => m.Email, new { @class = "px-3 py-2 w-100 form-control", required = "required" })
+                        </div>
 
-                    <div class="d-flex flex-column mb-3">
-                        <label class="fs-6 mb-2">Địa chỉ mặc định<span class="text-danger"> *</span></label>
-                        @Html.DropDownList("MaDC", listDiaChiDropdown, new { @class = "form-select px-3 py-2 w-100", required = "required" })
+                        <div class="d-flex flex-column mb-3">
+                            <label class="fs-6 mb-2">Địa chỉ mặc định<span class="text-danger"> *</span></label>
+                            @Html.DropDownList("MaDC", listDiaChiDropdown as IEnumerable<SelectListItem>, new { @class = "form-select px-3 py-2 w-100", required = "required" })
+                        </div>
                     </div>
-
                     <div class="mt-4 text-center">
-                        <button type="submit" class="btn btn-primary w-100 py-2 fw-bold">Cập nhật thông</button>
+                        <button type="submit" class="btn btn-primary w-100 py-2 fw-bold">Cập nhật thông tin</button>
                     </div>
                 </div>
             </div>
@@ -203,3 +290,184 @@
         }
     </div>
 </div>
+
+<div class="modal fade" id="addAddress" tabindex="-1" aria-labelledby="addAddressModal" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable ms-auto me-3 my-3 w-100"
+         style="max-width: 550px; height: calc(100% - 2rem);">
+        @using (Html.BeginForm("ThemDiaChi", "Member", FormMethod.Post, new { @class = "modal-content h-100 rounded-4 shadow-lg border-0 position-relative" }))
+        {
+            @Html.AntiForgeryToken()
+            @Html.HiddenFor(m => m.MaKH)
+
+            <div class="modal-body p-0 d-flex flex-column hide-scrollbar">
+
+                <div class="fw-bold fs-6 border-bottom border-1 p-3 mb-3 position-sticky top-0 bg-white"
+                     style="border-color: #e2e2e2; z-index: 100;">
+                    Thêm địa chỉ
+                </div>
+                <div class="mb-3 fw-bold small px-4">Địa chỉ nhận hàng</div>
+                <div class="px-4 pb-4 h-100 d-flex flex-column justify-content-between">
+                    <div class="d-flex flex-column">
+                        <div class="d-flex flex-column mb-3">
+                            <label class="fs-6 mb-2">Tỉnh/Thành phố </label>
+                            <select class="form-select px-3 py-2 w-100" id="province" name="TinhThanhPho" required>
+                                <option value="" disabled selected>Chọn Tỉnh/Thành phố</option>
+                            </select>
+                        </div>
+
+                        <div class="d-flex flex-column mb-3">
+                            <label class="fs-6 mb-2">Quận/Huyện</label>
+                            <select class="form-select px-3 py-2 w-100" id="district" name="QuanHuyen" required disabled>
+                                <option value="" disabled selected>Chọn Quận/Huyện</option>
+                            </select>
+                        </div>
+
+                        <div class="d-flex flex-column mb-3">
+                            <label class="fs-6 mb-2">Phường/Xã</label>
+                            <select class="form-select px-3 py-2 w-100" id="ward" name="PhuongXa" required disabled>
+                                <option value="" disabled selected>Chọn Phường/Xã</option>
+                            </select>
+                        </div>
+
+                        <div class="d-flex flex-column mb-3">
+                            <label class="fs-6 mb-2">Địa chỉ nhà</label>
+                            <input type="text" class="form-control  px-3 py-2 w-100" name="DiaChiCuThe" required placeholder="Nhập địa chỉ nhà" />
+                        </div>
+                        <div class="d-flex gap-2 align-items-center py-3 mt-1" style="border-top: 2px dotted #dedcdc">
+                            <span class="fs-6 fw-bold">Đặt làm mặc định</span>                           
+                                <!-- Rounded switch -->
+                                <label class="switch">
+                                    <input type="checkbox" value="1" name="isDefault">
+                                    <span class="slider round"></span>
+                                </label>                            
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4 text-center">
+                        <button type="submit" class="btn btn-primary w-100 py-2 fw-bold">Thêm địa chỉ</button>
+                    </div>
+                </div>
+                <button type="button" class="btn-close position-absolute mt-3 me-3" data-bs-dismiss="modal" style="right: 0; top: 0; z-index: 105; font-size: 11px" aria-label="Đóng"></button>
+            </div>
+        }
+    </div>
+</div>
+
+<script>
+    const API_BASE_URL = 'https://provinces.open-api.vn/api';
+
+    let provinces = [];
+    let districts = [];
+    let wards = [];
+
+    // Load provinces on page load
+    document.addEventListener('DOMContentLoaded', async function () {
+        await loadProvinces();
+        setupEventListeners();
+    });
+
+    // Load provinces from API
+    async function loadProvinces() {
+        try {
+            const response = await fetch(`${API_BASE_URL}/p/`);
+            provinces = await response.json();
+
+            const provinceSelect = document.getElementById('province');
+            provinces.forEach(province => {
+                const name = province.name.replace('Thành phố ', '').replace('Tỉnh ', '');
+                const option = document.createElement('option');
+                option.value = name;   // lưu tên trực tiếp
+                option.textContent = name;
+                provinceSelect.appendChild(option);
+            });
+        } catch (error) {
+            console.error('Error loading provinces:', error);
+            alert('Không thể tải danh sách tỉnh/thành phố. Vui lòng thử lại!');
+        }
+    }
+
+    // Load districts based on selected province
+    async function loadDistricts(provinceName) {
+        try {
+            // Tìm province object từ tên
+            const province = provinces.find(p => p.name.replace('Thành phố ', '').replace('Tỉnh ', '') === provinceName);
+            if (!province) return;
+
+            const response = await fetch(`${API_BASE_URL}/p/${province.code}?depth=2`);
+            const data = await response.json();
+            districts = data.districts;
+
+            const districtSelect = document.getElementById('district');            
+
+            districts.forEach(district => {
+                const name = district.name.replace('Quận ', '').replace('Huyện ', '').replace('Thành phố ', '').replace('Thị xã ', '');
+                const option = document.createElement('option');
+                option.value = name;   // lưu tên trực tiếp
+                option.textContent = name;
+                districtSelect.appendChild(option);
+            });
+
+            districtSelect.disabled = false;
+            const wardSelect = document.getElementById('ward');
+            wardSelect.disabled = true;
+            
+        } catch (error) {
+            console.error('Error loading districts:', error);
+            alert('Không thể tải danh sách quận/huyện. Vui lòng thử lại!');
+        }
+    }
+
+    // Load wards based on selected district
+    async function loadWards(districtName) {
+        try {
+            const district = districts.find(d => d.name.replace('Quận ', '').replace('Huyện ', '').replace('Thành phố ', '').replace('Thị xã ', '') === districtName);
+            if (!district) return;
+
+            const response = await fetch(`${API_BASE_URL}/d/${district.code}?depth=2`);
+            const data = await response.json();
+            wards = data.wards;
+
+            const wardSelect = document.getElementById('ward');
+            wardSelect.innerHTML = '<option value="">Chọn</option>';
+
+            wards.forEach(ward => {
+                const name = ward.name.replace('Phường ', '').replace('Xã ', '').replace('Thị trấn ', '');
+                const option = document.createElement('option');
+                option.value = name;   // lưu tên trực tiếp
+                option.textContent = name;
+                wardSelect.appendChild(option);
+            });
+
+            wardSelect.disabled = false;
+        } catch (error) {
+            console.error('Error loading wards:', error);
+            alert('Không thể tải danh sách phường/xã. Vui lòng thử lại!');
+        }
+    }
+
+    // Setup event listeners
+    function setupEventListeners() {
+        const provinceSelect = document.getElementById('province');
+        const districtSelect = document.getElementById('district');
+        const wardSelect = document.getElementById('ward');
+
+        provinceSelect.addEventListener('change', function () {
+            const provinceName = this.value;
+            if (provinceName) {
+                loadDistricts(provinceName);
+            } else {
+                districtSelect.disabled = true;
+                wardSelect.disabled = true;
+            }
+        });
+
+        districtSelect.addEventListener('change', function () {
+            const districtName = this.value;
+            if (districtName) {
+                loadWards(districtName);
+            } else {
+                wardSelect.disabled = true;                
+            }
+        });
+    }
+</script>

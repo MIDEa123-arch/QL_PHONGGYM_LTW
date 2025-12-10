@@ -4,7 +4,7 @@
   <edmx:Runtime>
     <!-- SSDL content -->
     <edmx:StorageModels>
-    <Schema Namespace="qlgymmModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+      <Schema Namespace="QL_PHONGGYMEntities.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
         <EntityType Name="CheckIn">
           <Key>
             <PropertyRef Name="MaCheckIn" />
@@ -269,30 +269,6 @@
           <Property Name="NgayGui" Type="datetime" />
           <Property Name="NgayXuLy" Type="datetime" />
         </EntityType>
-        <Association Name="FK_CheckIn_KH">
-          <End Role="KhachHang" Type="Self.KhachHang" Multiplicity="1" />
-          <End Role="CheckIn" Type="Self.CheckIn" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="KhachHang">
-              <PropertyRef Name="MaKH" />
-            </Principal>
-            <Dependent Role="CheckIn">
-              <PropertyRef Name="MaKH" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <Association Name="FK_ChiTietGioHang_KhachHang">
-          <End Role="KhachHang" Type="Self.KhachHang" Multiplicity="1" />
-          <End Role="ChiTietGioHang" Type="Self.ChiTietGioHang" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="KhachHang">
-              <PropertyRef Name="MaKH" />
-            </Principal>
-            <Dependent Role="ChiTietGioHang">
-              <PropertyRef Name="MaKH" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
         <Association Name="FK_CT_HD">
           <End Role="HoaDon" Type="Self.HoaDon" Multiplicity="1" />
           <End Role="ChiTietHoaDon" Type="Self.ChiTietHoaDon" Multiplicity="*" />
@@ -350,6 +326,30 @@
             </Principal>
             <Dependent Role="ChiTietHoaDon">
               <PropertyRef Name="MaSP" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_CheckIn_KH">
+          <End Role="KhachHang" Type="Self.KhachHang" Multiplicity="1" />
+          <End Role="CheckIn" Type="Self.CheckIn" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="KhachHang">
+              <PropertyRef Name="MaKH" />
+            </Principal>
+            <Dependent Role="CheckIn">
+              <PropertyRef Name="MaKH" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_ChiTietGioHang_KhachHang">
+          <End Role="KhachHang" Type="Self.KhachHang" Multiplicity="1" />
+          <End Role="ChiTietGioHang" Type="Self.ChiTietGioHang" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="KhachHang">
+              <PropertyRef Name="MaKH" />
+            </Principal>
+            <Dependent Role="ChiTietGioHang">
+              <PropertyRef Name="MaKH" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
@@ -563,18 +563,6 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK_NhanVien_ChucVu">
-          <End Role="ChucVu" Type="Self.ChucVu" Multiplicity="0..1" />
-          <End Role="NhanVien" Type="Self.NhanVien" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="ChucVu">
-              <PropertyRef Name="MaChucVu" />
-            </Principal>
-            <Dependent Role="NhanVien">
-              <PropertyRef Name="MaChucVu" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
         <Association Name="FK_NVCM_CM">
           <End Role="ChuyenMon" Type="Self.ChuyenMon" Multiplicity="1" />
           <End Role="NhanVienChuyenMon" Type="Self.NhanVienChuyenMon" Multiplicity="*" />
@@ -596,6 +584,18 @@
             </Principal>
             <Dependent Role="NhanVienChuyenMon">
               <PropertyRef Name="MaNV" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_NhanVien_ChucVu">
+          <End Role="ChucVu" Type="Self.ChucVu" Multiplicity="0..1" />
+          <End Role="NhanVien" Type="Self.NhanVien" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="ChucVu">
+              <PropertyRef Name="MaChucVu" />
+            </Principal>
+            <Dependent Role="NhanVien">
+              <PropertyRef Name="MaChucVu" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
@@ -803,7 +803,7 @@
         <Function Name="XoaLichVaLop" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
           <Parameter Name="MaLop" Type="int" Mode="In" />
         </Function>
-        <EntityContainer Name="qlgymmModelStoreContainer">
+        <EntityContainer Name="QL_PHONGGYMEntitiesStoreContainer">
           <EntitySet Name="CheckIn" EntityType="Self.CheckIn" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="ChiTietGioHang" EntityType="Self.ChiTietGioHang" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="ChiTietHoaDon" EntityType="Self.ChiTietHoaDon" Schema="dbo" store:Type="Tables" />
@@ -827,14 +827,6 @@
           <EntitySet Name="NhanVienChuyenMon" EntityType="Self.NhanVienChuyenMon" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="SanPham" EntityType="Self.SanPham" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="YeuCauHoTro" EntityType="Self.YeuCauHoTro" Schema="dbo" store:Type="Tables" />
-          <AssociationSet Name="FK_CheckIn_KH" Association="Self.FK_CheckIn_KH">
-            <End Role="KhachHang" EntitySet="KhachHang" />
-            <End Role="CheckIn" EntitySet="CheckIn" />
-          </AssociationSet>
-          <AssociationSet Name="FK_ChiTietGioHang_KhachHang" Association="Self.FK_ChiTietGioHang_KhachHang">
-            <End Role="KhachHang" EntitySet="KhachHang" />
-            <End Role="ChiTietGioHang" EntitySet="ChiTietGioHang" />
-          </AssociationSet>
           <AssociationSet Name="FK_CT_HD" Association="Self.FK_CT_HD">
             <End Role="HoaDon" EntitySet="HoaDon" />
             <End Role="ChiTietHoaDon" EntitySet="ChiTietHoaDon" />
@@ -854,6 +846,14 @@
           <AssociationSet Name="FK_CT_SP" Association="Self.FK_CT_SP">
             <End Role="SanPham" EntitySet="SanPham" />
             <End Role="ChiTietHoaDon" EntitySet="ChiTietHoaDon" />
+          </AssociationSet>
+          <AssociationSet Name="FK_CheckIn_KH" Association="Self.FK_CheckIn_KH">
+            <End Role="KhachHang" EntitySet="KhachHang" />
+            <End Role="CheckIn" EntitySet="CheckIn" />
+          </AssociationSet>
+          <AssociationSet Name="FK_ChiTietGioHang_KhachHang" Association="Self.FK_ChiTietGioHang_KhachHang">
+            <End Role="KhachHang" EntitySet="KhachHang" />
+            <End Role="ChiTietGioHang" EntitySet="ChiTietGioHang" />
           </AssociationSet>
           <AssociationSet Name="FK_DiaChi_KhachHang" Association="Self.FK_DiaChi_KhachHang">
             <End Role="KhachHang" EntitySet="KhachHang" />
@@ -923,10 +923,6 @@
             <End Role="NhanVien" EntitySet="NhanVien" />
             <End Role="LopHoc" EntitySet="LopHoc" />
           </AssociationSet>
-          <AssociationSet Name="FK_NhanVien_ChucVu" Association="Self.FK_NhanVien_ChucVu">
-            <End Role="ChucVu" EntitySet="ChucVu" />
-            <End Role="NhanVien" EntitySet="NhanVien" />
-          </AssociationSet>
           <AssociationSet Name="FK_NVCM_CM" Association="Self.FK_NVCM_CM">
             <End Role="ChuyenMon" EntitySet="ChuyenMon" />
             <End Role="NhanVienChuyenMon" EntitySet="NhanVienChuyenMon" />
@@ -934,6 +930,10 @@
           <AssociationSet Name="FK_NVCM_NV" Association="Self.FK_NVCM_NV">
             <End Role="NhanVien" EntitySet="NhanVien" />
             <End Role="NhanVienChuyenMon" EntitySet="NhanVienChuyenMon" />
+          </AssociationSet>
+          <AssociationSet Name="FK_NhanVien_ChucVu" Association="Self.FK_NhanVien_ChucVu">
+            <End Role="ChucVu" EntitySet="ChucVu" />
+            <End Role="NhanVien" EntitySet="NhanVien" />
           </AssociationSet>
           <AssociationSet Name="FK_SP_LSP" Association="Self.FK_SP_LSP">
             <End Role="LoaiSanPham" EntitySet="LoaiSanPham" />
@@ -948,10 +948,11 @@
             <End Role="YeuCauHoTro" EntitySet="YeuCauHoTro" />
           </AssociationSet>
         </EntityContainer>
-      </Schema></edmx:StorageModels>
+      </Schema>
+    </edmx:StorageModels>
     <!-- CSDL content -->
     <edmx:ConceptualModels>
-      <Schema Namespace="qlgymmModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
+      <Schema Namespace="QL_PHONGGYMEntities" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
         <ComplexType Name="fn_TimKiemSanPham_Result">
           <Property Name="MaSP" Type="Int32" Nullable="false" />
           <Property Name="TenSP" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
@@ -1089,12 +1090,12 @@
           </Key>
           <Property Name="MaDonHang" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
           <Property Name="MaKH" Type="Int32" Nullable="false" />
-          <Property Name="DiaChi_Full" Type="String" MaxLength="500" FixedLength="false" Unicode="true" />
           <Property Name="NgayDat" Type="DateTime" Nullable="false" Precision="3" />
           <Property Name="TongTien" Type="Decimal" Precision="12" Scale="2" Nullable="false" />
           <Property Name="PhiShip" Type="Decimal" Precision="12" Scale="2" Nullable="false" />
           <Property Name="TrangThaiDonHang" Type="String" MaxLength="50" FixedLength="false" Unicode="true" Nullable="false" />
           <Property Name="GhiChu" Type="String" MaxLength="250" FixedLength="false" Unicode="true" />
+          <Property Name="DiaChi_Full" Type="String" MaxLength="500" FixedLength="false" Unicode="true" />
           <NavigationProperty Name="HoaDons" Relationship="Self.FK_HoaDon_DonHang" FromRole="DonHang" ToRole="HoaDon" />
         </EntityType>
         <EntityType Name="GoiTap">
@@ -1627,7 +1628,7 @@
           <End Role="ChuyenMon" Type="Self.ChuyenMon" Multiplicity="*" />
           <End Role="NhanVien" Type="Self.NhanVien" Multiplicity="*" />
         </Association>
-        <EntityContainer Name="QL_PHONGGYMEntities" annotation:LazyLoadingEnabled="true">
+        <EntityContainer Name="qlgymmEntities" annotation:LazyLoadingEnabled="true">
           <EntitySet Name="CheckIns" EntityType="Self.CheckIn" />
           <EntitySet Name="ChiTietGioHangs" EntityType="Self.ChiTietGioHang" />
           <EntitySet Name="ChiTietHoaDons" EntityType="Self.ChiTietHoaDon" />
@@ -1766,7 +1767,7 @@
             <End Role="ChuyenMon" EntitySet="ChuyenMons" />
             <End Role="NhanVien" EntitySet="NhanViens" />
           </AssociationSet>
-          <FunctionImport Name="fn_TimKiemSanPham" IsComposable="true" ReturnType="Collection(qlgymmModel.fn_TimKiemSanPham_Result)">
+          <FunctionImport Name="fn_TimKiemSanPham" IsComposable="true" ReturnType="Collection(QL_PHONGGYMEntities.fn_TimKiemSanPham_Result)">
             <Parameter Name="MaSP" Mode="In" Type="Int32" />
             <Parameter Name="TenSP" Mode="In" Type="String" />
           </FunctionImport>
@@ -1791,7 +1792,7 @@
             <Parameter Name="IsMain" Mode="In" Type="Boolean" />
           </FunctionImport>
           <FunctionImport Name="sp_HinhAnh_Xoa" ReturnType="Collection(Int32)">
-          <Parameter Name="MaHinh" Mode="In" Type="Int32" />
+            <Parameter Name="MaHinh" Mode="In" Type="Int32" />
           </FunctionImport>
           <FunctionImport Name="sp_KhachHangDangKy">
             <Parameter Name="TenKH" Mode="In" Type="String" />
@@ -1802,7 +1803,7 @@
             <Parameter Name="TenDangNhap" Mode="In" Type="String" />
             <Parameter Name="MatKhau" Mode="In" Type="String" />
           </FunctionImport>
-          <FunctionImport Name="sp_KhachHangLogin" ReturnType="Collection(qlgymmModel.sp_KhachHangLogin_Result)">
+          <FunctionImport Name="sp_KhachHangLogin" ReturnType="Collection(QL_PHONGGYMEntities.sp_KhachHangLogin_Result)">
             <Parameter Name="TenDangNhap" Mode="In" Type="String" />
             <Parameter Name="MatKhau" Mode="In" Type="String" />
           </FunctionImport>
@@ -1850,7 +1851,7 @@
             <Parameter Name="TrangThai" Mode="In" Type="Int32" />
           </FunctionImport>
           <FunctionImport Name="sp_ThemChucVu">
-          <Parameter Name="TenChucVu" Mode="In" Type="String" />
+            <Parameter Name="TenChucVu" Mode="In" Type="String" />
           </FunctionImport>
           <FunctionImport Name="sp_ThemChuyenMon">
             <Parameter Name="TenChuyenMon" Mode="In" Type="String" />
@@ -1877,7 +1878,7 @@
             <Parameter Name="TrangThai" Mode="In" Type="String" />
           </FunctionImport>
           <FunctionImport Name="sp_ThemLoaiSanPham" ReturnType="Collection(Decimal)">
-          <Parameter Name="TenLoaiSP" Mode="In" Type="String" />
+            <Parameter Name="TenLoaiSP" Mode="In" Type="String" />
           </FunctionImport>
           <FunctionImport Name="sp_ThemLopHocVaLich">
             <Parameter Name="TenLop" Mode="In" Type="String" />
@@ -1918,23 +1919,23 @@
           </FunctionImport>
           <FunctionImport Name="sp_UpdateTrangThaiLichLop" />
           <FunctionImport Name="sp_XoaChucVu">
-          <Parameter Name="MaChucVu" Mode="In" Type="Int32" />
+            <Parameter Name="MaChucVu" Mode="In" Type="Int32" />
           </FunctionImport>
           <FunctionImport Name="sp_XoaChuyenMon">
-          <Parameter Name="MaCM" Mode="In" Type="Int32" />
+            <Parameter Name="MaCM" Mode="In" Type="Int32" />
           </FunctionImport>
           <FunctionImport Name="sp_XoaNhanVien">
-          <Parameter Name="MaNV" Mode="In" Type="Int32" />
+            <Parameter Name="MaNV" Mode="In" Type="Int32" />
           </FunctionImport>
           <FunctionImport Name="sp_XoaNhanVienChuyenMon">
             <Parameter Name="MaNV" Mode="In" Type="Int32" />
             <Parameter Name="MaCM" Mode="In" Type="Int32" />
           </FunctionImport>
           <FunctionImport Name="sp_XoaSanPham">
-          <Parameter Name="MaSP" Mode="In" Type="Int32" />
+            <Parameter Name="MaSP" Mode="In" Type="Int32" />
           </FunctionImport>
           <FunctionImport Name="XoaLichVaLop">
-          <Parameter Name="MaLop" Mode="In" Type="Int32" />
+            <Parameter Name="MaLop" Mode="In" Type="Int32" />
           </FunctionImport>
         </EntityContainer>
         <ComplexType Name="sp_KhachHangLogin_Result">
@@ -1948,9 +1949,9 @@
     <!-- C-S mapping content -->
     <edmx:Mappings>
       <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
-        <EntityContainerMapping StorageEntityContainer="qlgymmModelStoreContainer" CdmEntityContainer="QL_PHONGGYMEntities">
+        <EntityContainerMapping StorageEntityContainer="QL_PHONGGYMEntitiesStoreContainer" CdmEntityContainer="qlgymmEntities">
           <EntitySetMapping Name="CheckIns">
-            <EntityTypeMapping TypeName="qlgymmModel.CheckIn">
+            <EntityTypeMapping TypeName="QL_PHONGGYMEntities.CheckIn">
               <MappingFragment StoreEntitySet="CheckIn">
                 <ScalarProperty Name="MaCheckIn" ColumnName="MaCheckIn" />
                 <ScalarProperty Name="MaKH" ColumnName="MaKH" />
@@ -1961,7 +1962,7 @@
             </EntityTypeMapping>
           </EntitySetMapping>
           <EntitySetMapping Name="ChiTietGioHangs">
-            <EntityTypeMapping TypeName="qlgymmModel.ChiTietGioHang">
+            <EntityTypeMapping TypeName="QL_PHONGGYMEntities.ChiTietGioHang">
               <MappingFragment StoreEntitySet="ChiTietGioHang">
                 <ScalarProperty Name="MaChiTietGH" ColumnName="MaChiTietGH" />
                 <ScalarProperty Name="MaKH" ColumnName="MaKH" />
@@ -1972,7 +1973,7 @@
             </EntityTypeMapping>
           </EntitySetMapping>
           <EntitySetMapping Name="ChiTietHoaDons">
-            <EntityTypeMapping TypeName="qlgymmModel.ChiTietHoaDon">
+            <EntityTypeMapping TypeName="QL_PHONGGYMEntities.ChiTietHoaDon">
               <MappingFragment StoreEntitySet="ChiTietHoaDon">
                 <ScalarProperty Name="MaCTHD" ColumnName="MaCTHD" />
                 <ScalarProperty Name="MaHD" ColumnName="MaHD" />
@@ -1986,7 +1987,7 @@
             </EntityTypeMapping>
           </EntitySetMapping>
           <EntitySetMapping Name="ChucVus">
-            <EntityTypeMapping TypeName="qlgymmModel.ChucVu">
+            <EntityTypeMapping TypeName="QL_PHONGGYMEntities.ChucVu">
               <MappingFragment StoreEntitySet="ChucVu">
                 <ScalarProperty Name="MaChucVu" ColumnName="MaChucVu" />
                 <ScalarProperty Name="TenChucVu" ColumnName="TenChucVu" />
@@ -1994,7 +1995,7 @@
             </EntityTypeMapping>
           </EntitySetMapping>
           <EntitySetMapping Name="ChuyenMons">
-            <EntityTypeMapping TypeName="qlgymmModel.ChuyenMon">
+            <EntityTypeMapping TypeName="QL_PHONGGYMEntities.ChuyenMon">
               <MappingFragment StoreEntitySet="ChuyenMon">
                 <ScalarProperty Name="MaCM" ColumnName="MaCM" />
                 <ScalarProperty Name="TenChuyenMon" ColumnName="TenChuyenMon" />
@@ -2003,7 +2004,7 @@
             </EntityTypeMapping>
           </EntitySetMapping>
           <EntitySetMapping Name="DangKyGoiTaps">
-            <EntityTypeMapping TypeName="qlgymmModel.DangKyGoiTap">
+            <EntityTypeMapping TypeName="QL_PHONGGYMEntities.DangKyGoiTap">
               <MappingFragment StoreEntitySet="DangKyGoiTap">
                 <ScalarProperty Name="MaDKGT" ColumnName="MaDKGT" />
                 <ScalarProperty Name="MaKH" ColumnName="MaKH" />
@@ -2016,7 +2017,7 @@
             </EntityTypeMapping>
           </EntitySetMapping>
           <EntitySetMapping Name="DangKyLops">
-            <EntityTypeMapping TypeName="qlgymmModel.DangKyLop">
+            <EntityTypeMapping TypeName="QL_PHONGGYMEntities.DangKyLop">
               <MappingFragment StoreEntitySet="DangKyLop">
                 <ScalarProperty Name="MaDKLop" ColumnName="MaDKLop" />
                 <ScalarProperty Name="MaKH" ColumnName="MaKH" />
@@ -2027,7 +2028,7 @@
             </EntityTypeMapping>
           </EntitySetMapping>
           <EntitySetMapping Name="DangKyPTs">
-            <EntityTypeMapping TypeName="qlgymmModel.DangKyPT">
+            <EntityTypeMapping TypeName="QL_PHONGGYMEntities.DangKyPT">
               <MappingFragment StoreEntitySet="DangKyPT">
                 <ScalarProperty Name="MaDKPT" ColumnName="MaDKPT" />
                 <ScalarProperty Name="MaKH" ColumnName="MaKH" />
@@ -2041,7 +2042,7 @@
             </EntityTypeMapping>
           </EntitySetMapping>
           <EntitySetMapping Name="DiaChis">
-            <EntityTypeMapping TypeName="qlgymmModel.DiaChi">
+            <EntityTypeMapping TypeName="QL_PHONGGYMEntities.DiaChi">
               <MappingFragment StoreEntitySet="DiaChi">
                 <ScalarProperty Name="MaDC" ColumnName="MaDC" />
                 <ScalarProperty Name="MaKH" ColumnName="MaKH" />
@@ -2055,21 +2056,21 @@
             </EntityTypeMapping>
           </EntitySetMapping>
           <EntitySetMapping Name="DonHangs">
-            <EntityTypeMapping TypeName="qlgymmModel.DonHang">
+            <EntityTypeMapping TypeName="QL_PHONGGYMEntities.DonHang">
               <MappingFragment StoreEntitySet="DonHang">
                 <ScalarProperty Name="MaDonHang" ColumnName="MaDonHang" />
                 <ScalarProperty Name="MaKH" ColumnName="MaKH" />
-                <ScalarProperty Name="DiaChi_Full" ColumnName="DiaChi_Full" />
                 <ScalarProperty Name="NgayDat" ColumnName="NgayDat" />
                 <ScalarProperty Name="TongTien" ColumnName="TongTien" />
                 <ScalarProperty Name="PhiShip" ColumnName="PhiShip" />
                 <ScalarProperty Name="TrangThaiDonHang" ColumnName="TrangThaiDonHang" />
                 <ScalarProperty Name="GhiChu" ColumnName="GhiChu" />
+                <ScalarProperty Name="DiaChi_Full" ColumnName="DiaChi_Full" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
           <EntitySetMapping Name="GoiTaps">
-            <EntityTypeMapping TypeName="qlgymmModel.GoiTap">
+            <EntityTypeMapping TypeName="QL_PHONGGYMEntities.GoiTap">
               <MappingFragment StoreEntitySet="GoiTap">
                 <ScalarProperty Name="MaGoiTap" ColumnName="MaGoiTap" />
                 <ScalarProperty Name="TenGoi" ColumnName="TenGoi" />
@@ -2081,7 +2082,7 @@
             </EntityTypeMapping>
           </EntitySetMapping>
           <EntitySetMapping Name="HINHANHs">
-            <EntityTypeMapping TypeName="qlgymmModel.HINHANH">
+            <EntityTypeMapping TypeName="QL_PHONGGYMEntities.HINHANH">
               <MappingFragment StoreEntitySet="HINHANH">
                 <ScalarProperty Name="MaHinh" ColumnName="MaHinh" />
                 <ScalarProperty Name="MaSP" ColumnName="MaSP" />
@@ -2091,7 +2092,7 @@
             </EntityTypeMapping>
           </EntitySetMapping>
           <EntitySetMapping Name="HoaDons">
-            <EntityTypeMapping TypeName="qlgymmModel.HoaDon">
+            <EntityTypeMapping TypeName="QL_PHONGGYMEntities.HoaDon">
               <MappingFragment StoreEntitySet="HoaDon">
                 <ScalarProperty Name="MaHD" ColumnName="MaHD" />
                 <ScalarProperty Name="MaKH" ColumnName="MaKH" />
@@ -2105,7 +2106,7 @@
             </EntityTypeMapping>
           </EntitySetMapping>
           <EntitySetMapping Name="KhachHangs">
-            <EntityTypeMapping TypeName="qlgymmModel.KhachHang">
+            <EntityTypeMapping TypeName="QL_PHONGGYMEntities.KhachHang">
               <MappingFragment StoreEntitySet="KhachHang">
                 <ScalarProperty Name="MaKH" ColumnName="MaKH" />
                 <ScalarProperty Name="TenKH" ColumnName="TenKH" />
@@ -2121,7 +2122,7 @@
             </EntityTypeMapping>
           </EntitySetMapping>
           <EntitySetMapping Name="LichLops">
-            <EntityTypeMapping TypeName="qlgymmModel.LichLop">
+            <EntityTypeMapping TypeName="QL_PHONGGYMEntities.LichLop">
               <MappingFragment StoreEntitySet="LichLop">
                 <ScalarProperty Name="MaLichLop" ColumnName="MaLichLop" />
                 <ScalarProperty Name="MaLop" ColumnName="MaLop" />
@@ -2134,7 +2135,7 @@
             </EntityTypeMapping>
           </EntitySetMapping>
           <EntitySetMapping Name="LichTapPTs">
-            <EntityTypeMapping TypeName="qlgymmModel.LichTapPT">
+            <EntityTypeMapping TypeName="QL_PHONGGYMEntities.LichTapPT">
               <MappingFragment StoreEntitySet="LichTapPT">
                 <ScalarProperty Name="MaLichPT" ColumnName="MaLichPT" />
                 <ScalarProperty Name="MaDKPT" ColumnName="MaDKPT" />
@@ -2146,7 +2147,7 @@
             </EntityTypeMapping>
           </EntitySetMapping>
           <EntitySetMapping Name="LoaiKhachHangs">
-            <EntityTypeMapping TypeName="qlgymmModel.LoaiKhachHang">
+            <EntityTypeMapping TypeName="QL_PHONGGYMEntities.LoaiKhachHang">
               <MappingFragment StoreEntitySet="LoaiKhachHang">
                 <ScalarProperty Name="MaLoaiKH" ColumnName="MaLoaiKH" />
                 <ScalarProperty Name="TenLoai" ColumnName="TenLoai" />
@@ -2155,7 +2156,7 @@
             </EntityTypeMapping>
           </EntitySetMapping>
           <EntitySetMapping Name="LoaiSanPhams">
-            <EntityTypeMapping TypeName="qlgymmModel.LoaiSanPham">
+            <EntityTypeMapping TypeName="QL_PHONGGYMEntities.LoaiSanPham">
               <MappingFragment StoreEntitySet="LoaiSanPham">
                 <ScalarProperty Name="MaLoaiSP" ColumnName="MaLoaiSP" />
                 <ScalarProperty Name="TenLoaiSP" ColumnName="TenLoaiSP" />
@@ -2163,7 +2164,7 @@
             </EntityTypeMapping>
           </EntitySetMapping>
           <EntitySetMapping Name="LopHocs">
-            <EntityTypeMapping TypeName="qlgymmModel.LopHoc">
+            <EntityTypeMapping TypeName="QL_PHONGGYMEntities.LopHoc">
               <MappingFragment StoreEntitySet="LopHoc">
                 <ScalarProperty Name="MaLop" ColumnName="MaLop" />
                 <ScalarProperty Name="TenLop" ColumnName="TenLop" />
@@ -2179,7 +2180,7 @@
             </EntityTypeMapping>
           </EntitySetMapping>
           <EntitySetMapping Name="NhanViens">
-            <EntityTypeMapping TypeName="qlgymmModel.NhanVien">
+            <EntityTypeMapping TypeName="QL_PHONGGYMEntities.NhanVien">
               <MappingFragment StoreEntitySet="NhanVien">
                 <ScalarProperty Name="MaNV" ColumnName="MaNV" />
                 <ScalarProperty Name="MaChucVu" ColumnName="MaChucVu" />
@@ -2194,7 +2195,7 @@
             </EntityTypeMapping>
           </EntitySetMapping>
           <EntitySetMapping Name="SanPhams">
-            <EntityTypeMapping TypeName="qlgymmModel.SanPham">
+            <EntityTypeMapping TypeName="QL_PHONGGYMEntities.SanPham">
               <MappingFragment StoreEntitySet="SanPham">
                 <ScalarProperty Name="MaSP" ColumnName="MaSP" />
                 <ScalarProperty Name="TenSP" ColumnName="TenSP" />
@@ -2212,7 +2213,7 @@
             </EntityTypeMapping>
           </EntitySetMapping>
           <EntitySetMapping Name="YeuCauHoTroes">
-            <EntityTypeMapping TypeName="qlgymmModel.YeuCauHoTro">
+            <EntityTypeMapping TypeName="QL_PHONGGYMEntities.YeuCauHoTro">
               <MappingFragment StoreEntitySet="YeuCauHoTro">
                 <ScalarProperty Name="MaYC" ColumnName="MaYC" />
                 <ScalarProperty Name="MaKH" ColumnName="MaKH" />
@@ -2227,7 +2228,7 @@
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
-          <AssociationSetMapping Name="NhanVienChuyenMon" TypeName="qlgymmModel.NhanVienChuyenMon" StoreEntitySet="NhanVienChuyenMon">
+          <AssociationSetMapping Name="NhanVienChuyenMon" TypeName="QL_PHONGGYMEntities.NhanVienChuyenMon" StoreEntitySet="NhanVienChuyenMon">
             <EndProperty Name="ChuyenMon">
               <ScalarProperty Name="MaCM" ColumnName="MaCM" />
             </EndProperty>
@@ -2235,15 +2236,32 @@
               <ScalarProperty Name="MaNV" ColumnName="MaNV" />
             </EndProperty>
           </AssociationSetMapping>
-          <FunctionImportMapping FunctionImportName="sp_DangKyLop_KiemTra" FunctionName="qlgymmModel.Store.sp_DangKyLop_KiemTra" />
-          <FunctionImportMapping FunctionImportName="sp_GanChuyenMonChoNhanVien" FunctionName="qlgymmModel.Store.sp_GanChuyenMonChoNhanVien" />
-          <FunctionImportMapping FunctionImportName="sp_HinhAnh_Sua" FunctionName="qlgymmModel.Store.sp_HinhAnh_Sua" />
-          <FunctionImportMapping FunctionImportName="sp_HinhAnh_Them" FunctionName="qlgymmModel.Store.sp_HinhAnh_Them" />
-          <FunctionImportMapping FunctionImportName="sp_HinhAnh_Xoa" FunctionName="qlgymmModel.Store.sp_HinhAnh_Xoa" />
-          <FunctionImportMapping FunctionImportName="sp_KhachHangDangKy" FunctionName="qlgymmModel.Store.sp_KhachHangDangKy" />
-          <FunctionImportMapping FunctionImportName="sp_KhachHangLogin" FunctionName="qlgymmModel.Store.sp_KhachHangLogin">
+          <FunctionImportMapping FunctionName="QL_PHONGGYMEntities.Store.fn_TimKiemSanPham" FunctionImportName="fn_TimKiemSanPham">
             <ResultMapping>
-              <ComplexTypeMapping TypeName="qlgymmModel.sp_KhachHangLogin_Result">
+              <ComplexTypeMapping TypeName="QL_PHONGGYMEntities.fn_TimKiemSanPham_Result">
+                <ScalarProperty Name="MaSP" ColumnName="MaSP" />
+                <ScalarProperty Name="TenSP" ColumnName="TenSP" />
+                <ScalarProperty Name="MaLoaiSP" ColumnName="MaLoaiSP" />
+                <ScalarProperty Name="DonGia" ColumnName="DonGia" />
+                <ScalarProperty Name="SoLuongTon" ColumnName="SoLuongTon" />
+                <ScalarProperty Name="GiaKhuyenMai" ColumnName="GiaKhuyenMai" />
+                <ScalarProperty Name="Hang" ColumnName="Hang" />
+                <ScalarProperty Name="XuatXu" ColumnName="XuatXu" />
+                <ScalarProperty Name="BaoHanh" ColumnName="BaoHanh" />
+                <ScalarProperty Name="MoTaChung" ColumnName="MoTaChung" />
+                <ScalarProperty Name="MoTaChiTiet" ColumnName="MoTaChiTiet" />
+              </ComplexTypeMapping>
+            </ResultMapping>
+          </FunctionImportMapping>
+          <FunctionImportMapping FunctionImportName="sp_DangKyLop_KiemTra" FunctionName="QL_PHONGGYMEntities.Store.sp_DangKyLop_KiemTra" />
+          <FunctionImportMapping FunctionImportName="sp_GanChuyenMonChoNhanVien" FunctionName="QL_PHONGGYMEntities.Store.sp_GanChuyenMonChoNhanVien" />
+          <FunctionImportMapping FunctionImportName="sp_HinhAnh_Sua" FunctionName="QL_PHONGGYMEntities.Store.sp_HinhAnh_Sua" />
+          <FunctionImportMapping FunctionImportName="sp_HinhAnh_Them" FunctionName="QL_PHONGGYMEntities.Store.sp_HinhAnh_Them" />
+          <FunctionImportMapping FunctionImportName="sp_HinhAnh_Xoa" FunctionName="QL_PHONGGYMEntities.Store.sp_HinhAnh_Xoa" />
+          <FunctionImportMapping FunctionImportName="sp_KhachHangDangKy" FunctionName="QL_PHONGGYMEntities.Store.sp_KhachHangDangKy" />
+          <FunctionImportMapping FunctionImportName="sp_KhachHangLogin" FunctionName="QL_PHONGGYMEntities.Store.sp_KhachHangLogin">
+            <ResultMapping>
+              <ComplexTypeMapping TypeName="QL_PHONGGYMEntities.sp_KhachHangLogin_Result">
                 <ScalarProperty Name="MaKH" ColumnName="MaKH" />
                 <ScalarProperty Name="TenKH" ColumnName="TenKH" />
                 <ScalarProperty Name="SDT" ColumnName="SDT" />
@@ -2251,28 +2269,28 @@
               </ComplexTypeMapping>
             </ResultMapping>
           </FunctionImportMapping>
-          <FunctionImportMapping FunctionImportName="sp_SuaChuyenMon" FunctionName="qlgymmModel.Store.sp_SuaChuyenMon" />
-          <FunctionImportMapping FunctionImportName="sp_SuaGoiTap" FunctionName="qlgymmModel.Store.sp_SuaGoiTap" />
-          <FunctionImportMapping FunctionImportName="sp_SuaLoaiSanPham" FunctionName="qlgymmModel.Store.sp_SuaLoaiSanPham" />
-          <FunctionImportMapping FunctionImportName="sp_SuaLopHoc" FunctionName="qlgymmModel.Store.sp_SuaLopHoc" />
-          <FunctionImportMapping FunctionImportName="sp_SuaSanPham" FunctionName="qlgymmModel.Store.sp_SuaSanPham" />
-          <FunctionImportMapping FunctionImportName="sp_ThemChucVu" FunctionName="qlgymmModel.Store.sp_ThemChucVu" />
-          <FunctionImportMapping FunctionImportName="sp_ThemChuyenMon" FunctionName="qlgymmModel.Store.sp_ThemChuyenMon" />
-          <FunctionImportMapping FunctionImportName="sp_ThemGoiTap" FunctionName="qlgymmModel.Store.sp_ThemGoiTap" />
-          <FunctionImportMapping FunctionImportName="sp_ThemLichLop" FunctionName="qlgymmModel.Store.sp_ThemLichLop" />
-          <FunctionImportMapping FunctionImportName="sp_ThemLichTapPT" FunctionName="qlgymmModel.Store.sp_ThemLichTapPT" />
-          <FunctionImportMapping FunctionImportName="sp_ThemLoaiSanPham" FunctionName="qlgymmModel.Store.sp_ThemLoaiSanPham" />
-          <FunctionImportMapping FunctionImportName="sp_ThemLopHocVaLich" FunctionName="qlgymmModel.Store.sp_ThemLopHocVaLich" />
-          <FunctionImportMapping FunctionImportName="sp_ThemNhanVien" FunctionName="qlgymmModel.Store.sp_ThemNhanVien" />
-          <FunctionImportMapping FunctionImportName="sp_ThemSanPham" FunctionName="qlgymmModel.Store.sp_ThemSanPham" />
-          <FunctionImportMapping FunctionImportName="sp_ThemVaoGioHang" FunctionName="qlgymmModel.Store.sp_ThemVaoGioHang" />
-          <FunctionImportMapping FunctionImportName="sp_UpdateTrangThaiLichLop" FunctionName="qlgymmModel.Store.sp_UpdateTrangThaiLichLop" />
-          <FunctionImportMapping FunctionImportName="sp_XoaChucVu" FunctionName="qlgymmModel.Store.sp_XoaChucVu" />
-          <FunctionImportMapping FunctionImportName="sp_XoaChuyenMon" FunctionName="qlgymmModel.Store.sp_XoaChuyenMon" />
-          <FunctionImportMapping FunctionImportName="sp_XoaNhanVien" FunctionName="qlgymmModel.Store.sp_XoaNhanVien" />
-          <FunctionImportMapping FunctionImportName="sp_XoaNhanVienChuyenMon" FunctionName="qlgymmModel.Store.sp_XoaNhanVienChuyenMon" />
-          <FunctionImportMapping FunctionImportName="sp_XoaSanPham" FunctionName="qlgymmModel.Store.sp_XoaSanPham" />
-          <FunctionImportMapping FunctionImportName="XoaLichVaLop" FunctionName="qlgymmModel.Store.XoaLichVaLop" />
+          <FunctionImportMapping FunctionImportName="sp_SuaChuyenMon" FunctionName="QL_PHONGGYMEntities.Store.sp_SuaChuyenMon" />
+          <FunctionImportMapping FunctionImportName="sp_SuaGoiTap" FunctionName="QL_PHONGGYMEntities.Store.sp_SuaGoiTap" />
+          <FunctionImportMapping FunctionImportName="sp_SuaLoaiSanPham" FunctionName="QL_PHONGGYMEntities.Store.sp_SuaLoaiSanPham" />
+          <FunctionImportMapping FunctionImportName="sp_SuaLopHoc" FunctionName="QL_PHONGGYMEntities.Store.sp_SuaLopHoc" />
+          <FunctionImportMapping FunctionImportName="sp_SuaSanPham" FunctionName="QL_PHONGGYMEntities.Store.sp_SuaSanPham" />
+          <FunctionImportMapping FunctionImportName="sp_ThemChucVu" FunctionName="QL_PHONGGYMEntities.Store.sp_ThemChucVu" />
+          <FunctionImportMapping FunctionImportName="sp_ThemChuyenMon" FunctionName="QL_PHONGGYMEntities.Store.sp_ThemChuyenMon" />
+          <FunctionImportMapping FunctionImportName="sp_ThemGoiTap" FunctionName="QL_PHONGGYMEntities.Store.sp_ThemGoiTap" />
+          <FunctionImportMapping FunctionImportName="sp_ThemLichLop" FunctionName="QL_PHONGGYMEntities.Store.sp_ThemLichLop" />
+          <FunctionImportMapping FunctionImportName="sp_ThemLichTapPT" FunctionName="QL_PHONGGYMEntities.Store.sp_ThemLichTapPT" />
+          <FunctionImportMapping FunctionImportName="sp_ThemLoaiSanPham" FunctionName="QL_PHONGGYMEntities.Store.sp_ThemLoaiSanPham" />
+          <FunctionImportMapping FunctionImportName="sp_ThemLopHocVaLich" FunctionName="QL_PHONGGYMEntities.Store.sp_ThemLopHocVaLich" />
+          <FunctionImportMapping FunctionImportName="sp_ThemNhanVien" FunctionName="QL_PHONGGYMEntities.Store.sp_ThemNhanVien" />
+          <FunctionImportMapping FunctionImportName="sp_ThemSanPham" FunctionName="QL_PHONGGYMEntities.Store.sp_ThemSanPham" />
+          <FunctionImportMapping FunctionImportName="sp_ThemVaoGioHang" FunctionName="QL_PHONGGYMEntities.Store.sp_ThemVaoGioHang" />
+          <FunctionImportMapping FunctionImportName="sp_UpdateTrangThaiLichLop" FunctionName="QL_PHONGGYMEntities.Store.sp_UpdateTrangThaiLichLop" />
+          <FunctionImportMapping FunctionImportName="sp_XoaChucVu" FunctionName="QL_PHONGGYMEntities.Store.sp_XoaChucVu" />
+          <FunctionImportMapping FunctionImportName="sp_XoaChuyenMon" FunctionName="QL_PHONGGYMEntities.Store.sp_XoaChuyenMon" />
+          <FunctionImportMapping FunctionImportName="sp_XoaNhanVien" FunctionName="QL_PHONGGYMEntities.Store.sp_XoaNhanVien" />
+          <FunctionImportMapping FunctionImportName="sp_XoaNhanVienChuyenMon" FunctionName="QL_PHONGGYMEntities.Store.sp_XoaNhanVienChuyenMon" />
+          <FunctionImportMapping FunctionImportName="sp_XoaSanPham" FunctionName="QL_PHONGGYMEntities.Store.sp_XoaSanPham" />
+          <FunctionImportMapping FunctionImportName="XoaLichVaLop" FunctionName="QL_PHONGGYMEntities.Store.XoaLichVaLop" />
         </EntityContainerMapping>
       </Mapping>
     </edmx:Mappings>

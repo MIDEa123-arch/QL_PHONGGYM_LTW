@@ -93,7 +93,8 @@
             <div class="d-flex flex-column h-100">
                 <h5 class="fw-bold mb-2 p-0">@Model.TenSP</h5>
                 <div class="mb-1">
-                    @if (Model.SoLuongTon > 0)
+
+                    @if (Model.SoLuongTon > 0 && Model.TrangThai == 1)
                     {
                         <span class="badge bg-success">Còn hàng (@Model.SoLuongTon sản phẩm)</span>
                     }
@@ -129,70 +130,77 @@
                         </span>
                     </div>
                 }
-                <div>
-                    @if (Model.SoLuongTon > 0)
+            <div>
+                @if (Model.SoLuongTon > 0 && Model.TrangThai == 1)
+                {
+                    if (Session["MaKH"] != null)
                     {
-                        if (Session["MaKH"] != null)
-                        {
-                            <div class="d-flex gap-2 mb-3">
-                                <div class="d-flex gap-2 align-items-center">
-                                    <label class="fw-semibold text-nowrap">Số lượng:</label>
-                                    <input id="quantity" type="number" class="form-control" value="1" min="1" max="@Model.SoLuongTon" style="width: 5rem; height: 3rem;" />
-                                </div>
-                                <button id="btnAddToCart" data-id="@Model.MaSP"
-                                        class="btn btn-outline-primary flex-grow-1 fw-semibold text-uppercase"
-                                        style="font-size: 14px">
-                                    Thêm vào giỏ hàng
-                                </button>
+                        <div class="d-flex gap-2 mb-3">
+                            <div class="d-flex gap-2 align-items-center">
+                                <label class="fw-semibold text-nowrap">Số lượng:</label>
+                                <input id="quantity" type="number" class="form-control" value="1" min="1" max="@Model.SoLuongTon" style="width: 5rem; height: 3rem;" />
                             </div>
-                            <form class="p-0 m-0" action="@Url.Action("AddToCart", "CartCheckout")" method="post">
-                                @Html.AntiForgeryToken()
-                                <input id="quantityHidden" type="hidden" name="soLuong" />
-                                <input id="IdHidden" type="hidden" name="maSP" value="@Model.MaSP" />
-                                <button id="btnBuyNow" data-id="@Model.MaSP"
-                                        class="btn btn-primary btn-lg w-100 d-flex flex-column">
-                                    <span class="fw-semibold text-uppercase text-white" style="font-size: 14px">Mua ngay</span>
-                                    <span class="fw-semibold text-uppercase text-white" style="font-size: 14px">
-                                        Giao hàng tận nơi hoặc nhận tại cửa hàng
-                                    </span>
-                                </button>
-                            </form>
-
-                            <div class="mt-2 w-100 text-center">
-                                <p style="font-size: 14px">
-                                    Gọi đặt mua <a class="text-primary text-decoration-none" href="tel:66663636" style="font-size: 14px">6666.3636</a> (8:00 - 22:00)
-                                </p>
-                            </div>
-                        }
-                        else
-                        {
-                            <div class="d-flex gap-2 mb-3">
-                                <div class="d-flex gap-2 align-items-center">
-                                    <label class="fw-semibold text-nowrap">Số lượng:</label>
-                                    <input disabled type="number" class="form-control" value="1" style="width: 5rem; height: 3rem;" />
-                                </div>
-                                <button class="btn btn-outline-primary flex-grow-1 fw-semibold text-uppercase" style="font-size: 14px"
-                                        data-bs-toggle="modal" data-bs-target="#loginModal">
-                                    Thêm vào giỏ hàng
-                                </button>
-                            </div>
-
-                            <button class="btn btn-primary btn-lg w-100 d-flex flex-column"
-                                    data-bs-toggle="modal" data-bs-target="#loginModal">
+                            <button id="btnAddToCart" data-id="@Model.MaSP"
+                                    class="btn btn-outline-primary flex-grow-1 fw-semibold text-uppercase"
+                                    style="font-size: 14px">
+                                Thêm vào giỏ hàng
+                            </button>
+                        </div>
+                        <form class="p-0 m-0" action="@Url.Action("AddToCart", "CartCheckout")" method="post">
+                            @Html.AntiForgeryToken()
+                            <input id="quantityHidden" type="hidden" name="soLuong" />
+                            <input id="IdHidden" type="hidden" name="maSP" value="@Model.MaSP" />
+                            <button id="btnBuyNow" data-id="@Model.MaSP"
+                                    class="btn btn-primary btn-lg w-100 d-flex flex-column">
                                 <span class="fw-semibold text-uppercase text-white" style="font-size: 14px">Mua ngay</span>
                                 <span class="fw-semibold text-uppercase text-white" style="font-size: 14px">
-                                    Đăng nhập để mua hàng
+                                    Giao hàng tận nơi hoặc nhận tại cửa hàng
                                 </span>
                             </button>
-                        }
+                        </form>
+
+                        <div class="mt-2 w-100 text-center">
+                            <p style="font-size: 14px">
+                                Gọi đặt mua <a class="text-primary text-decoration-none" href="tel:66663636" style="font-size: 14px">6666.3636</a> (8:00 - 22:00)
+                            </p>
+                        </div>
                     }
                     else
                     {
-                        <div class="btn btn-outline-danger btn-lg w-100 rounded-2 fs-6">
-                            Hết hàng
+                        <div class="d-flex gap-2 mb-3">
+                            <div class="d-flex gap-2 align-items-center">
+                                <label class="fw-semibold text-nowrap">Số lượng:</label>
+                                <input disabled type="number" class="form-control" value="1" style="width: 5rem; height: 3rem;" />
+                            </div>
+                            <button class="btn btn-outline-primary flex-grow-1 fw-semibold text-uppercase" style="font-size: 14px"
+                                    data-bs-toggle="modal" data-bs-target="#loginModal">
+                                Thêm vào giỏ hàng
+                            </button>
                         </div>
+
+                        <button class="btn btn-primary btn-lg w-100 d-flex flex-column"
+                                data-bs-toggle="modal" data-bs-target="#loginModal">
+                            <span class="fw-semibold text-uppercase text-white" style="font-size: 14px">Mua ngay</span>
+                            <span class="fw-semibold text-uppercase text-white" style="font-size: 14px">
+                                Đăng nhập để mua hàng
+                            </span>
+                        </button>
                     }
-                </div>
+                }
+                else if (Model.TrangThai == 0)
+                {
+                    <div class="btn btn-outline-secondary btn-lg w-100 rounded-2 fs-6">
+                        Sản phẩm đã ngừng bán
+                    </div>
+                }
+
+                else
+                {
+                    <div class="btn btn-outline-danger btn-lg w-100 rounded-2 fs-6">
+                        Hết hàng
+                    </div>
+                }
+            </div>
 
 
                 <div class="w-100 mt-3 d-flex flex-column">
@@ -364,6 +372,7 @@
                                         <div class="fw-bold small text-dark">@item.TenSP</div>
                                         <div class="text-secondary small">@item.Hang</div>
                                     </div>
+                                    
                                     @if (item.SoLuongTon == 0)
                                     {
                                         <div class="fw-bold text-muted mt-1">

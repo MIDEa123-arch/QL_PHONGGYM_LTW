@@ -50,7 +50,7 @@ namespace QL_PHONGGYM.Models
         public virtual DbSet<SanPham> SanPhams { get; set; }
         public virtual DbSet<YeuCauHoTro> YeuCauHoTroes { get; set; }
     
-        [DbFunction("QL_PHONGGYMEntities", "fn_TimKiemSanPham")]
+        [DbFunction("qlgymmEntities", "fn_TimKiemSanPham")]
         public virtual IQueryable<fn_TimKiemSanPham_Result> fn_TimKiemSanPham(Nullable<int> maSP, string tenSP)
         {
             var maSPParameter = maSP.HasValue ?
@@ -61,7 +61,7 @@ namespace QL_PHONGGYM.Models
                 new ObjectParameter("TenSP", tenSP) :
                 new ObjectParameter("TenSP", typeof(string));
     
-            return ((IObjectContextAdapter)this).ObjectContext.CreateQuery<fn_TimKiemSanPham_Result>("[QL_PHONGGYMEntities].[fn_TimKiemSanPham](@MaSP, @TenSP)", maSPParameter, tenSPParameter);
+            return ((IObjectContextAdapter)this).ObjectContext.CreateQuery<fn_TimKiemSanPham_Result>("[qlgymmEntities].[fn_TimKiemSanPham](@MaSP, @TenSP)", maSPParameter, tenSPParameter);
         }
     
         public virtual int sp_DangKyLop_KiemTra(Nullable<int> maKH, Nullable<int> maLop, ObjectParameter maDKLop)

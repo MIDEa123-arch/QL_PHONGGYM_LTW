@@ -6,7 +6,7 @@ using System.Web;
 
 namespace QL_PHONGGYM.Repositories
 {
-   
+
     public class GoiTapRepository
     {
         private readonly QL_PHONGGYMEntities _context;
@@ -15,7 +15,7 @@ namespace QL_PHONGGYM.Repositories
         {
             _context = context;
         }
-        
+
         public List<GoiTap> goiTaps()
         {
             return _context.GoiTaps.Where(gt => gt.TrangThai == 1).ToList();
@@ -23,19 +23,26 @@ namespace QL_PHONGGYM.Repositories
 
         public GoiTap ThongTinGoiTap(int id)
         {
-            var gt = _context.GoiTaps.FirstOrDefault(x => x.MaGoiTap == id);
-
-            if (gt == null)
+            try
             {
-                throw new Exception("Không tìm thấy thông tin gói tập!");
-            }
+                var gt = _context.GoiTaps.FirstOrDefault(x => x.MaGoiTap == id);
 
-            if (gt.TrangThai != 1)
+                if (gt == null)
+                {
+                    throw new Exception("Không tìm thấy thông tin gói tập!");
+                }
+
+                if (gt.TrangThai != 1)
+                {
+                    throw new Exception("Gói tập này hiện đã ngừng bán!");
+                }
+
+                return gt;
+            }
+            catch (Exception ex)
             {
-                throw new Exception("Gói tập này hiện đã ngừng bán!");
+                throw ex;
             }
-
-            return gt;
         }
     }
 }
