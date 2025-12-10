@@ -1,41 +1,7 @@
 ﻿@model QL_PHONGGYM.Models.KhachHang
 @{
     ViewBag.Title = "Thông tin tài khoản";
-    Layout = "~/Views/Shared/_LayoutMember.cshtml";
-
-    // Xử lý địa chỉ hiển thị
-    var diaChiMacDinhObj = Model.DiaChis.FirstOrDefault(dc => dc.LaDiaChiMacDinh == true);
-
-    // Tạo chuỗi địa chỉ hiển thị ở phần thông tin
-    string diaChiHienThi = diaChiMacDinhObj != null
-        ? string.Join(", ", new[] { diaChiMacDinhObj.DiaChiCuThe, diaChiMacDinhObj.PhuongXa, diaChiMacDinhObj.QuanHuyen, diaChiMacDinhObj.TinhThanhPho }.Where(x => !string.IsNullOrWhiteSpace(x)))
-        : "-";
-
-    var listDiaChiDropdown = Model.DiaChis
-      .Where(dc => dc.MaKH == (int)Session["MaKH"])
-      .OrderByDescending(dc => dc.LaDiaChiMacDinh)
-      .Select(dc =>
-      {
-          // 1. Tạo chuỗi địa chỉ đầy đủ trước
-          string fullText = (dc.LaDiaChiMacDinh == true ? "✔ " : "") +
-                            string.Join(", ", new[] { dc.DiaChiCuThe, dc.PhuongXa, dc.QuanHuyen, dc.TinhThanhPho }
-                            .Where(x => !string.IsNullOrWhiteSpace(x)));
-
-          // 2. Giới hạn độ dài (Ví dụ: 60 ký tự thì cắt)
-          int maxLength = 55;
-          string displayText = fullText.Length > maxLength
-                               ? fullText.Substring(0, maxLength - 3) + "..."
-                               : fullText;
-
-          // 3. Trả về item cho dropdown
-          return new SelectListItem
-          {
-              Value = dc.MaDC.ToString(),
-              Text = displayText,
-              Selected = dc.LaDiaChiMacDinh == true
-          };
-      })
-      .ToList();
+    Layout = "~/Views/Shared/_LayoutMember.cshtml";       
 }
 
 <style>
@@ -175,7 +141,7 @@
             </div>
             <div class="d-flex justify-content-between boder border-bottom border-1 py-3" style="border-color: #dddddd">
                 <span class="text-muted small text-break">Địa chỉ mặc định</span>
-                <span class="fw-bold small">@diaChiHienThi</span>
+                <span class="fw-bold small">@ViewBag.diaChiHienThi</span>
             </div>
         </div>
     </div>
@@ -214,7 +180,30 @@
                         </span>
                     </div>
                     <div class="d-flex justify-content-end gap-3 mt-auto">
-                        <a href="#" class="text-decoration-none text-danger small">Xóa</a>
+                        <button class="text-decoration-none text-danger small bg-transparent border-0 " data-bs-toggle="modal" data-bs-target="#areYouSure">Xóa</button>  
+
+                        <div class="modal fade" id="areYouSure" tabindex="-1" aria-labelledby="areYouSureModel" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered">
+                                <div class="modal-content rounded-4 mx-auto shadow-lg border-0 position-relative" style="width: 80%">
+                                    <div class="mt-3 border-0 text-center w-100">
+                                        <h5 class="modal-title fw-bold text-primary text-center">Xóa địa chỉ</h5>
+                                    </div>
+                                    <div class="modal-body text-center py-2">
+                                        <p class="mb-4 small text-muted" style="font-size: 16px">
+                                            Bạn có chắc chắn muốn xoá địa chỉ
+                                        </p>
+                                        <div class="d-flex justify-content-center gap-3 mb-1">
+                                            <a href="@Url.Action("XoaDiaChi", "Member", new { id = item.MaDC })" class="btn btn-outline-secondary py-2 fw-semibold small" style="width: 10rem">
+                                                Xóa địa chỉ
+                                            </a>
+                                            <button type="button" class="btn btn-primary py-2 fw-semibold small" data-bs-dismiss="modal" style="width: 10rem">
+                                                Suy nghĩ lại
+                                            </button>
+                                        </div>
+                                    </div>                                    
+                                </div>
+                            </div>
+                        </div>
                         <a href="#" class="text-decoration-none text-info small">Cập nhật</a>
                     </div>
                 </div>
@@ -277,7 +266,7 @@
 
                         <div class="d-flex flex-column mb-3">
                             <label class="fs-6 mb-2">Địa chỉ mặc định<span class="text-danger"> *</span></label>
-                            @Html.DropDownList("MaDC", listDiaChiDropdown as IEnumerable<SelectListItem>, new { @class = "form-select px-3 py-2 w-100", required = "required" })
+                            @Html.DropDownList("MaDC", ViewBag.ListDiaChiDropdown as IEnumerable<SelectListItem>, new { @class = "form-select px-3 py-2 w-100", required = "required" })
                         </div>
                     </div>
                     <div class="mt-4 text-center">

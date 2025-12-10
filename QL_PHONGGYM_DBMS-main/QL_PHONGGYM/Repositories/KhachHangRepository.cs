@@ -17,6 +17,25 @@ namespace QL_PHONGGYM.Repositories
             _context = context;
         }
 
+        public bool XoaDiaChi(int maDC)
+        {
+            try
+            {
+                var diaChi = _context.DiaChis.Find(maDC);
+
+                if (diaChi == null)
+                {
+                    throw new Exception("Địa chỉ này không tồn tại");
+                }
+                _context.DiaChis.Remove(diaChi);
+                _context.SaveChanges();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
         public bool CapNhatTt(FormCollection form)
         {
             var makhStr = form["MaKH"];
@@ -156,7 +175,8 @@ namespace QL_PHONGGYM.Repositories
                     else
                     {
                         var diaChiMacDinh = _context.DiaChis.FirstOrDefault(dc => dc.LaDiaChiMacDinh);
-                        diaChiMacDinh.LaDiaChiMacDinh = false;
+                        if (diaChiMacDinh != null)
+                            diaChiMacDinh.LaDiaChiMacDinh = false;
 
                         diaChiMoi = new DiaChi
                         {

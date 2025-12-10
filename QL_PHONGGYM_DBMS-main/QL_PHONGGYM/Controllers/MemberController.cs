@@ -1,9 +1,10 @@
 ﻿using QL_PHONGGYM.Models;
 using QL_PHONGGYM.Repositories;
 using System;
+using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Web.Mvc;
-using System.Globalization;
 
 namespace QL_PHONGGYM.Controllers
 {
@@ -193,6 +194,45 @@ namespace QL_PHONGGYM.Controllers
                 ViewBag.ActiveMenu = "taikhoan";
                 int maKH = (int)Session["MaKH"];
                 var khachHang = _cusRepo.ThongTinKH(maKH);
+                var listDiaChi = _cusRepo.GetAllDiaChi(maKH);
+
+                var diaChiMacDinhObj = _cusRepo.GetAllDiaChi(maKH).FirstOrDefault(dc => dc.LaDiaChiMacDinh == true);
+                if (diaChiMacDinhObj != null)
+                {
+                    ViewBag.diaChiHienThi = string.Join(", ", new[] { diaChiMacDinhObj.DiaChiCuThe, diaChiMacDinhObj.PhuongXa, diaChiMacDinhObj.QuanHuyen, diaChiMacDinhObj.TinhThanhPho });
+                }
+                else
+                    ViewBag.diaChiHienThi = "-";
+
+                var dropdownList = new List<SelectListItem>();
+
+                if (listDiaChi != null && listDiaChi.Any())
+                {
+                    dropdownList = listDiaChi
+                        .OrderByDescending(dc => dc.LaDiaChiMacDinh)
+                        .Select(dc =>
+                        {
+                            // Logic tạo text hiển thị
+                            string fullText = (dc.LaDiaChiMacDinh == true ? "✔ " : "") +
+                                              string.Join(", ", new[] { dc.DiaChiCuThe, dc.PhuongXa, dc.QuanHuyen, dc.TinhThanhPho }
+                                              .Where(x => !string.IsNullOrWhiteSpace(x)));
+
+                            // Logic cắt chuỗi (nếu quá dài)
+                            int maxLength = 55;
+                            string displayText = fullText.Length > maxLength
+                                                 ? fullText.Substring(0, maxLength - 3) + "..."
+                                                 : fullText;
+
+                            return new SelectListItem
+                            {
+                                Value = dc.MaDC.ToString(),
+                                Text = displayText,
+                                Selected = dc.LaDiaChiMacDinh == true
+                            };
+                        }).ToList();
+                }
+                
+                ViewBag.ListDiaChiDropdown = dropdownList;
                 return View(khachHang);
             }
             catch (Exception ex)
@@ -232,6 +272,21 @@ namespace QL_PHONGGYM.Controllers
 
         }
 
+        public ActionResult XoaDiaChi(int id)
+        {
+            try
+            {
+                var result = _cusRepo.XoaDiaChi(id);
+                if (result == false)                
+                    TempData["ErrorMessage"] = "Lỗi khi thực hiện xóa địa chỉ";                                    
+
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = ex.Message;                
+            }
+            return RedirectToAction("ThongTinTaiKhoan");
+        }
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult DoiMatKhau(string MatKhauCu, string MatKhauMoi)
