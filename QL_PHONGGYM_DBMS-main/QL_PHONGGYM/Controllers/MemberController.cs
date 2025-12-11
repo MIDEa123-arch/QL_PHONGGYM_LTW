@@ -135,7 +135,7 @@ namespace QL_PHONGGYM.Controllers
                         listHoaDon = listHoaDon.Where(n => n.DonHang != null && n.DonHang.TrangThaiDonHang == "Chờ giao hàng");
                         break;
                     case "da-nhan-hang":
-                        listHoaDon = listHoaDon.Where(n => n.DonHang != null && n.DonHang.TrangThaiDonHang == "Đã nhận hàng");
+                        listHoaDon = listHoaDon.Where(n => n.DonHang != null && n.DonHang.TrangThaiDonHang == "Đã giao hàng");
                         break;
                     case "da-huy":
                         listHoaDon = listHoaDon.Where(n => n.DonHang != null && n.DonHang.TrangThaiDonHang == "Đã hủy");
@@ -245,6 +245,34 @@ namespace QL_PHONGGYM.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        public ActionResult CapNhatDiaChi(FormCollection form)
+        {
+            try
+            {
+                if (!KiemTraDangNhap())
+                    return RedirectToAction("Login", "Account");
+                try
+                {
+                    int maKH = (int)Session["MaKH"];
+                    _cusRepo.UpdateDiaChi(maKH, form);
+                    TempData["ThongBao"] = "Cập nhật địa chỉ thành công!";
+                    return RedirectToAction("ThongTinTaiKhoan");
+                }
+                catch (Exception ex)
+                {
+                    TempData["ErrorMessage"] = ex.Message;
+                    return RedirectToAction("ThongTinTaiKhoan");
+                }
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = ex.Message;
+                return RedirectToAction("Login", "Account");
+            }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
         public ActionResult ThemDiaChi(FormCollection form)
         {
             try
@@ -310,6 +338,6 @@ namespace QL_PHONGGYM.Controllers
             }
 
         }
-
+       
     }
 }

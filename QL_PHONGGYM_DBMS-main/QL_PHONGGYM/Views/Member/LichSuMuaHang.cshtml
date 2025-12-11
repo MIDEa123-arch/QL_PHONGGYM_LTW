@@ -115,8 +115,8 @@
                                         trangThaiHienThi = item.DonHang.TrangThaiDonHang;
                                     }
 
-                                    if (trangThaiHienThi == "Đã nhận hàng" || trangThaiHienThi == "Đã thanh toán")
-                                    {
+                                    if (trangThaiHienThi == "Đã giao hàng" || trangThaiHienThi == "Đã thanh toán")
+                                    {                                        
                                         colorClass = "text-success";
                                         bgClass = "#c9eed9";
                                     }
@@ -132,7 +132,12 @@
                                     }
                                 }
                                 <div class="@colorClass border border-1 rounded-2 p-1 fw-bold" style="background-color: @bgClass; font-size: 12px">
-                                    @trangThaiHienThi
+                                    @if (trangThaiHienThi == "Đã giao hàng")
+                                    {
+                                        trangThaiHienThi = "Đã nhận hàng";
+                                    }                                    
+                                        @trangThaiHienThi
+
                                 </div>
                             </div>
                         </div>

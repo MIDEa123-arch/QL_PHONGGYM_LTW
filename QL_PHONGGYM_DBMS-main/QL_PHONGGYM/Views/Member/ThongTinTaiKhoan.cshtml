@@ -180,9 +180,9 @@
                         </span>
                     </div>
                     <div class="d-flex justify-content-end gap-3 mt-auto">
-                        <button class="text-decoration-none text-danger small bg-transparent border-0 " data-bs-toggle="modal" data-bs-target="#areYouSure">Xóa</button>  
+                        <button class="text-decoration-none text-danger small bg-transparent border-0 " data-bs-toggle="modal" data-bs-target="#areYouSure-@item.MaDC">Xóa</button>
 
-                        <div class="modal fade" id="areYouSure" tabindex="-1" aria-labelledby="areYouSureModel" aria-hidden="true">
+                        <div class="modal fade" id="areYouSure-@item.MaDC" tabindex="-1" aria-labelledby="areYouSureModel" aria-hidden="true">
                             <div class="modal-dialog modal-dialog-centered">
                                 <div class="modal-content rounded-4 mx-auto shadow-lg border-0 position-relative" style="width: 80%">
                                     <div class="mt-3 border-0 text-center w-100">
@@ -200,11 +200,21 @@
                                                 Suy nghĩ lại
                                             </button>
                                         </div>
-                                    </div>                                    
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        <a href="#" class="text-decoration-none text-info small">Cập nhật</a>
+                        </div>                        
+                        <button class="text-decoration-none text-info small border-0 bg-transparent btn-edit-address"
+                                data-bs-toggle="modal"
+                                data-bs-target="#updateAddress"
+                                data-id="@item.MaDC"
+                                data-tinh="@item.TinhThanhPho"
+                                data-huyen="@item.QuanHuyen"
+                                data-xa="@item.PhuongXa"
+                                data-chitiet="@item.DiaChiCuThe"
+                                data-macdinh="@(item.LaDiaChiMacDinh == true ? "true" : "false")">
+                            Cập nhật
+                        </button>
                     </div>
                 </div>
             </div>
@@ -342,121 +352,248 @@
     </div>
 </div>
 
+<div class="modal fade" id="updateAddress" tabindex="-1" aria-labelledby="updateAddressModal" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable ms-auto me-3 my-3 w-100" style="max-width: 550px; height: calc(100% - 2rem);">
+        @using (Html.BeginForm("CapNhatDiaChi", "Member", FormMethod.Post, new { @class = "modal-content h-100 rounded-4 shadow-lg border-0 position-relative" }))
+        {
+            @Html.AntiForgeryToken()            
+            <input type="hidden" id="update_MaDC" name="MaDC" />
+
+            <div class="modal-body p-0 d-flex flex-column hide-scrollbar">
+                <div class="fw-bold fs-6 border-bottom border-1 p-3 mb-3 position-sticky top-0 bg-white" style="border-color: #e2e2e2; z-index: 100;">
+                    Cập nhật địa chỉ
+                </div>
+                <div class="mb-3 fw-bold small px-4">Địa chỉ nhận hàng</div>
+                <div class="px-4 pb-4 h-100 d-flex flex-column justify-content-between">
+                    <div class="d-flex flex-column">
+                        <div class="d-flex flex-column mb-3">
+                            <label class="fs-6 mb-2">Tỉnh/Thành phố </label>
+                            <select class="form-select px-3 py-2 w-100" id="update_province" name="TinhThanhPho" required>
+                                <option value="" disabled selected>Chọn Tỉnh/Thành phố</option>
+                            </select>
+                        </div>
+
+                        <div class="d-flex flex-column mb-3">
+                            <label class="fs-6 mb-2">Quận/Huyện</label>
+                            <select class="form-select px-3 py-2 w-100" id="update_district" name="QuanHuyen" required disabled>
+                                <option value="" disabled selected>Chọn Quận/Huyện</option>
+                            </select>
+                        </div>
+
+                        <div class="d-flex flex-column mb-3">
+                            <label class="fs-6 mb-2">Phường/Xã</label>
+                            <select class="form-select px-3 py-2 w-100" id="update_ward" name="PhuongXa" required disabled>
+                                <option value="" disabled selected>Chọn Phường/Xã</option>
+                            </select>
+                        </div>
+
+                        <div class="d-flex flex-column mb-3">
+                            <label class="fs-6 mb-2">Địa chỉ nhà</label>
+                            <input type="text" class="form-control px-3 py-2 w-100" id="update_addressDetail" name="DiaChiCuThe" required placeholder="Nhập địa chỉ nhà" />
+                        </div>
+                        <div class="d-flex gap-2 align-items-center py-3 mt-1" style="border-top: 2px dotted #dedcdc">
+                            <span class="fs-6 fw-bold">Đặt làm mặc định</span>
+                            <label class="switch">
+                                <input type="checkbox" value="1" id="update_isDefault" name="isDefault">
+                                <span class="slider round"></span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 text-center d-flex gap-3">
+                        <button type="button" id="btn-delete-trigger" class="btn btn-outline-secondary w-100 py-2 fw-bold">
+                            Xóa địa chỉ
+                        </button>
+
+                        <button type="submit" class="btn btn-primary w-100 py-2 fw-bold">Cập nhật địa chỉ</button>
+                    </div>
+                </div>
+                <button type="button" class="btn-close position-absolute mt-3 me-3" data-bs-dismiss="modal" style="right: 0; top: 0; z-index: 105; font-size: 11px" aria-label="Đóng"></button>
+            </div>
+        }
+    </div>
+</div>
+
 <script>
     const API_BASE_URL = 'https://provinces.open-api.vn/api';
 
-    let provinces = [];
-    let districts = [];
-    let wards = [];
+    // Biến toàn cục cache dữ liệu
+    let globalProvinces = [];
+    let currentAddDistricts = [];    // Cache huyện cho modal Thêm
+    let currentUpdateDistricts = []; // Cache huyện cho modal Sửa
 
-    // Load provinces on page load
     document.addEventListener('DOMContentLoaded', async function () {
-        await loadProvinces();
-        setupEventListeners();
+        // 1. Tải dữ liệu Tỉnh/Thành ban đầu
+        await loadProvincesInit();
+
+        // 2. Cài đặt sự kiện cho các Modal
+        setupAddModalListeners();       // Logic dropdown cho modal Thêm
+        setupUpdateModalListeners();    // Logic dropdown cho modal Sửa
+
+        // 3. Cài đặt sự kiện cho các Nút bấm
+        setupEditButtons();             // Nút "Cập nhật" (Mở modal & điền dữ liệu)
+        setupDeleteButtonInModal();     // Nút "Xóa" bên trong modal Cập nhật
     });
 
-    // Load provinces from API
-    async function loadProvinces() {
+    // --- 1. HÀM TẢI DỮ LIỆU CƠ BẢN ---
+    async function loadProvincesInit() {
         try {
             const response = await fetch(`${API_BASE_URL}/p/`);
-            provinces = await response.json();
+            globalProvinces = await response.json();
 
-            const provinceSelect = document.getElementById('province');
-            provinces.forEach(province => {
-                const name = province.name.replace('Thành phố ', '').replace('Tỉnh ', '');
-                const option = document.createElement('option');
-                option.value = name;   // lưu tên trực tiếp
-                option.textContent = name;
-                provinceSelect.appendChild(option);
-            });
+            // Fill cho cả 2 modal
+            fillSelect('province', globalProvinces, 'Chọn Tỉnh/Thành phố');
+            fillSelect('update_province', globalProvinces, 'Chọn Tỉnh/Thành phố');
         } catch (error) {
-            console.error('Error loading provinces:', error);
-            alert('Không thể tải danh sách tỉnh/thành phố. Vui lòng thử lại!');
+            console.error('Lỗi tải tỉnh:', error);
         }
     }
 
-    // Load districts based on selected province
-    async function loadDistricts(provinceName) {
-        try {
-            // Tìm province object từ tên
-            const province = provinces.find(p => p.name.replace('Thành phố ', '').replace('Tỉnh ', '') === provinceName);
-            if (!province) return;
+    function fillSelect(elementId, data, defaultText) {
+        const select = document.getElementById(elementId);
+        if (!select) return;
+        select.innerHTML = `<option value="" disabled selected>${defaultText}</option>`;
+        data.forEach(item => {
+            // Xử lý tên hiển thị cho đẹp
+            let name = item.name.replace(/(Tỉnh |Thành phố |Quận |Huyện |Thị xã |Phường |Xã |Thị trấn )/g, "");
 
-            const response = await fetch(`${API_BASE_URL}/p/${province.code}?depth=2`);
-            const data = await response.json();
-            districts = data.districts;
-
-            const districtSelect = document.getElementById('district');            
-
-            districts.forEach(district => {
-                const name = district.name.replace('Quận ', '').replace('Huyện ', '').replace('Thành phố ', '').replace('Thị xã ', '');
-                const option = document.createElement('option');
-                option.value = name;   // lưu tên trực tiếp
-                option.textContent = name;
-                districtSelect.appendChild(option);
-            });
-
-            districtSelect.disabled = false;
-            const wardSelect = document.getElementById('ward');
-            wardSelect.disabled = true;
-            
-        } catch (error) {
-            console.error('Error loading districts:', error);
-            alert('Không thể tải danh sách quận/huyện. Vui lòng thử lại!');
-        }
+            const option = document.createElement('option');
+            option.value = name;
+            option.textContent = name;
+            option.dataset.code = item.code;
+            select.appendChild(option);
+        });
     }
 
-    // Load wards based on selected district
-    async function loadWards(districtName) {
-        try {
-            const district = districts.find(d => d.name.replace('Quận ', '').replace('Huyện ', '').replace('Thành phố ', '').replace('Thị xã ', '') === districtName);
-            if (!district) return;
+    // --- 2. HÀM GỌI API (Dùng chung) ---
+    async function fetchDistricts(provinceName) {
+        // Tìm code dựa trên tên (đã xử lý text) - Lưu ý: logic tìm kiếm này cần khớp với data
+        // Cách an toàn nhất là tìm trong globalProvinces cái nào có tên chứa chuỗi này
+        const prov = globalProvinces.find(p => p.name.includes(provinceName));
+        if (!prov) return [];
 
-            const response = await fetch(`${API_BASE_URL}/d/${district.code}?depth=2`);
-            const data = await response.json();
-            wards = data.wards;
-
-            const wardSelect = document.getElementById('ward');
-            wardSelect.innerHTML = '<option value="">Chọn</option>';
-
-            wards.forEach(ward => {
-                const name = ward.name.replace('Phường ', '').replace('Xã ', '').replace('Thị trấn ', '');
-                const option = document.createElement('option');
-                option.value = name;   // lưu tên trực tiếp
-                option.textContent = name;
-                wardSelect.appendChild(option);
-            });
-
-            wardSelect.disabled = false;
-        } catch (error) {
-            console.error('Error loading wards:', error);
-            alert('Không thể tải danh sách phường/xã. Vui lòng thử lại!');
-        }
+        const response = await fetch(`${API_BASE_URL}/p/${prov.code}?depth=2`);
+        const data = await response.json();
+        return data.districts;
     }
 
-    // Setup event listeners
-    function setupEventListeners() {
-        const provinceSelect = document.getElementById('province');
-        const districtSelect = document.getElementById('district');
-        const wardSelect = document.getElementById('ward');
+    async function fetchWards(districtName, currentDistrictsList) {
+        const dist = currentDistrictsList.find(d => d.name.includes(districtName));
+        if (!dist) return [];
 
-        provinceSelect.addEventListener('change', function () {
-            const provinceName = this.value;
-            if (provinceName) {
-                loadDistricts(provinceName);
-            } else {
-                districtSelect.disabled = true;
-                wardSelect.disabled = true;
-            }
+        const response = await fetch(`${API_BASE_URL}/d/${dist.code}?depth=2`);
+        const data = await response.json();
+        return data.wards;
+    }
+
+    // --- 3. LOGIC MODAL THÊM MỚI ---
+    function setupAddModalListeners() {
+        const pSelect = document.getElementById('province');
+        const dSelect = document.getElementById('district');
+        const wSelect = document.getElementById('ward');
+
+        pSelect.addEventListener('change', async function () {
+            dSelect.innerHTML = '<option>Đang tải...</option>'; dSelect.disabled = true;
+            wSelect.innerHTML = '<option>Chọn Phường/Xã</option>'; wSelect.disabled = true;
+
+            currentAddDistricts = await fetchDistricts(this.value);
+            fillSelect('district', currentAddDistricts, 'Chọn Quận/Huyện');
+            dSelect.disabled = false;
         });
 
-        districtSelect.addEventListener('change', function () {
-            const districtName = this.value;
-            if (districtName) {
-                loadWards(districtName);
-            } else {
-                wardSelect.disabled = true;                
-            }
+        dSelect.addEventListener('change', async function () {
+            wSelect.innerHTML = '<option>Đang tải...</option>'; wSelect.disabled = true;
+            const wards = await fetchWards(this.value, currentAddDistricts);
+            fillSelect('ward', wards, 'Chọn Phường/Xã');
+            wSelect.disabled = false;
         });
+    }
+
+    // --- 4. LOGIC MODAL CẬP NHẬT ---
+    function setupUpdateModalListeners() {
+        const pSelect = document.getElementById('update_province');
+        const dSelect = document.getElementById('update_district');
+        const wSelect = document.getElementById('update_ward');
+
+        pSelect.addEventListener('change', async function () {
+            dSelect.innerHTML = '<option>Đang tải...</option>'; dSelect.disabled = true;
+            wSelect.innerHTML = '<option>Chọn Phường/Xã</option>'; wSelect.disabled = true;
+
+            currentUpdateDistricts = await fetchDistricts(this.value);
+            fillSelect('update_district', currentUpdateDistricts, 'Chọn Quận/Huyện');
+            dSelect.disabled = false;
+        });
+
+        dSelect.addEventListener('change', async function () {
+            wSelect.innerHTML = '<option>Đang tải...</option>'; wSelect.disabled = true;
+            const wards = await fetchWards(this.value, currentUpdateDistricts);
+            fillSelect('update_ward', wards, 'Chọn Phường/Xã');
+            wSelect.disabled = false;
+        });
+    }
+
+    // --- 5. LOGIC FILL DỮ LIỆU VÀO MODAL CẬP NHẬT ---
+    function setupEditButtons() {
+        const btns = document.querySelectorAll('.btn-edit-address');
+        btns.forEach(btn => {
+            btn.addEventListener('click', async function () {
+                // Lấy data
+                const { id, tinh, huyen, xa, chitiet, macdinh } = this.dataset;
+
+                // Điền info cơ bản
+                document.getElementById('update_MaDC').value = id;
+                document.getElementById('update_addressDetail').value = chitiet;
+                document.getElementById('update_isDefault').checked = (macdinh === 'true');
+
+                // Điền Tỉnh -> Trigger load Huyện
+                const pSelect = document.getElementById('update_province');
+                pSelect.value = tinh;
+
+                if (tinh) {
+                    const dSelect = document.getElementById('update_district');
+                    dSelect.innerHTML = '<option>Đang tải...</option>';
+
+                    currentUpdateDistricts = await fetchDistricts(tinh);
+                    fillSelect('update_district', currentUpdateDistricts, 'Chọn Quận/Huyện');
+                    dSelect.disabled = false;
+                    dSelect.value = huyen;
+
+                    // Điền Huyện -> Trigger load Xã
+                    if (huyen) {
+                        const wSelect = document.getElementById('update_ward');
+                        wSelect.innerHTML = '<option>Đang tải...</option>';
+
+                        const wards = await fetchWards(huyen, currentUpdateDistricts);
+                        fillSelect('update_ward', wards, 'Chọn Phường/Xã');
+                        wSelect.disabled = false;
+                        wSelect.value = xa;
+                    }
+                }
+            });
+        });
+    }
+
+    // --- 6. LOGIC CHUYỂN TỪ MODAL CẬP NHẬT SANG XÓA ---
+    function setupDeleteButtonInModal() {
+        const btnDeleteTrigger = document.getElementById('btn-delete-trigger');
+        if (btnDeleteTrigger) {
+            btnDeleteTrigger.addEventListener('click', function () {
+                // 1. Lấy ID đang sửa
+                const currentId = document.getElementById('update_MaDC').value;
+                if (!currentId) return;
+
+                // 2. Đóng modal Cập nhật
+                const updateModalEl = document.getElementById('updateAddress');
+                const updateModalInstance = bootstrap.Modal.getInstance(updateModalEl);
+                if (updateModalInstance) updateModalInstance.hide();
+
+                // 3. Mở modal Xác nhận xóa tương ứng
+                const confirmModalEl = document.getElementById('areYouSure-' + currentId);
+                if (confirmModalEl) {
+                    const confirmModalInstance = new bootstrap.Modal(confirmModalEl);
+                    confirmModalInstance.show();
+                }
+            });
+        }
     }
 </script>

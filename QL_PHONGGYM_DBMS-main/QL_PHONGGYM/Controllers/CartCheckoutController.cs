@@ -35,7 +35,7 @@ namespace QL_PHONGGYM.Controllers
             var kh = _cusRepo.ThongTinKH(maKH);
 
             if (kh == null)
-            {     
+            {
                 TempData["ErrorMessage"] = "Tài khoản không tồn tại";
                 return false;
             }
@@ -57,7 +57,7 @@ namespace QL_PHONGGYM.Controllers
             if (!KiemTraDangNhap())
                 return RedirectToAction("Login", "Account");
             try
-            {                
+            {
                 var HoaDonPT = _cartRepo.HoaDonPT(maHD);
                 var kh = _cusRepo.ThongTinKH((int)Session["maKH"]);
 
@@ -67,13 +67,13 @@ namespace QL_PHONGGYM.Controllers
                 ViewBag.Url = url;
                 return View(HoaDonPT);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 TempData["ErrorMessage"] = ex.Message;
 
                 return Redirect(url);
             }
-           
+
 
         }
 
@@ -91,6 +91,7 @@ namespace QL_PHONGGYM.Controllers
             {
                 _cartRepo.TaoHoaDon(form, maKH, cart, null, null, diaChi);
                 Session["GioHang"] = _accountRepo.GetCartCount(maKH);
+                Session["GhiChu"] = null;
             }
             catch (Exception ex)
             {
@@ -105,19 +106,20 @@ namespace QL_PHONGGYM.Controllers
         public ActionResult ThanhToanfinal()
         {
             try
-            { 
-            if (!KiemTraDangNhap())
-                return RedirectToAction("Login", "Account");
+            {
+                if (!KiemTraDangNhap())
+                    return RedirectToAction("Login", "Account");
 
-            int maKH = (int)Session["MaKH"];
-            var kh = _cusRepo.ThongTinKH(maKH);
+                int maKH = (int)Session["MaKH"];
+                var kh = _cusRepo.ThongTinKH(maKH);
 
-            ViewBag.Khachhang = kh;
-            ViewBag.LoaiKh = kh.MaLoaiKH.HasValue ? _cusRepo.LoaiKh(kh.MaLoaiKH.Value) : null;
-            ViewBag.DiaChi = Session["Diachi"] as DiaChi;
+                ViewBag.Khachhang = kh;
+                ViewBag.LoaiKh = kh.MaLoaiKH.HasValue ? _cusRepo.LoaiKh(kh.MaLoaiKH.Value) : null;
+                ViewBag.DiaChi = Session["Diachi"] as DiaChi;
+                ViewBag.GhiChu = Session["GhiChu"] as string;
 
-            var cart = (List<GioHangViewModel>)Session["thanhtoan"];
-            return View(cart.OrderByDescending(sp => sp.NgayThem));
+                var cart = (List<GioHangViewModel>)Session["thanhtoan"];
+                return View(cart.OrderByDescending(sp => sp.NgayThem));
             }
             catch (Exception ex)
             {
@@ -162,6 +164,14 @@ namespace QL_PHONGGYM.Controllers
                 };
                 Session["Diachi"] = diaChiMoi;
 
+                if (!String.IsNullOrEmpty(form["note"]))
+                {
+                    Session["GhiChu"] = form["note"];
+                }
+                else
+                {
+                    Session["GhiChu"] = null;
+                }
 
                 var cart = (List<GioHangViewModel>)Session["thanhtoan"];
 
@@ -179,7 +189,7 @@ namespace QL_PHONGGYM.Controllers
             if (!KiemTraDangNhap())
                 return RedirectToAction("Login", "Account");
             try
-            {                
+            {
                 _cartRepo.Xoa(id);
                 Session["GioHang"] = _accountRepo.GetCartCount((int)Session["MaKH"]);
             }
@@ -196,7 +206,7 @@ namespace QL_PHONGGYM.Controllers
             if (!KiemTraDangNhap())
                 return RedirectToAction("Login", "Account");
             try
-            {               
+            {
                 _cartRepo.Them(id, (int)Session["MaKH"]);
                 Session["GioHang"] = _accountRepo.GetCartCount((int)Session["MaKH"]);
             }
@@ -246,7 +256,7 @@ namespace QL_PHONGGYM.Controllers
                 }
                 return RedirectToAction("ToCheckOut");
             }
-            catch (Exception ex) 
+            catch (Exception ex)
             {
                 TempData["ErrorMessage"] = ex.Message;
                 return RedirectToAction("ToCheckOut");
@@ -307,7 +317,7 @@ namespace QL_PHONGGYM.Controllers
                     return Json(new { success = false, message = "Thêm vào giỏ thất bại (Lỗi không xác định)." });
                 }
 
-  
+
                 int newCount = _accountRepo.GetCartCount(maKH);
                 Session["GioHang"] = newCount;
 

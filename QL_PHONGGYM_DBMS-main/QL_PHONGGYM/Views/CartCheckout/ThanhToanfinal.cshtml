@@ -36,6 +36,8 @@
     <input name="tongTien" value="@Model.Sum(sp => sp.ThanhTien)" hidden />
     <input name="thanhTien" value="@ThanhTien" hidden />
     <input name="giamGia" value="@giamGia" hidden />
+    @if(ViewBag.GhiChu != null) { <input name="note" value="@ViewBag.GhiChu" hidden />}            
+
     <div class="mt-2 d-flex flex-column mx-auto justify-content-center px-5" style="margin-top: 200px; margin-bottom: 300px; width: 40rem">
         <div class="py-3 position-relative border-bottom border-1">
             <a href="@Url.Action("ThanhToan", "CartCheckout")" class="text-decoration-none position-absolute">

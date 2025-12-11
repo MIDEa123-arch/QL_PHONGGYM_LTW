@@ -170,15 +170,30 @@ namespace QL_PHONGGYM.Repositories
                         }
 
                         snapshotDiaChiFull = $"{diaChi.DiaChiCuThe}, {diaChi.PhuongXa}, {diaChi.QuanHuyen}, {diaChi.TinhThanhPho}";
-
-                        donHang = new DonHang
+                        
+                        if (!string.IsNullOrEmpty(form["note"]))
                         {
-                            MaKH = maKH,
-                            DiaChi_Full = snapshotDiaChiFull, 
-                            NgayDat = DateTime.Now,
-                            TrangThaiDonHang = "Chờ xác nhận",
-                            TongTien = Convert.ToDecimal(form["thanhTien"])
-                        };
+                            donHang = new DonHang
+                            {
+                                MaKH = maKH,
+                                DiaChi_Full = snapshotDiaChiFull,
+                                NgayDat = DateTime.Now,
+                                GhiChu = form["note"],
+                                TrangThaiDonHang = "Chờ xác nhận",
+                                TongTien = Convert.ToDecimal(form["thanhTien"])
+                            };
+                        }
+                        else
+                        {
+                            donHang = new DonHang
+                            {
+                                MaKH = maKH,
+                                DiaChi_Full = snapshotDiaChiFull,
+                                NgayDat = DateTime.Now,                                
+                                TrangThaiDonHang = "Chờ xác nhận",
+                                TongTien = Convert.ToDecimal(form["thanhTien"])
+                            };
+                        }    
 
                         _context.DonHangs.Add(donHang);
                         _context.SaveChanges();

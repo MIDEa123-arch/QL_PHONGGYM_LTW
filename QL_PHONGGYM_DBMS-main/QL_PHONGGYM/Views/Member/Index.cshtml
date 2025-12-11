@@ -104,10 +104,10 @@
                                         <span class="text-muted">Ngày đặt hàng: <span class="fw-bold text-dark">@item.NgayLap.Value.ToString("dd/MM/yyyy")</span></span>
                                     </div>
                                     <div class="text-end">
-                                        @if (@item.DonHang.TrangThaiDonHang == "Đã nhận hàng")
+                                        @if (@item.DonHang.TrangThaiDonHang == "Đã giao hàng")
                                         {
                                             <div class="text-success border border-1 rounded-2 p-1 fw-bold" style="background-color: #c9eed9; font-size: 12px">
-                                                @item.DonHang.TrangThaiDonHang
+                                                Đã nhận hàng
                                             </div>
                                         }
                                         @if (@item.DonHang.TrangThaiDonHang == "Chờ xác nhận")

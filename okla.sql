@@ -4405,6 +4405,3 @@ GO
 
 ALTER TABLE [dbo].[LopHoc] ENABLE TRIGGER [TR_LopHoc_UpdateLichLopNV]
 GO
-
-select * from LichLop
-select * from LopHoc

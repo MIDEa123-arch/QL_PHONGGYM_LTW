@@ -135,7 +135,54 @@ namespace QL_PHONGGYM.Repositories
             return diaChi ?? diaChiList.First();
         }
 
+        public void UpdateDiaChi(int makh, FormCollection form)
+        {
+            int maDC;
+            if (String.IsNullOrEmpty(form["MaDC"]))
+                throw new Exception("Địa chỉ không tồn tại");
+            else
+                maDC = Convert.ToInt32(form["MaDC"]);
 
+            string tinh = form["TinhThanhPho"];
+            string huyen = form["QuanHuyen"];
+            string xa = form["PhuongXa"];
+            string diaChiCuThe = form["DiaChiCuThe"];
+            string datMacDinh = form["isDefault"];
+
+            try
+            {
+                if (string.IsNullOrEmpty(tinh) || string.IsNullOrEmpty(huyen) || string.IsNullOrEmpty(xa)) return;
+
+                var diaChiTonTai = _context.DiaChis.Find(maDC);                 
+
+                if (diaChiTonTai == null)
+                {
+                    throw new Exception("Địa chỉ không tồn tại");
+                }
+                else
+                {
+                    diaChiTonTai.TinhThanhPho = tinh;
+                    diaChiTonTai.QuanHuyen = huyen;
+                    diaChiTonTai.PhuongXa = xa;
+                    diaChiTonTai.DiaChiCuThe = diaChiCuThe;
+
+                    if (datMacDinh != null)
+                    {
+                        var diaChiMacDinh = _context.DiaChis.FirstOrDefault(dc => dc.LaDiaChiMacDinh);
+                        if (diaChiMacDinh != null)
+                            diaChiMacDinh.LaDiaChiMacDinh = false;
+                        diaChiTonTai.LaDiaChiMacDinh = true;
+                    }    
+                        
+                }
+                _context.SaveChanges();
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
+        }
         public void ThemDiaChi(int makh, FormCollection form)
         {
             string tinh = form["TinhThanhPho"];
