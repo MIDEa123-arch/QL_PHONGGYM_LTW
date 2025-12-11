@@ -14,6 +14,7 @@
         filter: brightness(100%) !important;
     }
 </style>
+
 <div class="w-100 py-5" style="background-color: #c5eff7; border-top: 2px solid #5eb1ec">
     <div class="d-flex flex-column gap-2 text-center container mx-auto">
         <span class="text-dark text-uppercase fs-3 fw-bold">Hội viên The Gym</span>
@@ -82,7 +83,7 @@
         @foreach (var item in ViewBag.usaProducts)
         {
             <div class="col">
-                <a href="@Url.Action("ProductDetail", "Product", new { id = item.MaSP })"
+                <a href="@Url.Action("ProductDetail", "Product", new { id = item.MaSP, url = Request.RawUrl })"
                    class="card h-100 border-1 text-decoration-none @(item.SoLuongTon == 0 ? "opacity-75" : "")">
                     <div class="position-relative">
                         <img src="@Url.Content("~/Content/Images/" + item.UrlHinhAnhChinh)"

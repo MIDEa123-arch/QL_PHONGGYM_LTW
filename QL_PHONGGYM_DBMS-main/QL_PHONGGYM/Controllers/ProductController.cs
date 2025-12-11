@@ -44,19 +44,14 @@ namespace QL_PHONGGYM.Controllers
             }
         }
 
-        public ActionResult ProductDetail(int? id, string url)
-        {
-            if (id == null)
-            {
-                return RedirectToAction("Product");
-            }
-                
+        public ActionResult ProductDetail(int id, string url)
+        {                
             var list = _productRepo.GetSanPhams().ToList();
             var sanpham = list.FirstOrDefault(sp => sp.MaSP == id);
 
             if (sanpham == null)
             {
-                TempData["ErrorMessage"] = "Sản phẩm này hiện đã ngừng bán!";
+                TempData["Error"] = "Sản phẩm này hiện đã ngừng bán!";
                 if (url != null)
                 {
                     return Redirect(url);

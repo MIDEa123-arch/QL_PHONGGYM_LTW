@@ -161,7 +161,7 @@
                 @foreach (var item in Model)
                 {
                     <div class="col">
-                        <a href="@Url.Action("ProductDetail", "Product", new { id = item.MaSP })"
+                        <a href="@Url.Action("ProductDetail", "Product", new { id = item.MaSP, url = Request.RawUrl })"
                            class="card h-100 border-1 text-decoration-none">
                             <div class="position-relative">
                                 <img src="@Url.Content("~/Content/Images/" + item.UrlHinhAnhChinh)"
