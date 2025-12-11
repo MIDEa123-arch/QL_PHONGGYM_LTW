@@ -131,7 +131,7 @@ namespace QL_PHONGGYM.Controllers
                                 var hinhAnh = new HINHANH
                                 {
                                     MaSP = model.MaSP,
-                                    Url = "/Content/Images/" + uniqueName,
+                                    Url = uniqueName,
                                     IsMain = isFirst
                                 };
                                 _context.HINHANHs.Add(hinhAnh);
@@ -166,7 +166,7 @@ namespace QL_PHONGGYM.Controllers
         [HttpPost]
         [ValidateInput(false)]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit(SanPham model, HttpPostedFileBase[] images, string strDonGia, string strGiaKhuyenMai)
+        public ActionResult Edit(SanPham model, HttpPostedFileBase[] images, string strDonGia, string strGiaKhuyenMai, int[] deleteImageIds)
         {
             if (string.IsNullOrEmpty(strDonGia))
             {
@@ -236,6 +236,37 @@ namespace QL_PHONGGYM.Controllers
                         sp.MoTaChung = model.MoTaChung;
                         sp.MoTaChiTiet = model.MoTaChiTiet;
 
+                        var currentImages = _context.HINHANHs.Where(x => x.MaSP == sp.MaSP).ToList();
+                        bool needNewMain = !currentImages.Any(x => x.IsMain == true);
+                        if (deleteImageIds != null && deleteImageIds.Length > 0)
+                        {
+                            foreach (var id in deleteImageIds)
+                            {
+                                var imgToDelete = currentImages.FirstOrDefault(x => x.MaHinh == id);
+                                if (imgToDelete != null)
+                                {
+                                    if (imgToDelete.IsMain == true) needNewMain = true;
+                                    try
+                                    {
+                                        string fullPath = Server.MapPath("~/Content/Images/" + imgToDelete.Url);
+                                        if (System.IO.File.Exists(fullPath)) System.IO.File.Delete(fullPath);
+                                    }
+                                    catch { }
+
+                                    _context.HINHANHs.Remove(imgToDelete);
+                                    currentImages.Remove(imgToDelete);
+                                }
+                            }
+                        }
+                        if (needNewMain && currentImages.Count > 0)
+                        {
+                            var newMain = currentImages.FirstOrDefault();
+                            if (newMain != null)
+                            {
+                                newMain.IsMain = true;
+                                needNewMain = false;
+                            }
+                        }
                         if (images != null && images.Length > 0 && images[0] != null)
                         {
                             foreach (var file in images)
@@ -251,9 +282,10 @@ namespace QL_PHONGGYM.Controllers
                                     var hinhAnh = new HINHANH
                                     {
                                         MaSP = sp.MaSP,
-                                        Url = "/Content/Images/" + uniqueName,
-                                        IsMain = false
+                                        Url = uniqueName,
+                                        IsMain = needNewMain
                                     };
+                                    if (needNewMain) needNewMain = false;
                                     _context.HINHANHs.Add(hinhAnh);
                                 }
                             }
@@ -272,35 +304,42 @@ namespace QL_PHONGGYM.Controllers
         }
 
         [HttpPost]
-        public JsonResult Delete(int id)
+        public JsonResult ToggleStatus(int id)
         {
-            var sp = _context.SanPhams.FirstOrDefault(t=>t.MaSP==id);
-            if (sp == null)
-            {
-                return Json(new { success = false, message = "Không tìm thấy sản phẩm!" });
-            }
-
             try
             {
-                bool daTungBan = _context.ChiTietHoaDons.Any(x => x.MaSP == id);
-                if (daTungBan)
+                var sp = _context.SanPhams.Find(id);
+                if (sp == null)
+                {
+                    return Json(new { success = false, message = "Không tìm thấy sản phẩm!" });
+                }
+
+                string message = "";
+                int currentStatus = sp.TrangThai.GetValueOrDefault(1);
+
+                if (currentStatus == 1)
                 {
                     sp.TrangThai = 0;
-                    _context.SaveChanges();
-                    return Json(new { success = true, message = "Sản phẩm đã từng được bán (có trong hóa đơn). Hệ thống đã chuyển trạng thái sang 'Ngừng kinh doanh'!" });
+                    message = "Đã chuyển trạng thái sang: Ngừng kinh doanh.";
                 }
                 else
                 {
-                    var images = _context.HINHANHs.Where(x => x.MaSP == id).ToList();
-                    if (images.Any())
+                    if (sp.SoLuongTon <= 0)
                     {
-                        _context.HINHANHs.RemoveRange(images);
+                        return Json(new
+                        {
+                            success = false,
+                            message = "LỖI: Sản phẩm này đã hết hàng (Tồn kho = 0). Vui lòng nhập thêm hàng trước khi mở bán!"
+                        });
                     }
-                    _context.SanPhams.Remove(sp);
-                    _context.SaveChanges();
 
-                    return Json(new { success = true, message = "Đã xóa vĩnh viễn sản phẩm và hình ảnh kèm theo!" });
+                    sp.TrangThai = 1;
+                    message = "Đã mở bán lại sản phẩm thành công.";
                 }
+
+                _context.SaveChanges();
+
+                return Json(new { success = true, message = message, newStatus = sp.TrangThai });
             }
             catch (Exception ex)
             {

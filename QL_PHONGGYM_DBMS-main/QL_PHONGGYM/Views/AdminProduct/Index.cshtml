@@ -49,7 +49,7 @@
                         <th>Giá bán</th>
                         <th>Tồn kho</th>
                         <th>Trạng thái</th>
-                        <th class="text-end pe-4">Hành động</th>
+                        <th class="text-center pe-4">Hành động</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -58,11 +58,11 @@
                         foreach (var item in Model)
                         {
                             var img = item.HINHANHs.FirstOrDefault(h => h.IsMain == true)?.Url ?? "/Content/Images/no-image.png";
-
                             <tr>
                                 <td class="ps-4">
                                     <div class="d-flex align-items-center">
-                                        <img src="@img" class="rounded border" style="width: 50px; height: 50px; object-fit: cover; margin-right: 15px;">
+
+                                        <img src="~/Content/Images/@img" class="rounded border" style="width: 50px; height: 50px; object-fit: cover; margin-right: 15px;">
                                         <div>
                                             <div class="fw-bold text-dark">@item.TenSP</div>
                                             <small class="text-muted">Mã: #@item.MaSP</small>
@@ -122,9 +122,18 @@
                                         <i class="fas fa-edit"></i>
                                     </a>
 
-                                    <button onclick="deleteProduct(@item.MaSP)" class="btn btn-outline-danger btn-sm" title="Xóa">
-                                        <i class="fas fa-trash-alt"></i>
-                                    </button>
+                                    @if (item.TrangThai == 1)
+                                    {
+                                        <button type="button" class="btn btn-sm btn-danger" onclick="toggleProductStatus(@item.MaSP, this)" title="Ngừng kinh doanh">
+                                            <i class="fas fa-ban"></i> Ngừng bán
+                                        </button>
+                                    }
+                                    else
+                                    {
+                                        <button type="button" class="btn btn-sm btn-primary" onclick="toggleProductStatus(@item.MaSP, this)" title="Mở bán lại">
+                                            <i class="fas fa-check"></i> Mở bán
+                                        </button>
+                                    }
                                 </td>
                             </tr>
                         }
@@ -171,24 +180,22 @@
     }
 </script>
 <script>
-    function deleteProduct(id) {
-        if (confirm('Bạn có chắc muốn xóa sản phẩm này?\n(Lưu ý: Nếu sản phẩm đã từng được bán, hệ thống sẽ chỉ chuyển sang trạng thái Ngừng kinh doanh).')) {
-            $.ajax({
-                url: '/AdminProduct/Delete',
-                type: 'POST',
-                data: { id: id },
-                success: function (res) {
-                    if (res.success) {
-                        alert(res.message);
-                        location.reload();
-                    } else {
-                        alert("KHÔNG THỂ XÓA: " + res.message);
-                    }
-                },
-                error: function () {
-                    alert("Lỗi kết nối đến máy chủ! Vui lòng thử lại sau.");
+    function toggleProductStatus(id, btn) {
+        $.ajax({
+            url: '/AdminProduct/ToggleStatus',
+            type: 'POST',
+            data: { id: id },
+            success: function (res) {
+                if (res.success) {
+                    alert(res.message);
+                    location.reload();
+                } else {
+                    alert(res.message);
                 }
-            });
-        }
+            },
+            error: function () {
+                alert("Lỗi kết nối server!");
+            }
+        });
     }
 </script>
