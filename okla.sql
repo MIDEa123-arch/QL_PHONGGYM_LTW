@@ -4380,5 +4380,31 @@ BEGIN
     END
 END;
 GO
+
+CREATE OR ALTER TRIGGER TR_LopHoc_UpdateLichLopNV
+ON LopHoc
+AFTER UPDATE
+AS
+BEGIN
+    SET NOCOUNT ON;
+    IF UPDATE(MaNV)
+    BEGIN
+        UPDATE LL
+        SET LL.MaNV = i.MaNV
+        FROM LichLop LL
+        INNER JOIN inserted i ON LL.MaLop = i.MaLop 
+        INNER JOIN deleted d ON LL.MaLop = d.MaLop 
+        WHERE 
+            (i.MaNV <> d.MaNV OR (i.MaNV IS NULL AND d.MaNV IS NOT NULL) OR (i.MaNV IS NOT NULL AND d.MaNV IS NULL))
+            AND LL.NgayHoc >= CAST(GETDATE() AS DATE)
+            AND LL.TrangThai NOT IN (N'Đã diễn ra', N'Đã hủy');
+    END
+END;
+GO
+
+
 ALTER TABLE [dbo].[LopHoc] ENABLE TRIGGER [TR_LopHoc_UpdateLichLopNV]
 GO
+
+select * from LichLop
+select * from LopHoc

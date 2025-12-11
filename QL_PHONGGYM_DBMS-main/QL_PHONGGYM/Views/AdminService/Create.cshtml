@@ -19,18 +19,18 @@
 
             <div class="row g-3">
                 <div class="col-md-12">
-                    <label class="form-label fw-bold">Tên gói tập</label>
+                    <label class="form-label fw-bold">Tên gói tập<span class="text-danger">*</span></label>
                     @Html.TextBoxFor(m => m.TenGoi, new { @class = "form-control", required = "required" })
                     @Html.ValidationMessageFor(model => model.TenGoi, "", new { @class = "text-danger" })
                 </div>
 
                 <div class="col-md-6">
-                    <label class="form-label fw-bold">Thời hạn (Số tháng)</label>
+                    <label class="form-label fw-bold">Thời hạn (Số tháng)<span class="text-danger">*</span></label>
                     @Html.TextBoxFor(m => m.ThoiHan, new { @class = "form-control", type = "number", required = "required", min = "1" })
                 </div>
 
                 <div class="col-md-6">
-                    <label class="form-label fw-bold">Giá gói tập (VNĐ)</label>
+                    <label class="form-label fw-bold">Giá gói tập (VNĐ)<span class="text-danger">*</span></label>
 
                     @Html.TextBoxFor(m => m.Gia, new
                {

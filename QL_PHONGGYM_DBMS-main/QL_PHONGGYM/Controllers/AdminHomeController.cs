@@ -75,5 +75,19 @@ namespace QL_PHONGGYM.Controllers
             Session.Remove("AdminRole");
             return RedirectToAction("Login");
         }
+        [HttpGet]
+        public ActionResult UserProfile()
+        {
+            if (Session["AdminUser"] == null)
+                return RedirectToAction("Login", "Auth"); 
+            var adminSession = Session["AdminUser"] as NhanVien;
+            var nhanVien = _context.NhanViens
+                                   .Include("ChucVu") 
+                                   .FirstOrDefault(n => n.MaNV == adminSession.MaNV);
+
+            if (nhanVien == null) return HttpNotFound();
+
+            return View(nhanVien);
+        }
     }
 }

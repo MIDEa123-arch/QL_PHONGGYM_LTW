@@ -1,0 +1,91 @@
+﻿@model QL_PHONGGYM.Models.NhanVien
+@{
+    ViewBag.Title = "UserProfile";
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-xl-4 order-xl-1">
+            <div class="card shadow border-0">
+                <div class="card-body pt-5 text-center">
+                    <div class="mb-4">
+                        @if (Model.GioiTinh == "Nữ")
+                        {
+                            <img src="https://cdn-icons-png.flaticon.com/512/4140/4140047.png" class="rounded-circle img-thumbnail shadow" width="150" alt="Avatar">
+                        }
+                        else
+                        {
+                            <img src="https://cdn-icons-png.flaticon.com/512/4140/4140048.png" class="rounded-circle img-thumbnail shadow" width="150" alt="Avatar">
+                        }
+                    </div>
+                    <h3 class="fw-bold text-primary">@Model.TenNV</h3>
+                    <div class="text-muted fw-bold mb-3">
+                        <i class="fas fa-id-badge me-2"></i> @(Model.ChucVu != null ? Model.ChucVu.TenChucVu : "Chưa phân loại")
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <a href="@Url.Action("Index", "AdminSetting", new { area = "Admin", tab = "security" })" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-key me-1"></i> Đổi mật khẩu
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-8 order-xl-2">
+            <div class="card shadow border-0">
+                <div class="card-header bg-white border-0 py-3">
+                    <div class="row align-items-center">
+                        <div class="col-8">
+                            <h5 class="mb-0 fw-bold text-primary">Thông tin tài khoản</h5>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <form>
+                        <h6 class="heading-small text-muted mb-4">Thông tin người dùng</h6>
+                        <div class="row g-3">
+                            <div class="col-lg-6">
+                                <label class="form-label fw-bold small text-muted">Tên đăng nhập</label>
+                                <input type="text" class="form-control" value="@Model.TenDangNhap" readonly>
+                            </div>
+                            <div class="col-lg-6">
+                                <label class="form-label fw-bold small text-muted">Họ và tên</label>
+                                <input type="text" class="form-control" value="@Model.TenNV" readonly>
+                            </div>
+                        </div>
+
+                        <hr class="my-4" />
+
+                        <h6 class="heading-small text-muted mb-4">Thông tin liên hệ</h6>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold small text-muted">Số điện thoại</label>
+                                <input type="text" class="form-control" value="@Model.SDT" readonly>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold small text-muted">Ngày sinh</label>
+                                <input type="text" class="form-control" value="@(Model.NgaySinh.HasValue ? Model.NgaySinh.Value.ToString("dd/MM/yyyy") : "Chưa cập nhật")" readonly>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold small text-muted">Giới tính</label>
+                                <input type="text" class="form-control" value="@Model.GioiTinh" readonly>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold small text-muted">Trạng thái</label>
+                                @if (Model.TrangThaiTaiKhoan == 1)
+                                {
+                                    <input type="text" class="form-control text-success fw-bold" value="Đang hoạt động" readonly>
+                                }
+                                else
+                                {
+                                    <input type="text" class="form-control text-danger fw-bold" value="Đã khóa" readonly>
+                                }
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

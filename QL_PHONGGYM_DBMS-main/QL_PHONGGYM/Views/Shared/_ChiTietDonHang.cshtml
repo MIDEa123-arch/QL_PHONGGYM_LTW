@@ -1,9 +1,7 @@
 ﻿@model QL_PHONGGYM.Models.DonHang
 
 @{
-    Layout = null; /* QUAN TRỌNG: Để không bị lặp Layout trong Modal */
-
-    // Lấy hóa đơn đầu tiên (Theo logic 1 Đơn - 1 Hóa đơn)
+    Layout = null; 
     var hoaDon = Model.HoaDons.FirstOrDefault();
 }
 
@@ -52,7 +50,7 @@
                                 var img = ct.SanPham?.HINHANHs?.FirstOrDefault(x => x.IsMain == true)?.Url ?? "no-image.png";
                                 <tr>
                                     <td>
-                                        <img src="~/Content/Images/Products/@img" alt="SP" style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px;" onerror="this.src='/Content/Images/no-image.png'" />
+                                        <img src="~/Content/Images/@img" alt="SP" style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px;" onerror="this.src='/Content/Images/no-image.png'" />
                                     </td>
                                     <td>
                                         <div class="fw-bold">@ct.SanPham.TenSP</div>

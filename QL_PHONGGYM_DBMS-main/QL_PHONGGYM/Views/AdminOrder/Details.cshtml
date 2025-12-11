@@ -5,7 +5,7 @@
 }
 <div class="container-fluid p-0">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h4 class="fw-bold text-dark mb-0">Chi tiết đơn hàng <span class="text-danger">#@Model.MaHD</span></h4>
+        <h4 class="fw-bold text-dark mb-0">Chi tiết hóa đơn <span class="text-danger">#@Model.MaHD</span></h4>
         <a href="@Url.Action("Index")" class="btn btn-outline-primary"><i class="fas fa-arrow-left me-2"></i>Quay lại</a>
     </div>
 
@@ -76,21 +76,7 @@
                         }
                     </p>
                 </div>
-            </div>
-
-            @*@if (Model.TrangThai == "Chưa thanh toán")
-            {
-                <div class="card border-0 shadow-sm">
-                    <div class="card-body">
-                        <button onclick="updateStatus(@Model.MaHD, 'Đã thanh toán')" class="btn btn-success w-100 mb-2 fw-bold">
-                            <i class="fas fa-check me-2"></i> Xác nhận thanh toán
-                        </button>
-                        <button onclick="updateStatus(@Model.MaHD, 'Hủy')" class="btn btn-outline-danger w-100 fw-bold">
-                            <i class="fas fa-times me-2"></i> Hủy đơn hàng
-                        </button>   
-                    </div>
-                </div>
-            }*@
+            
         </div>
     </div>
 </div>
