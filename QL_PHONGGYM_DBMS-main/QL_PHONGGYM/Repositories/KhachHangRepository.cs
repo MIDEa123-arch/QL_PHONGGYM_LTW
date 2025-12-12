@@ -5,6 +5,7 @@ using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 using System.Data.Entity;
+using System.Net;
 
 namespace QL_PHONGGYM.Repositories
 {
@@ -48,8 +49,7 @@ namespace QL_PHONGGYM.Repositories
 
             if (string.IsNullOrEmpty(makhStr) || string.IsNullOrEmpty(hoten) ||
                 string.IsNullOrEmpty(gioiTinh) || string.IsNullOrEmpty(ngaySinhStr) ||
-                string.IsNullOrEmpty(sdt) || string.IsNullOrEmpty(email) ||
-                string.IsNullOrEmpty(madcStr))
+                string.IsNullOrEmpty(sdt) || string.IsNullOrEmpty(email))
             {
                 return false;
             }
@@ -57,7 +57,11 @@ namespace QL_PHONGGYM.Repositories
             try
             {
                 int id = int.Parse(makhStr);
-                int maDCNew = int.Parse(madcStr);
+                int maDCNew = -1;
+                if (madcStr != null)
+                {
+                    maDCNew = int.Parse(madcStr);
+                }
                 var kh = _context.KhachHangs.FirstOrDefault(k => k.MaKH == id && k.TrangThaiTaiKhoan == 1);
 
                 if (kh == null)
@@ -83,23 +87,24 @@ namespace QL_PHONGGYM.Repositories
                 kh.Email = email;
                 kh.NgaySinh = DateTime.Parse(ngaySinhStr);
 
-                var diachiMoi = _context.DiaChis.FirstOrDefault(dc => dc.MaKH == kh.MaKH && dc.MaDC == maDCNew);
-
-                if (diachiMoi == null)
+                if (maDCNew != -1)
                 {
-                    throw new Exception("Địa chỉ đã chọn không tồn tại.");
+                    var diachiMoi = _context.DiaChis.FirstOrDefault(dc => dc.MaKH == kh.MaKH && dc.MaDC == maDCNew);
+                    if (diachiMoi == null)
+                    {
+                        throw new Exception("Địa chỉ đã chọn không tồn tại.");
+                    }
+                    else
+                    {
+                        diachiMoi.LaDiaChiMacDinh = true;
+                        var diachiCu = _context.DiaChis.FirstOrDefault(dc => dc.MaKH == kh.MaKH && dc.LaDiaChiMacDinh == true && dc.MaDC != diachiMoi.MaDC);
+
+                        if (diachiCu != null)
+                        {
+                            diachiCu.LaDiaChiMacDinh = false;
+                        }
+                    }
                 }
-
-
-                diachiMoi.LaDiaChiMacDinh = true;
-
-                var diachiCu = _context.DiaChis.FirstOrDefault(dc => dc.MaKH == kh.MaKH && dc.LaDiaChiMacDinh == true && dc.MaDC != diachiMoi.MaDC);
-
-                if (diachiCu != null)
-                {
-                    diachiCu.LaDiaChiMacDinh = false;
-                }
-                
                 _context.SaveChanges();
                 return true;
             }
@@ -153,7 +158,7 @@ namespace QL_PHONGGYM.Repositories
             {
                 if (string.IsNullOrEmpty(tinh) || string.IsNullOrEmpty(huyen) || string.IsNullOrEmpty(xa)) return;
 
-                var diaChiTonTai = _context.DiaChis.Find(maDC);                 
+                var diaChiTonTai = _context.DiaChis.Find(maDC);
 
                 if (diaChiTonTai == null)
                 {
@@ -172,8 +177,10 @@ namespace QL_PHONGGYM.Repositories
                         if (diaChiMacDinh != null)
                             diaChiMacDinh.LaDiaChiMacDinh = false;
                         diaChiTonTai.LaDiaChiMacDinh = true;
-                    }    
-                        
+                    }
+                    else
+                        diaChiTonTai.LaDiaChiMacDinh = false;
+
                 }
                 _context.SaveChanges();
             }
@@ -192,7 +199,7 @@ namespace QL_PHONGGYM.Repositories
             string datMacDinh = form["isDefault"];
 
             try
-            { 
+            {
                 if (string.IsNullOrEmpty(tinh) || string.IsNullOrEmpty(huyen) || string.IsNullOrEmpty(xa)) return;
 
                 var diaChiTonTai = _context.DiaChis
@@ -207,7 +214,7 @@ namespace QL_PHONGGYM.Repositories
                 {
                     DiaChi diaChiMoi;
                     if (String.IsNullOrEmpty(datMacDinh))
-                    { 
+                    {
                         diaChiMoi = new DiaChi
                         {
                             MaKH = makh,
@@ -245,11 +252,11 @@ namespace QL_PHONGGYM.Repositories
                 }
                 _context.SaveChanges();
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 throw ex;
             }
-            
+
         }
         public List<DangKyGoiTap> GetGoiTapHienTai(int maKH)
         {
@@ -307,59 +314,18 @@ namespace QL_PHONGGYM.Repositories
                                   .ToList();
 
             return listTong;
-        }
-        public bool CheckIn(int maLich, string loaiLich)
-        {
-            try
-            {
-                if (loaiLich == "Lớp Học")
-                {
-                    var lich = _context.LichLops.FirstOrDefault(l => l.MaLichLop == maLich);
-                    if (lich != null)
-                    {
-                        lich.TrangThai = "Đã tham gia";
-                        _context.SaveChanges();
-                        return true;
-                    }
-                }
-                else if (loaiLich == "Tập PT")
-                {
-                    var lich = _context.LichTapPTs.FirstOrDefault(l => l.MaLichPT == maLich);
-                    if (lich != null)
-                    {
-                        lich.TrangThai = "Đã tập";
-
-                        var dkpt = _context.DangKyPTs.FirstOrDefault(d => d.MaDKPT == lich.MaDKPT);
-                        if (dkpt != null && dkpt.SoBuoi > 0)
-                        {
-                            dkpt.SoBuoi = dkpt.SoBuoi - 1;
-                            if (dkpt.SoBuoi == 0) dkpt.TrangThai = "Kết thúc";
-                        }
-                        _context.SaveChanges();
-                        return true;
-                    }
-                }
-                return false;
-            }
-            catch
-            {
-                return false;
-            }
-        }
-
+        }    
 
         public bool DoiMatKhau(int maKH, string mkCu, string mkMoi)
         {
             var kh = _context.KhachHangs.FirstOrDefault(k => k.MaKH == maKH);
 
+            if (mkCu != kh.MatKhau)
+                return false;
 
-            if (kh != null && kh.MatKhau == mkCu)
-            {
-                kh.MatKhau = mkMoi;
-                _context.SaveChanges();
-                return true;
-            }
-            return false;
+            kh.MatKhau = mkMoi;
+            _context.SaveChanges();
+            return true;            
         }
         public void ThietLapMacDinh(int maKH, int maDiaChi)
         {

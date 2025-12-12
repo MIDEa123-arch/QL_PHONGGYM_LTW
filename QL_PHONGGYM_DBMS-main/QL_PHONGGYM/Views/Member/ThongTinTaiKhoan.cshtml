@@ -1,10 +1,33 @@
 ﻿@model QL_PHONGGYM.Models.KhachHang
 @{
     ViewBag.Title = "Thông tin tài khoản";
-    Layout = "~/Views/Shared/_LayoutMember.cshtml";       
+    Layout = "~/Views/Shared/_LayoutMember.cshtml";
+    QL_PHONGGYM.ViewModel.UpdatePasswordViewModel m;
 }
 
 <style>
+    input[type="password"]::-ms-reveal,
+    input[type="password"]::-ms-clear {
+        display: none;
+
+    }
+    .cursor-pointer {
+        cursor: pointer;
+    }
+
+    .select-ellipsis {
+        /* Ép hiển thị dấu ... nếu text quá dài so với khung */
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        padding-right: 2rem; /* Chừa chỗ cho mũi tên dropdown */
+    }
+
+        /* Khi dropdown xổ xuống (option), đảm bảo hiển thị full text */
+        .select-ellipsis option {
+            white-space: normal; /* Cho phép xuống dòng hoặc hiển thị đầy đủ tùy trình duyệt */
+        }
+
     .hide-scrollbar::-webkit-scrollbar {
         display: none;
     }
@@ -203,7 +226,7 @@
                                     </div>
                                 </div>
                             </div>
-                        </div>                        
+                        </div>
                         <button class="text-decoration-none text-info small border-0 bg-transparent btn-edit-address"
                                 data-bs-toggle="modal"
                                 data-bs-target="#updateAddress"
@@ -218,6 +241,88 @@
                     </div>
                 </div>
             </div>
+        }
+    </div>
+</div>
+<div class="rounded-2 p-4 bg-white mt-3">
+    <div class="d-flex justify-content-between w-100 align-items-center">
+        <span class="fs-5 fw-bold">Mật khẩu</span>
+        <button class="text-decoration-none text-info small d-flex align-items-center gap-1 bg-transparent border-0" data-bs-toggle="modal" data-bs-target="#updatePass">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-pencil-square" viewBox="0 0 16 16">
+                <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z" />
+                <path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5v11z" />
+            </svg>
+            Thay đổi mật khẩu
+        </button>
+    </div>
+</div>
+
+<div class="modal fade" id="updatePass" tabindex="-1" aria-labelledby="updatePassModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable ms-auto me-3 my-3 w-100"
+         style="max-width: 550px; height: calc(100% - 2rem);">
+
+        @using (Html.BeginForm("DoiMatKhau", "Member", FormMethod.Post, new { @class = "modal-content h-100 rounded-4 shadow-lg border-0 position-relative" }))
+        {
+            @Html.AntiForgeryToken()
+
+            <div class="modal-body p-0 d-flex flex-column hide-scrollbar">
+
+                <div class="fw-bold fs-6 border-bottom border-1 p-3 mb-3 position-sticky top-0 bg-white"
+                     style="border-color: #e2e2e2; z-index: 100;">
+                    Đổi mật khẩu
+                </div>
+
+                <div class="px-4 pb-4 h-100 d-flex flex-column justify-content-between">
+                    <div class="d-flex flex-column">
+
+                        <div class="d-flex flex-column mb-3">
+                            <label class="fs-6 mb-2">Mật khẩu hiện tại <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                @Html.Password("CurrentMatKhau", null, new { @class = "form-control px-3 py-2", required = "required", placeholder = "Nhập mật khẩu cũ", id = "currentPass" })
+                                <span class="input-group-text bg-white cursor-pointer toggle-password" data-target="#currentPass">
+                                    <i class="bi bi-eye-slash"></i>
+                                </span>
+                            </div>
+                            @Html.ValidationMessage("CurrentMatKhau", "", new { @class = "text-danger small mt-1 fw-bold", style = "font-size: 12px;" })
+                        </div>
+
+                        <div class="d-flex flex-column mb-3">
+                            <label class="fs-6 mb-2">Mật khẩu mới <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                @Html.Password("MatKhau", null, new { @class = "form-control px-3 py-2", required = "required", placeholder = "Nhập mật khẩu mới", id = "newPass" })
+                                <span class="input-group-text bg-white cursor-pointer toggle-password" data-target="#newPass">
+                                    <i class="bi bi-eye-slash"></i>
+                                </span>
+                            </div>
+
+                            @Html.ValidationMessage("MatKhau", "", new { @class = "text-danger small mt-1 fw-bold", style = "font-size: 12px;" })
+
+                            <small id="msg-newPass" class="text-danger mt-1 fw-bold" style="display:none; font-size: 12px;"></small>
+                        </div>
+
+                        <div class="d-flex flex-column mb-3">
+                            <label class="fs-6 mb-2">Xác nhận mật khẩu mới <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                @Html.Password("XacNhanMatKhau", null, new { @class = "form-control px-3 py-2", required = "required", placeholder = "Nhập lại mật khẩu mới", id = "confirmPass" })
+                                <span class="input-group-text bg-white cursor-pointer toggle-password" data-target="#confirmPass">
+                                    <i class="bi bi-eye-slash"></i>
+                                </span>
+                            </div>
+
+                            @Html.ValidationMessage("XacNhanMatKhau", "", new { @class = "text-danger small mt-1 fw-bold", style = "font-size: 12px;" })
+
+                            <small id="msg-confirmPass" class="text-danger mt-1 fw-bold" style="display:none; font-size: 12px;"></small>
+                        </div>
+
+                    </div>
+
+                    <div class="mt-4 text-center">
+                        <button type="submit" id="btnSavePass" class="btn btn-primary w-100 py-2 fw-bold">Lưu thay đổi</button>
+                    </div>
+                </div>
+            </div>
+
+            <button type="button" class="btn-close position-absolute mt-3 me-3" data-bs-dismiss="modal" style="right: 0; top: 0; z-index: 105; font-size: 11px" aria-label="Đóng"></button>
         }
     </div>
 </div>
@@ -273,11 +378,19 @@
                             <label class="fs-6 mb-2">Email</label>
                             @Html.TextBoxFor(m => m.Email, new { @class = "px-3 py-2 w-100 form-control", required = "required" })
                         </div>
+                        @{
+                            var listDrop = ViewBag.ListDiaChiDropdown as IEnumerable<SelectListItem>;
+                        }
 
-                        <div class="d-flex flex-column mb-3">
-                            <label class="fs-6 mb-2">Địa chỉ mặc định<span class="text-danger"> *</span></label>
-                            @Html.DropDownList("MaDC", ViewBag.ListDiaChiDropdown as IEnumerable<SelectListItem>, new { @class = "form-select px-3 py-2 w-100", required = "required" })
-                        </div>
+                        @if (listDrop != null && listDrop.Any())
+                        {
+                            <div class="d-flex flex-column mb-3">
+                                <label class="fs-6 mb-2">Địa chỉ mặc định<span class="text-danger"> *</span></label>
+                                @Html.DropDownList("MaDC",
+                                    ViewBag.ListDiaChiDropdown as IEnumerable<SelectListItem>,
+                                    new { @class = "form-select ps-3 py-2 w-100 select-ellipsis pe-5", required = "required", })
+                            </div>
+                        }
                     </div>
                     <div class="mt-4 text-center">
                         <button type="submit" class="btn btn-primary w-100 py-2 fw-bold">Cập nhật thông tin</button>
@@ -333,15 +446,15 @@
                             <input type="text" class="form-control  px-3 py-2 w-100" name="DiaChiCuThe" required placeholder="Nhập địa chỉ nhà" />
                         </div>
                         <div class="d-flex gap-2 align-items-center py-3 mt-1" style="border-top: 2px dotted #dedcdc">
-                            <span class="fs-6 fw-bold">Đặt làm mặc định</span>                           
-                                <!-- Rounded switch -->
-                                <label class="switch">
-                                    <input type="checkbox" value="1" name="isDefault">
-                                    <span class="slider round"></span>
-                                </label>                            
+                            <span class="fs-6 fw-bold">Đặt làm mặc định</span>
+                            <!-- Rounded switch -->
+                            <label class="switch">
+                                <input type="checkbox" value="1" name="isDefault">
+                                <span class="slider round"></span>
+                            </label>
                         </div>
                     </div>
-                    
+
                     <div class="mt-4 text-center">
                         <button type="submit" class="btn btn-primary w-100 py-2 fw-bold">Thêm địa chỉ</button>
                     </div>
@@ -356,7 +469,7 @@
     <div class="modal-dialog modal-dialog-scrollable ms-auto me-3 my-3 w-100" style="max-width: 550px; height: calc(100% - 2rem);">
         @using (Html.BeginForm("CapNhatDiaChi", "Member", FormMethod.Post, new { @class = "modal-content h-100 rounded-4 shadow-lg border-0 position-relative" }))
         {
-            @Html.AntiForgeryToken()            
+            @Html.AntiForgeryToken()
             <input type="hidden" id="update_MaDC" name="MaDC" />
 
             <div class="modal-body p-0 d-flex flex-column hide-scrollbar">
@@ -414,8 +527,81 @@
     </div>
 </div>
 
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
     const API_BASE_URL = 'https://provinces.open-api.vn/api';
+
+    $(document).on('click', '.toggle-password', function () {
+        // 1. Lấy id của input mục tiêu từ attribute data-target
+        var targetSelector = $(this).data('target');
+        var $input = $(targetSelector);
+        var $icon = $(this).find('i');
+
+        // 2. Kiểm tra type hiện tại và đảo ngược
+        if ($input.attr('type') === 'password') {
+            $input.attr('type', 'text');
+            // Đổi icon sang mắt mở
+            $icon.removeClass('bi-eye-slash').addClass('bi-eye');
+        } else {
+            $input.attr('type', 'password');
+            // Đổi icon sang mắt đóng (gạch chéo)
+            $icon.removeClass('bi-eye').addClass('bi-eye-slash');
+        }
+    });
+
+    $(document).ready(function () {
+
+        // Vừa gõ vừa kiểm tra ô Mật khẩu mới
+        $('#newPass').on('input', function () {
+            validatePasswordForm();
+        });
+
+        // Vừa gõ vừa kiểm tra ô Xác nhận
+        $('#confirmPass').on('input', function () {
+            validatePasswordForm();
+        });
+
+        function validatePasswordForm() {
+            var newPass = $('#newPass').val();
+            var confirmPass = $('#confirmPass').val();
+
+            var $msgLen = $('#msg-newPass');
+            var $msgMatch = $('#msg-confirmPass');
+            var $btn = $('#btnSavePass');
+
+            var isValidLength = true;
+            var isValidMatch = true;
+
+            // 1. Kiểm tra độ dài (>= 6 ký tự)
+            if (newPass.length > 0 && newPass.length < 6) {
+                $msgLen.text('Mật khẩu phải có ít nhất 6 ký tự').show();
+                isValidLength = false;
+            } else {
+                $msgLen.hide();
+            }
+
+            // 2. Kiểm tra khớp mật khẩu
+            if (confirmPass.length > 0) {
+                if (newPass !== confirmPass) {
+                    $msgMatch.text('Mật khẩu xác nhận không trùng khớp').show();
+                    isValidMatch = false;
+                } else {
+                    $msgMatch.hide();
+                }
+            } else {
+                $msgMatch.hide();
+                // Nếu ô xác nhận rỗng thì cũng chưa cho lưu
+                if (newPass.length > 0) isValidMatch = false;
+            }
+
+            // 3. Quyết định mở/khóa nút Lưu
+            if (newPass.length >= 6 && confirmPass.length > 0 && isValidLength && isValidMatch) {
+                $btn.prop('disabled', false);
+            } else {
+                $btn.prop('disabled', true);
+            }
+        }
+    });
 
     // Biến toàn cục cache dữ liệu
     let globalProvinces = [];
@@ -434,8 +620,7 @@
         setupEditButtons();             // Nút "Cập nhật" (Mở modal & điền dữ liệu)
         setupDeleteButtonInModal();     // Nút "Xóa" bên trong modal Cập nhật
     });
-
-    // --- 1. HÀM TẢI DỮ LIỆU CƠ BẢN ---
+    
     async function loadProvincesInit() {
         try {
             const response = await fetch(`${API_BASE_URL}/p/`);
@@ -464,8 +649,7 @@
             select.appendChild(option);
         });
     }
-
-    // --- 2. HÀM GỌI API (Dùng chung) ---
+    
     async function fetchDistricts(provinceName) {
         // Tìm code dựa trên tên (đã xử lý text) - Lưu ý: logic tìm kiếm này cần khớp với data
         // Cách an toàn nhất là tìm trong globalProvinces cái nào có tên chứa chuỗi này

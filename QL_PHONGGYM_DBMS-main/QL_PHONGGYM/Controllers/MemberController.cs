@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Web.Mvc;
+using System.Web.UI;
 
 namespace QL_PHONGGYM.Controllers
 {
@@ -102,7 +103,7 @@ namespace QL_PHONGGYM.Controllers
 
         }
 
-        public ActionResult LichSuMuaHang(string status = "all", string daterange = "")
+        public ActionResult LichSuMuaHang(string status = "all", string daterange = "", int page = 1)
         {
             try
             {
@@ -111,6 +112,8 @@ namespace QL_PHONGGYM.Controllers
                 ViewBag.ActiveMenu = "hoadon";
                 int maKH = (int)Session["MaKH"];
 
+                int pageSize = 5; // Số hóa đơn mỗi trang
+                if (page < 1) page = 1;
                 var listHoaDon = _cusRepo.GetLichSuMuaHang(maKH).AsQueryable();
 
                 if (!string.IsNullOrEmpty(daterange))
@@ -150,8 +153,17 @@ namespace QL_PHONGGYM.Controllers
                         break;
                 }
 
-                var resultList = listHoaDon.OrderByDescending(n => n.NgayLap).ToList();
+                int totalRecord = listHoaDon.Count();
+                int totalPage = (int)Math.Ceiling((double)totalRecord / pageSize);               
 
+                var resultList = listHoaDon
+                            .OrderByDescending(n => n.NgayLap)
+                            .Skip((page - 1) * pageSize) // Bỏ qua các phần tử của trang trước
+                            .Take(pageSize)              // Lấy 5 phần tử
+                            .ToList();
+
+                ViewBag.TotalPage = totalPage;
+                ViewBag.CurrentPage = page;
                 ViewBag.CurrentStatus = status;
                 ViewBag.CurrentDateRange = daterange;
 
@@ -217,16 +229,10 @@ namespace QL_PHONGGYM.Controllers
                                               string.Join(", ", new[] { dc.DiaChiCuThe, dc.PhuongXa, dc.QuanHuyen, dc.TinhThanhPho }
                                               .Where(x => !string.IsNullOrWhiteSpace(x)));
 
-                            // Logic cắt chuỗi (nếu quá dài)
-                            int maxLength = 55;
-                            string displayText = fullText.Length > maxLength
-                                                 ? fullText.Substring(0, maxLength - 3) + "..."
-                                                 : fullText;
-
                             return new SelectListItem
                             {
                                 Value = dc.MaDC.ToString(),
-                                Text = displayText,
+                                Text = fullText,
                                 Selected = dc.LaDiaChiMacDinh == true
                             };
                         }).ToList();
@@ -317,17 +323,20 @@ namespace QL_PHONGGYM.Controllers
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult DoiMatKhau(string MatKhauCu, string MatKhauMoi)
+        public ActionResult DoiMatKhau(string CurrentMatKhau, string MatKhau)
         {
             try
             {
                 if (!KiemTraDangNhap())
                     return RedirectToAction("Login", "Account");
+                
                 int maKH = (int)Session["MaKH"];
-                bool result = _cusRepo.DoiMatKhau(maKH, MatKhauCu, MatKhauMoi);
+
+                bool result = _cusRepo.DoiMatKhau(maKH, CurrentMatKhau, MatKhau);
 
                 if (result) TempData["ThongBao"] = "Đổi mật khẩu thành công.";
-                else TempData["ThongBao"] = "Mật khẩu cũ không chính xác.";
+
+                else TempData["Error"] = "Mật khẩu cũ không chính xác.";
 
                 return RedirectToAction("ThongTinTaiKhoan");
             }

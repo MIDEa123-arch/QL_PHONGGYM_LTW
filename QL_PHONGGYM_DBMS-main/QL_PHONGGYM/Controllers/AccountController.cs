@@ -1,21 +1,119 @@
-﻿using QL_PHONGGYM.Models;
+﻿using QL_PHONGGYM.Helpers;
+using QL_PHONGGYM.Models;
 using QL_PHONGGYM.Repositories;
 using QL_PHONGGYM.ViewModel;
 using System;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Web.Mvc;
-using System.Data.SqlClient;
+using static System.Net.WebRequestMethods;
 
 namespace QL_PHONGGYM.Controllers
 {
     public class AccountController : Controller
     {
         private readonly AccountRepository _accountRepo;
+        private readonly KhachHangRepository _khachhangRepo;
+        private readonly GmailService _khoiPhucRepo;
 
         public AccountController()
         {
             _accountRepo = new AccountRepository(new QL_PHONGGYMEntities());
+            _khachhangRepo = new KhachHangRepository(new QL_PHONGGYMEntities());
+            _khoiPhucRepo = new GmailService(new QL_PHONGGYMEntities());
         }
+
+        public ActionResult ForgotPassword()
+        {
+            return View();
+
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult ForgotPassword(FormCollection form)
+        {
+            if (String.IsNullOrEmpty(form["email"]))
+            {     
+                TempData["ErrorMessage"] = "Vui lòng nhập email";
+                return View();
+            }
+            
+            try
+            {                
+                string otp;
+                var result = _khoiPhucRepo.SendOTP(form["email"], out otp);
+
+                if (result)
+                {
+                    Session["OTP"] = otp;
+                    Session["OTP_Expire"] = DateTime.Now.AddMinutes(3);
+                    Session["AllowOTPPage"] = true;
+
+                    return RedirectToAction("XacThuc", new { email = form["email"] });
+                }
+                else
+                {
+                    return View();
+                }
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = ex.Message;
+                return View();
+            }            
+        }
+
+        public ActionResult XacThuc(string email)
+        {
+            if (Session["AllowOTPPage"] == null)
+                return RedirectToAction("ForgotPassword");
+            
+            Session.Remove("AllowOTPPage");
+         
+            if (Session["OTP"] == null || Session["OTP_Expire"] == null)
+                return RedirectToAction("ForgotPassword");
+
+            if (String.IsNullOrEmpty(email))
+                return RedirectToAction("ForgotPassword");
+
+            return View((object)email);
+        }
+
+
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult KhoiPhucMatKhau(string otp1, string otp2, string otp3, string otp4, string emailXacthuc)
+        {
+            string userOtp = otp1 + otp2 + otp3 + otp4;
+
+            string savedOtp = Session["OTP"] as string;
+            DateTime? expire = Session["OTP_Expire"] as DateTime?;
+
+            if (savedOtp == null || expire == null)
+                return RedirectToAction("ForgotPassword");
+
+            if (DateTime.Now > expire)
+            {
+                TempData["OtpError"] = "Mã OTP đã hết hạn!";
+                Session["AllowOTPPage"] = true;
+                return RedirectToAction("XacThuc", new { email = emailXacthuc });
+            }
+
+            if (userOtp != savedOtp)
+            {
+                TempData["OtpError"] = "OTP không chính xác!";
+                Session["AllowOTPPage"] = true;
+                return RedirectToAction("XacThuc", new { email = emailXacthuc });
+            }
+            
+            Session.Remove("OTP");
+            Session.Remove("OTP_Expire");
+
+            return RedirectToAction("DatMatKhauMoi");
+        }
+
 
         // GET: /Account/Register
         public ActionResult Register(string returnUrl)
