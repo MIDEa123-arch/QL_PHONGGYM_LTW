@@ -11,10 +11,21 @@ namespace QL_PHONGGYM.Controllers
     {
         private readonly QL_PHONGGYMEntities _context = new QL_PHONGGYMEntities();
 
-        public ActionResult Index()
+        public ActionResult Index(int page = 1) 
         {
             if (Session["AdminUser"] == null) return RedirectToAction("Login", "Auth");
-            var list = _context.GoiTaps.OrderBy(x => x.Gia).ToList();
+
+            var query = _context.GoiTaps.AsQueryable();
+            int pageSize = 10; 
+            int totalRecord = query.Count(); 
+            int totalPages = (int)Math.Ceiling((double)totalRecord / pageSize); 
+
+            var list = query.OrderBy(x => x.Gia)
+                            .Skip((page - 1) * pageSize) 
+                            .Take(pageSize)              
+                            .ToList();
+            ViewBag.TotalPages = totalPages;
+            ViewBag.CurrentPage = page;
             return View(list);
         }
 

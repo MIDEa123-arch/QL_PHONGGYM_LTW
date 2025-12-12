@@ -11,28 +11,39 @@ namespace QL_PHONGGYM.Controllers
     {
         private readonly QL_PHONGGYMEntities _context = new QL_PHONGGYMEntities();
 
-        public ActionResult Index(string search="", int maChucVu = 0)
+        public ActionResult Index(string search = "", int maChucVu = 0, int page = 1)
         {
             if (Session["AdminUser"] == null) return RedirectToAction("Login", "Auth");
 
-            var query = _context.NhanViens.Include("ChucVu").OrderByDescending(n => n.MaNV).ToList();
+            var query = _context.NhanViens.Include("ChucVu").AsQueryable();
+
             if (!string.IsNullOrEmpty(search))
             {
                 search = search.Trim().ToLower();
                 query = query.Where(x => x.TenNV.ToLower().Contains(search) ||
                                          x.SDT.Contains(search) ||
-                                         x.TenDangNhap.ToLower().Contains(search)).ToList();
+                                         x.TenDangNhap.ToLower().Contains(search));
             }
             if (maChucVu > 0)
             {
-                query = query.Where(x => x.MaChucVu == maChucVu).ToList();
+                query = query.Where(x => x.MaChucVu == maChucVu);
             }
-            ViewBag.ListChucVu = new SelectList(_context.ChucVus, "MaChucVu", "TenChucVu", maChucVu);
 
+            int pageSize = 10;
+            int totalRecord = query.Count();
+            int totalPages = (int)Math.Ceiling((double)totalRecord / pageSize);
+
+            var model = query.OrderByDescending(x => x.MaNV)
+                             .Skip((page - 1) * pageSize)
+                             .Take(pageSize)
+                             .ToList();
+
+            ViewBag.ListChucVu = new SelectList(_context.ChucVus, "MaChucVu", "TenChucVu", maChucVu);
             ViewBag.CurrentSearch = search;
             ViewBag.CurrentMaChucVu = maChucVu;
+            ViewBag.TotalPages = totalPages;
+            ViewBag.CurrentPage = page;
 
-            var model = query.OrderByDescending(x => x.MaNV).ToList();
             return View(model);
         }
 

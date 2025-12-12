@@ -11,7 +11,7 @@ namespace QL_PHONGGYM.Controllers
     {
         private readonly QL_PHONGGYMEntities _context = new QL_PHONGGYMEntities();
 
-        public ActionResult Index(string search = "", int? maLoai=0)
+        public ActionResult Index(string search = "", int? maLoai = 0, int page = 1) 
         {
             if (Session["AdminUser"] == null) return RedirectToAction("Login", "Auth");
 
@@ -21,20 +21,34 @@ namespace QL_PHONGGYM.Controllers
             {
                 query = query.Where(k => k.TenKH.Contains(search) || k.SDT.Contains(search));
             }
-            if (maLoai!=0 && maLoai!=null)
+            if (maLoai != 0 && maLoai != null)
             {
                 query = query.Where(h => h.MaLoaiKH == maLoai);
             }
-            var model = query.OrderByDescending(k => k.MaKH).ToList();
+
+            int pageSize = 10;
+            int totalRecord = query.Count(); 
+            int totalPages = (int)Math.Ceiling((double)totalRecord / pageSize); 
+
+
+            var model = query.OrderByDescending(k => k.MaKH)
+                             .Skip((page - 1) * pageSize)
+                             .Take(pageSize)
+                             .ToList();
+
             ViewBag.DanhSachLoai = _context.LoaiKhachHangs.ToList();
             ViewBag.CurrentSearch = search;
             ViewBag.CurrentStatus = maLoai;
+
+            ViewBag.TotalPages = totalPages;
+            ViewBag.CurrentPage = page;
+
             if (Request.IsAjaxRequest())
             {
-                // Trả về PartialView chứa bảng dữ liệu đã được lọc
                 return PartialView("_DanhSachHoiVien", model);
             }
-            return View(query.OrderByDescending(k => k.MaKH).ToList());
+
+            return View(model);
         }
 
         public ActionResult Edit(int id)
@@ -99,7 +113,7 @@ namespace QL_PHONGGYM.Controllers
         [HttpGet]
         public ActionResult Create()
         {
-            // Kiểm tra đăng nhập
+
             if (Session["AdminUser"] == null)
             {
                 return RedirectToAction("Login", "Auth");
@@ -107,7 +121,7 @@ namespace QL_PHONGGYM.Controllers
 
             ViewBag.MaLoaiKH = new SelectList(_context.LoaiKhachHangs, "MaLoaiKH", "TenLoai");
 
-            // Trả về View (Form nhập liệu)
+
             return View();
         }
         [HttpPost]

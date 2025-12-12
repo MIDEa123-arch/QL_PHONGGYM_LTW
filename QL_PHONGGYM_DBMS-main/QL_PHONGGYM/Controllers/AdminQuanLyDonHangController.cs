@@ -10,17 +10,13 @@ namespace QL_PHONGGYM.Controllers
     public class AdminQuanLyDonHangController : Controller
     {
         private readonly QL_PHONGGYMEntities _context = new QL_PHONGGYMEntities();
-        public ActionResult Index(string search = "", string status = "", bool? isAjax = false)
+        public ActionResult Index(string search = "", string status = "", int page = 1, bool? isAjax = false)
         {
-
             if (Session["AdminUser"] == null) return RedirectToAction("Login", "Auth");
-
             var query = _context.DonHangs.ToList();
-
             if (!string.IsNullOrEmpty(search))
             {
-                query = _context.DonHangs
-                .Where(dh => dh.HoaDons.Any(hd => hd.KhachHang.TenKH.Contains(search) || dh.MaDonHang.ToString() == search)).ToList();
+                query = query.Where(dh => dh.HoaDons.Any(hd => hd.KhachHang.TenKH.Contains(search) || dh.MaDonHang.ToString() == search)).ToList();
             }
 
             if (!string.IsNullOrEmpty(status))
@@ -28,9 +24,21 @@ namespace QL_PHONGGYM.Controllers
                 query = query.Where(d => d.TrangThaiDonHang == status).ToList();
             }
 
-            var model = query.OrderByDescending(d => d.NgayDat).ToList();
+            var sortedQuery = query.OrderByDescending(d => d.NgayDat).ToList();
 
-            if (isAjax==true)
+            int pageSize = 10; 
+            int totalRecord = sortedQuery.Count();
+            int totalPages = (int)Math.Ceiling((double)totalRecord / pageSize);
+
+            var model = sortedQuery.Skip((page - 1) * pageSize)
+                                   .Take(pageSize)
+                                   .ToList();
+            ViewBag.CurrentSearch = search;
+            ViewBag.CurrentStatus = status;
+            ViewBag.TotalPages = totalPages;
+            ViewBag.CurrentPage = page;
+
+            if (isAjax == true)
             {
                 return PartialView("DanhSachDonHang", model);
             }
