@@ -38,23 +38,26 @@
         </div>
     </div>
 </div>
-
-<div class="alert alert-primary d-flex align-items-center justify-content-between border-0 shadow-sm mb-2" role="alert" style="background-color: #eef6fc;">
-    <div>
-        <i class="fas fa-info-circle text-primary me-2"></i>
-        <span class="text-primary fw-bold">Đăng ký Gói Tập ngay để nhận ưu đãi đặc quyền!</span>
+@if (!Model.DangKyGoiTaps.Any()) { 
+    
+    <div class="alert alert-primary d-flex align-items-center justify-content-between border-0 shadow-sm mb-2" role="alert" style="background-color: #eef6fc;">
+        <div>
+            <i class="fas fa-info-circle text-primary me-2"></i>
+            <span class="text-primary fw-bold">Đăng ký Gói Tập ngay để nhận ưu đãi đặc quyền!</span>
+        </div>
+        <a href="@Url.Action("GoiTap", "GoiTap")" class="btn btn-sm btn-link text-decoration-none fw-bold">Đăng ký ngay</a>
     </div>
-    <a href="@Url.Action("GoiTap", "GoiTap")" class="btn btn-sm btn-link text-decoration-none fw-bold">Đăng ký ngay</a>
-</div>
-
+}
+@if (!Model.DiaChis.Any()) { 
+    
 <div class="alert alert-primary d-flex align-items-center justify-content-between border-0 shadow-sm mb-4" role="alert" style="background-color: #eef6fc;">
     <div>
         <i class="fas fa-map-marker-alt text-primary me-2"></i>
         <span class="text-primary fw-bold">Thêm địa chỉ để đặt đơn hàng nhanh hơn.</span>
     </div>
-    <a href="@Url.Action("SoDiaChi", "Member")" class="btn btn-sm btn-link text-decoration-none fw-bold">Thêm địa chỉ</a>
+    <a href="@Url.Action("ThongTinTaiKhoan", "Member")" class="btn btn-sm btn-link text-decoration-none fw-bold">Thêm địa chỉ</a>
 </div>
-
+}
 <div class="row">
     <div class="col-lg-8">
         <div class="bg-white rounded-3 shadow-sm p-3 h-100">

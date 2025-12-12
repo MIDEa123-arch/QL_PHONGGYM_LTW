@@ -5,6 +5,9 @@
 
     string currentStatus = Request.QueryString["status"] ?? "all";
     string currentDateRange = Request.QueryString["daterange"] ?? "";
+    
+    int currentPage = ViewBag.CurrentPage != null ? (int)ViewBag.CurrentPage : 1;
+    int totalPage = ViewBag.TotalPage != null ? (int)ViewBag.TotalPage : 1;
 }
 
 <style>
@@ -44,6 +47,27 @@
         color: #0d6efd !important;
         border-bottom: 2px solid #0d6efd;
     }
+
+    /* Style cho phân trang */
+    .pagination .page-link {
+        color: #333;
+        border: 1px solid #dee2e6;
+        margin: 0 2px;
+        border-radius: 4px;
+    }
+
+    .pagination .page-item.active .page-link {
+        background-color: #0d6efd;
+        border-color: #0d6efd;
+        color: #fff;
+    }
+
+    .pagination .page-item.disabled .page-link {
+        color: #6c757d;
+        pointer-events: none;
+        background-color: #fff;
+        border-color: #dee2e6;
+    }
 </style>
 
 <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
@@ -51,25 +75,25 @@
 <div class="bg-white rounded-3 shadow-sm px-4 py-2 h-100">
 
     <div class="d-flex gap-2 mb-3 justify-content-start overflow-auto pb-2 border-bottom">
-        <a href="@Url.Action("LichSuMuaHang", new { status = "all", daterange = currentDateRange })"
+        <a href="@Url.Action("LichSuMuaHang", new { status = "all", daterange = currentDateRange, page = 1 })"
            class="filter-btn @(currentStatus == "all" ? "filter-btn-active" : "filter-btn-default")">Tất cả</a>
 
-        <a href="@Url.Action("LichSuMuaHang", new { status = "cho-xac-nhan", daterange = currentDateRange })"
+        <a href="@Url.Action("LichSuMuaHang", new { status = "cho-xac-nhan", daterange = currentDateRange, page = 1 })"
            class="filter-btn @(currentStatus == "cho-xac-nhan" ? "filter-btn-active" : "filter-btn-default")">Chờ xác nhận</a>
 
-        <a href="@Url.Action("LichSuMuaHang", new { status = "cho-giao-hang", daterange = currentDateRange })"
+        <a href="@Url.Action("LichSuMuaHang", new { status = "cho-giao-hang", daterange = currentDateRange, page = 1 })"
            class="filter-btn @(currentStatus == "cho-giao-hang" ? "filter-btn-active" : "filter-btn-default")">Chờ giao hàng</a>
 
-        <a href="@Url.Action("LichSuMuaHang", new { status = "da-nhan-hang", daterange = currentDateRange })"
+        <a href="@Url.Action("LichSuMuaHang", new { status = "da-nhan-hang", daterange = currentDateRange, page = 1 })"
            class="filter-btn @(currentStatus == "da-nhan-hang" ? "filter-btn-active" : "filter-btn-default")">Đã nhận hàng</a>
 
-        <a href="@Url.Action("LichSuMuaHang", new { status = "da-thanh-toan", daterange = currentDateRange })"
+        <a href="@Url.Action("LichSuMuaHang", new { status = "da-thanh-toan", daterange = currentDateRange, page = 1 })"
            class="filter-btn @(currentStatus == "da-thanh-toan" ? "filter-btn-active" : "filter-btn-default")">Đã thanh toán</a>
 
-        <a href="@Url.Action("LichSuMuaHang", new { status = "chua-thanh-toan", daterange = currentDateRange })"
+        <a href="@Url.Action("LichSuMuaHang", new { status = "chua-thanh-toan", daterange = currentDateRange, page = 1 })"
            class="filter-btn @(currentStatus == "chua-thanh-toan" ? "filter-btn-active" : "filter-btn-default")">Chưa thanh toán</a>
 
-        <a href="@Url.Action("LichSuMuaHang", new { status = "da-huy", daterange = currentDateRange })"
+        <a href="@Url.Action("LichSuMuaHang", new { status = "da-huy", daterange = currentDateRange, page = 1 })"
            class="filter-btn @(currentStatus == "da-huy" ? "filter-btn-active" : "filter-btn-default")">Đã hủy</a>
     </div>
 
@@ -116,7 +140,7 @@
                                     }
 
                                     if (trangThaiHienThi == "Đã giao hàng" || trangThaiHienThi == "Đã thanh toán")
-                                    {                                        
+                                    {
                                         colorClass = "text-success";
                                         bgClass = "#c9eed9";
                                     }
@@ -135,8 +159,8 @@
                                     @if (trangThaiHienThi == "Đã giao hàng")
                                     {
                                         trangThaiHienThi = "Đã nhận hàng";
-                                    }                                    
-                                        @trangThaiHienThi
+                                    }
+                                    @trangThaiHienThi
 
                                 </div>
                             </div>
@@ -200,6 +224,38 @@
                 </a>
             }
         </div>
+        
+        if (totalPage > 1)
+        {
+            <nav aria-label="Page navigation" class="mt-4 pb-3">
+                <ul class="pagination justify-content-center">
+
+                    @* Nút Previous *@
+                    <li class="page-item @(currentPage == 1 ? "disabled" : "")">
+                        <a class="page-link" href="@Url.Action("LichSuMuaHang", new { status = currentStatus, daterange = currentDateRange, page = currentPage - 1 })">
+                            <i class="fas fa-chevron-left"></i>
+                        </a>
+                    </li>
+
+                    @* Các số trang *@
+                    @for (int i = 1; i <= totalPage; i++)
+                    {
+                        <li class="page-item @(currentPage == i ? "active" : "")">
+                            <a class="page-link" href="@Url.Action("LichSuMuaHang", new { status = currentStatus, daterange = currentDateRange, page = i })">
+                                @i
+                            </a>
+                        </li>
+                    }
+
+                    @* Nút Next *@
+                    <li class="page-item @(currentPage == totalPage ? "disabled" : "")">
+                        <a class="page-link" href="@Url.Action("LichSuMuaHang", new { status = currentStatus, daterange = currentDateRange, page = currentPage + 1 })">
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        }
     }
     else
     {
@@ -250,19 +306,22 @@
                 $('input[name="daterange"]').val(start.format('DD/MM/YYYY') + ' - ' + end.format('DD/MM/YYYY'));
             }
 
+            // Khi chọn ngày -> Reset về page 1
             $('input[name="daterange"]').on('apply.daterangepicker', function (ev, picker) {
                 var selectedRange = picker.startDate.format('DD/MM/YYYY') + ' - ' + picker.endDate.format('DD/MM/YYYY');
                 $(this).val(selectedRange);
                 var urlParams = new URLSearchParams(window.location.search);
                 var currentStatus = urlParams.get('status') || 'all';
-                window.location.href = '@Url.Action("LichSuMuaHang", "Member")' + '?status=' + currentStatus + '&daterange=' + selectedRange;
+                // Thêm &page=1 để reset về trang đầu khi lọc
+                window.location.href = '@Url.Action("LichSuMuaHang", "Member")' + '?status=' + currentStatus + '&daterange=' + selectedRange + '&page=1';
             });
 
+            // Khi xóa ngày -> Reset về page 1
             $('input[name="daterange"]').on('cancel.daterangepicker', function (ev, picker) {
                 $(this).val('');
                 var urlParams = new URLSearchParams(window.location.search);
                 var currentStatus = urlParams.get('status') || 'all';
-                window.location.href = '@Url.Action("LichSuMuaHang", "Member")' + '?status=' + currentStatus;
+                window.location.href = '@Url.Action("LichSuMuaHang", "Member")' + '?status=' + currentStatus + '&page=1';
             });
         });
     </script>
