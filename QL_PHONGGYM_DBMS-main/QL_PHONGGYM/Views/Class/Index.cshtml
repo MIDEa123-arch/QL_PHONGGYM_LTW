@@ -244,24 +244,31 @@
                                     { <span>@string.Format("{0:N0}đ", item.HocPhi)</span>}
                                 </div>
 
-                                @if (!item.DaDangKy && !item.BiTrungLich)
-                                {
-                                    if (Session["MaKH"] != null)
-                                    {
-                                        <a href="@Url.Action("CheckOutLopHoc", "Class", new { maLop = item.MaLop, url = Request.RawUrl })"
-                                           class="btn btn-outline-primary btn-sm fw-bold px-3 rounded-pill">
-                                            Đăng ký ngay
-                                        </a>
-                                    }
-                                    else
-                                    {
-                                        <button class="btn btn-outline-primary btn-sm fw-bold px-3 rounded-pill"
-                                                data-bs-toggle="modal" data-bs-target="#loginModal">
-                                            Đăng ký ngay
-                                        </button>
-                                    }
-                                }
+                                <div class="d-flex gap-2">
 
+                                    <button type="button" class="btn btn-outline-info btn-sm fw-bold px-3 rounded-pill"
+                                            onclick="showSchedule(@item.MaLop, '@item.TenLop')">
+                                        <i class="fas fa-calendar-alt me-1"></i> Xem lịch
+                                    </button>
+
+                                    @if (!item.DaDangKy && !item.BiTrungLich)
+                                    {
+                                        if (Session["MaKH"] != null)
+                                        {
+                                            <a href="@Url.Action("CheckOutLopHoc", "Class", new { maLop = item.MaLop, url = Request.RawUrl })"
+                                               class="btn btn-primary btn-sm fw-bold px-3 rounded-pill">
+                                                Đăng ký
+                                            </a>
+                                        }
+                                        else
+                                        {
+                                            <button class="btn btn-primary btn-sm fw-bold px-3 rounded-pill"
+                                                    data-bs-toggle="modal" data-bs-target="#loginModal">
+                                                Đăng ký
+                                            </button>
+                                        }
+                                    }
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -322,6 +329,30 @@
     </div>
 </div>
 
+<div class="modal fade" id="scheduleModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title fw-bold" id="scheduleModalLabel">
+                    <i class="fas fa-calendar-week me-2"></i>Lịch học: <span id="modalClassName"></span>
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="scheduleContent" class="text-center py-4">
+                    <div class="spinner-border text-info" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     function closeCustomAlert() {
         var overlay = document.getElementById('custom-alert-overlay');
@@ -336,5 +367,26 @@
             overlay.style.display = 'none';
         }
     }
+
+    function showSchedule(maLop, tenLop) {
+        document.getElementById('modalClassName').innerText = tenLop;
+
+        var contentDiv = document.getElementById('scheduleContent');
+        contentDiv.innerHTML = '<div class="text-center py-3"><div class="spinner-border text-info"></div><p class="mt-2">Đang tải lịch học...</p></div>';
+
+        var myModal = new bootstrap.Modal(document.getElementById('scheduleModal'));
+        myModal.show();
+
+        $.ajax({
+            url: '/Class/GetLichHoc',
+            type: 'GET',
+            data: { maLop: maLop },
+            success: function (response) {
+                contentDiv.innerHTML = response;
+            },
+            error: function () {
+                contentDiv.innerHTML = '<div class="alert alert-danger">Không thể tải dữ liệu lịch học.</div>';
+            }
+        });
+    }
 </script>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>

@@ -11,25 +11,37 @@ namespace QL_PHONGGYM.Controllers
     {
         private readonly QL_PHONGGYMEntities _context = new QL_PHONGGYMEntities();
 
-        public ActionResult Index(string search = "", string status = "")
+        public ActionResult Index(string search = "", string status = "", int page = 1)
         {
             if (Session["AdminUser"] == null) return RedirectToAction("Login", "Auth");
 
             var query = _context.HoaDons
                 .Include("KhachHang")
-                .OrderByDescending(h => h.NgayLap)
-                .ToList();
+                .AsQueryable();
+
             if (!string.IsNullOrEmpty(search))
             {
-                query = query.Where(h => h.KhachHang.TenKH.Contains(search)).ToList();
+                query = query.Where(h => h.KhachHang.TenKH.Contains(search));
             }
             if (!string.IsNullOrEmpty(status))
             {
-                query = query.Where(h => h.TrangThai == status).ToList();
+                query = query.Where(h => h.TrangThai == status);
             }
+
+            int pageSize = 10;
+            int totalRecord = query.Count();
+            int totalPages = (int)Math.Ceiling((double)totalRecord / pageSize);
+
+            var list = query.OrderByDescending(h => h.NgayLap)
+                            .Skip((page - 1) * pageSize)
+                            .Take(pageSize)
+                            .ToList();
+
             ViewBag.CurrentSearch = search;
             ViewBag.CurrentStatus = status;
-            var list = query.OrderByDescending(h => h.NgayLap).ToList();    
+            ViewBag.TotalPages = totalPages;
+            ViewBag.CurrentPage = page;
+
             return View(list);
         }
 

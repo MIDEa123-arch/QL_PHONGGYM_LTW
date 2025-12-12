@@ -125,6 +125,35 @@
             </table>
         </div>
     </div>
+    @if (ViewBag.TotalPages > 1)
+    {
+        <div class="card-footer bg-white py-3">
+            <nav aria-label="Page navigation">
+                <ul class="pagination justify-content-center mb-0">
+                    @if (ViewBag.CurrentPage > 1)
+                    {
+                        <li class="page-item">
+                            <a class="page-link" href="@Url.Action("Index", new { page = ViewBag.CurrentPage - 1, search = ViewBag.CurrentSearch, maChucVu = ViewBag.CurrentMaChucVu })">Trước</a>
+                        </li>
+                    }
+
+                    @for (int i = 1; i <= ViewBag.TotalPages; i++)
+                    {
+                        <li class="page-item @(i == ViewBag.CurrentPage ? "active" : "")">
+                            <a class="page-link" href="@Url.Action("Index", new { page = i, search = ViewBag.CurrentSearch, maChucVu = ViewBag.CurrentMaChucVu })">@i</a>
+                        </li>
+                    }
+
+                    @if (ViewBag.CurrentPage < ViewBag.TotalPages)
+                    {
+                        <li class="page-item">
+                            <a class="page-link" href="@Url.Action("Index", new { page = ViewBag.CurrentPage + 1, search = ViewBag.CurrentSearch, maChucVu = ViewBag.CurrentMaChucVu })">Sau</a>
+                        </li>
+                    }
+                </ul>
+            </nav>
+        </div>
+    }
 </div>
 
 @section scripts {
@@ -134,9 +163,7 @@
         function confirmToggle(id, action, color) {
             if (confirm(`Bạn có chắc chắn muốn ${action} tài khoản nhân viên này không?`)) {
 
-                // --- Xử lý giao diện nút bấm ---
                 var btn = event.target;
-                // Nếu bấm vào icon <i> bên trong nút, lấy thẻ cha là <button>
                 if (btn.tagName === 'I') btn = btn.parentElement;
 
                 var oldHtml = btn.innerHTML;
@@ -144,27 +171,24 @@
                 btn.disabled = true;
 
                 $.ajax({
-                    // --- QUAN TRỌNG: Tên Controller phải là AdminStaff ---
                     url: '@Url.Action("ToggleAccountStatus", "AdminStaff")',
                     type: 'POST',
                     data: { id: id },
                     success: function (res) {
-                        // Khôi phục nút
                         btn.innerHTML = oldHtml;
                         btn.disabled = false;
 
                         if (res.success) {
                             alert(res.message);
-                            // Tải lại trang (Bỏ qua cache)
                             window.location.href = window.location.href.split('?')[0] + "?t=" + new Date().getTime();
                         } else {
-                            alert(res.message); // Hiện thông báo lỗi ràng buộc
+                            alert(res.message);
                         }
                     },
                     error: function (xhr) {
                         btn.innerHTML = oldHtml;
                         btn.disabled = false;
-                        console.log(xhr); // Xem lỗi chi tiết trong Console
+                        console.log(xhr);
                         alert("Lỗi kết nối! (Mã lỗi: " + xhr.status + "). Kiểm tra lại tên Controller.");
                     }
                 });
