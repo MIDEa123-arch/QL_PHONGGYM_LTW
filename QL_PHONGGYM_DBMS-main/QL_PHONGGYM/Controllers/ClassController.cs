@@ -19,13 +19,13 @@ namespace QL_PHONGGYM.Controllers
             var db = new QL_PHONGGYMEntities();
             _productRepo = new ProductRepository(db);
             _cartRepo = new CartRepository(db);
-            _khachhangRepo = new KhachHangRepository(db);            
+            _khachhangRepo = new KhachHangRepository(db);
         }
+
         private bool KiemTraDangNhap()
         {
             if (Session["MaKH"] == null)
                 return false;
-
 
             if (!int.TryParse(Session["MaKH"].ToString(), out int maKH))
                 return false;
@@ -49,6 +49,7 @@ namespace QL_PHONGGYM.Controllers
 
             return true;
         }
+
         public ActionResult Index(string search = "", int? chuyenMonId = null, string filterType = "", int? page = 1)
         {
             int? maKH = null;
@@ -95,7 +96,6 @@ namespace QL_PHONGGYM.Controllers
 
                 return View(lop);
             }
-
             catch (Exception ex)
             {
                 TempData["ErrorMessage"] = ex.Message;
@@ -126,6 +126,21 @@ namespace QL_PHONGGYM.Controllers
 
                 string returnUrl = form["returnUrl"] ?? Url.Action("Index", "Class");
                 return RedirectToAction("CheckOutLopHoc", new { maLop = lop, url = returnUrl });
+            }
+        }
+
+        public ActionResult GetLichHoc(int maLop)
+        {
+            using (var db = new QL_PHONGGYMEntities())
+            {
+
+                var lichHoc = db.LichLops
+                    .Where(l => l.MaLop == maLop)
+                    .OrderBy(l => l.NgayHoc)
+                    .ThenBy(l => l.GioBatDau)
+                    .ToList();
+
+                return PartialView("_LichHocPartial", lichHoc);
             }
         }
     }

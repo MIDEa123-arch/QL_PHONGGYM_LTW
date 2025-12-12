@@ -4,7 +4,7 @@
   <edmx:Runtime>
     <!-- SSDL content -->
     <edmx:StorageModels>
-      <Schema Namespace="qlgymModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+    <Schema Namespace="qlgymModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
         <EntityType Name="CheckIn">
           <Key>
             <PropertyRef Name="MaCheckIn" />
@@ -948,8 +948,7 @@
             <End Role="YeuCauHoTro" EntitySet="YeuCauHoTro" />
           </AssociationSet>
         </EntityContainer>
-      </Schema>
-    </edmx:StorageModels>
+      </Schema></edmx:StorageModels>
     <!-- CSDL content -->
     <edmx:ConceptualModels>
       <Schema Namespace="qlgymModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
@@ -1775,7 +1774,7 @@
             <Parameter Name="IsMain" Mode="In" Type="Boolean" />
           </FunctionImport>
           <FunctionImport Name="sp_HinhAnh_Xoa" ReturnType="Collection(Int32)">
-            <Parameter Name="MaHinh" Mode="In" Type="Int32" />
+          <Parameter Name="MaHinh" Mode="In" Type="Int32" />
           </FunctionImport>
           <FunctionImport Name="sp_KhachHangDangKy">
             <Parameter Name="TenKH" Mode="In" Type="String" />
@@ -1834,7 +1833,7 @@
             <Parameter Name="TrangThai" Mode="In" Type="Int32" />
           </FunctionImport>
           <FunctionImport Name="sp_ThemChucVu">
-            <Parameter Name="TenChucVu" Mode="In" Type="String" />
+          <Parameter Name="TenChucVu" Mode="In" Type="String" />
           </FunctionImport>
           <FunctionImport Name="sp_ThemChuyenMon">
             <Parameter Name="TenChuyenMon" Mode="In" Type="String" />
@@ -1861,7 +1860,7 @@
             <Parameter Name="TrangThai" Mode="In" Type="String" />
           </FunctionImport>
           <FunctionImport Name="sp_ThemLoaiSanPham" ReturnType="Collection(Decimal)">
-            <Parameter Name="TenLoaiSP" Mode="In" Type="String" />
+          <Parameter Name="TenLoaiSP" Mode="In" Type="String" />
           </FunctionImport>
           <FunctionImport Name="sp_ThemLopHocVaLich">
             <Parameter Name="TenLop" Mode="In" Type="String" />
@@ -1902,23 +1901,23 @@
           </FunctionImport>
           <FunctionImport Name="sp_UpdateTrangThaiLichLop" />
           <FunctionImport Name="sp_XoaChucVu">
-            <Parameter Name="MaChucVu" Mode="In" Type="Int32" />
+          <Parameter Name="MaChucVu" Mode="In" Type="Int32" />
           </FunctionImport>
           <FunctionImport Name="sp_XoaChuyenMon">
-            <Parameter Name="MaCM" Mode="In" Type="Int32" />
+          <Parameter Name="MaCM" Mode="In" Type="Int32" />
           </FunctionImport>
           <FunctionImport Name="sp_XoaNhanVien">
-            <Parameter Name="MaNV" Mode="In" Type="Int32" />
+          <Parameter Name="MaNV" Mode="In" Type="Int32" />
           </FunctionImport>
           <FunctionImport Name="sp_XoaNhanVienChuyenMon">
             <Parameter Name="MaNV" Mode="In" Type="Int32" />
             <Parameter Name="MaCM" Mode="In" Type="Int32" />
           </FunctionImport>
           <FunctionImport Name="sp_XoaSanPham">
-            <Parameter Name="MaSP" Mode="In" Type="Int32" />
+          <Parameter Name="MaSP" Mode="In" Type="Int32" />
           </FunctionImport>
           <FunctionImport Name="XoaLichVaLop">
-            <Parameter Name="MaLop" Mode="In" Type="Int32" />
+          <Parameter Name="MaLop" Mode="In" Type="Int32" />
           </FunctionImport>
         </EntityContainer>
         <ComplexType Name="sp_KhachHangLogin_Result">

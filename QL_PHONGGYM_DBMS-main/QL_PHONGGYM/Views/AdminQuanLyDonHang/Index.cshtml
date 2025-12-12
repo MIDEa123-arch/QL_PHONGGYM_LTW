@@ -8,16 +8,19 @@
         <h5 class="mb-0 fw-bold text-primary"><i class="fas fa-box-open me-2"></i> Quản lý Đơn hàng</h5>
         <div class="row g-2 mt-3">
             <div class="col-md-4">
-                <input type="text" id="txtSearch" class="form-control" placeholder="Tìm mã đơn hoặc tên khách..." onkeyup="FilterOrders()">
+                <input type="text" id="txtSearch" class="form-control" value="@ViewBag.CurrentSearch" placeholder="Tìm mã đơn hoặc tên khách..." onkeyup="if(event.keyCode===13) FilterOrders(1)">
             </div>
             <div class="col-md-3">
-                <select id="ddlStatus" class="form-select" onchange="FilterOrders()">
-                    <option value="">-- Tất cả trạng thái --</option>
-                    <option value="Chờ xác nhận">Chờ xác nhận</option>
-                    <option value="Chờ giao hàng">Chờ giao hàng</option>
-                    <option value="Đã giao hàng">Đã giao hàng</option>
-                    <option value="Đã hủy">Đã hủy</option>
+                <select id="ddlStatus" class="form-select" onchange="FilterOrders(1)">
+                    <option value="" @(ViewBag.CurrentStatus == "" ? "selected" : "")>-- Tất cả trạng thái --</option>
+                    <option value="Chờ xác nhận" @(ViewBag.CurrentStatus == "Chờ xác nhận" ? "selected" : "")>Chờ xác nhận</option>
+                    <option value="Chờ giao hàng" @(ViewBag.CurrentStatus == "Chờ giao hàng" ? "selected" : "")>Chờ giao hàng</option>
+                    <option value="Đã giao hàng" @(ViewBag.CurrentStatus == "Đã giao hàng" ? "selected" : "")>Đã giao hàng</option>
+                    <option value="Đã hủy" @(ViewBag.CurrentStatus == "Đã hủy" ? "selected" : "")>Đã hủy</option>
                 </select>
+            </div>
+            <div class="col-md-2">
+                <button type="button" class="btn btn-primary w-100" onclick="FilterOrders(1)">Tìm kiếm</button>
             </div>
         </div>
     </div>
@@ -26,6 +29,36 @@
             @Html.Partial("DanhSachDonHang", Model)
         </div>
     </div>
+
+    @if (ViewBag.TotalPages > 1)
+    {
+        <div class="card-footer bg-white py-3">
+            <nav aria-label="Page navigation">
+                <ul class="pagination justify-content-center mb-0">
+                    @if (ViewBag.CurrentPage > 1)
+                    {
+                        <li class="page-item">
+                            <a class="page-link" href="javascript:void(0)" onclick="FilterOrders(@(ViewBag.CurrentPage - 1))">Trước</a>
+                        </li>
+                    }
+
+                    @for (int i = 1; i <= ViewBag.TotalPages; i++)
+                    {
+                        <li class="page-item @(i == ViewBag.CurrentPage ? "active" : "")">
+                            <a class="page-link" href="javascript:void(0)" onclick="FilterOrders(@i)">@i</a>
+                        </li>
+                    }
+
+                    @if (ViewBag.CurrentPage < ViewBag.TotalPages)
+                    {
+                        <li class="page-item">
+                            <a class="page-link" href="javascript:void(0)" onclick="FilterOrders(@(ViewBag.CurrentPage + 1))">Sau</a>
+                        </li>
+                    }
+                </ul>
+            </nav>
+        </div>
+    }
 </div>
 
 <div class="modal fade" id="orderModal" tabindex="-1">
@@ -44,21 +77,23 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
     <script>
-        // --- HÀM 1: LỌC DỮ LIỆU ---
-        function FilterOrders() {
+
+        function FilterOrders(page) {
             var search = $('#txtSearch').val();
             var status = $('#ddlStatus').val();
 
+            if (!page) page = 1;
+
             $.ajax({
-                url: '/AdminQuanLyDonHang/Index',
+                url: '/AdminOrder/Index',
                 type: 'GET',
                 data: {
                     search: search,
                     status: status,
-                    isAjax: true // <--- DÒNG NÀY RẤT QUAN TRỌNG
+                    page: page, 
+                    isAjax: true
                 },
                 success: function (res) {
-                    // Sau khi sửa Controller, 'res' lúc này chỉ là nội dung của bảng
                     $('#orderTableContainer').html(res);
                 },
                 error: function () {
@@ -67,9 +102,7 @@
             });
         }
 
-        // --- HÀM 2: XỬ LÝ TRẠNG THÁI (Đặt ở đây để không bị lỗi 'is not defined') ---
         function updateOrderStatus(id, action, e) {
-            // 1. Chặn submit form (Sửa lỗi load lại trang)
             if (e) {
                 e.preventDefault();
                 e.stopPropagation();
@@ -80,7 +113,6 @@
 
             if (!confirm(msg)) return;
 
-            // Hiệu ứng nút bấm
             var btn = e ? e.target : null;
             if (btn && btn.tagName === 'I') btn = btn.parentElement;
 
@@ -92,14 +124,17 @@
             }
 
             $.ajax({
-                url: '/AdminQuanLyDonHang/UpdateOrderStatus',
+                url: '/AdminOrder/UpdateStatus', 
                 type: 'POST',
-                data: { id: id, action: action },
+                data: { id: id, status: (action == 'cancel' ? 'Hủy' : (action == 'ship' ? 'Đã giao hàng' : 'Chờ giao hàng')) },
+
                 success: function (res) {
                     if (res.success) {
-                        alert(res.message);
-                        // Gọi lại hàm Filter để cập nhật bảng
-                        FilterOrders();
+                        alert("Cập nhật thành công!");
+
+                        var currentPage = $('.pagination .page-item.active .page-link').text();
+                        FilterOrders(currentPage ? currentPage : 1);
+
                     } else {
                         alert("Lỗi: " + res.message);
                         if (btn) {
@@ -117,21 +152,17 @@
                 }
             });
         }
-        function viewOrder(id) {
-            // 1. Hiển thị text "Đang tải..." trong modal trước
-            $('#modalContent').html('<div class="text-center py-4"><div class="spinner-border text-primary"></div><br>Đang tải dữ liệu...</div>');
 
-            // 2. Mở Modal
+        function viewOrder(id) {
+            $('#modalContent').html('<div class="text-center py-4"><div class="spinner-border text-primary"></div><br>Đang tải dữ liệu...</div>');
             var myModal = new bootstrap.Modal(document.getElementById('orderModal'));
             myModal.show();
 
-            // 3. Gọi AJAX lấy nội dung chi tiết
             $.ajax({
-                url: '/AdminQuanLyDonHang/Details',
+                url: '/AdminOrder/Details', 
                 type: 'GET',
                 data: { id: id },
                 success: function (res) {
-                    // Nhét HTML nhận được vào bụng Modal
                     $('#modalContent').html(res);
                 },
                 error: function () {

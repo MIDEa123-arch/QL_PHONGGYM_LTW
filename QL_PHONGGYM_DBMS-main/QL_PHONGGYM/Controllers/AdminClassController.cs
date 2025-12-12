@@ -11,31 +11,44 @@ namespace QL_PHONGGYM.Controllers
     {
         private readonly QL_PHONGGYMEntities _context = new QL_PHONGGYMEntities();
 
-        public ActionResult Index(string search = "", int maCM = 0)
+        public ActionResult Index(string search = "", int maCM = 0, int page = 1)
         {
             if (Session["AdminUser"] == null) return RedirectToAction("Login", "Auth");
 
             var query = _context.LopHocs
                 .Include("ChuyenMon")
                 .Include("NhanVien")
-                .OrderByDescending(l => l.NgayBatDau)
-                .ToList();
+                .AsQueryable();
+
             if (!string.IsNullOrEmpty(search))
             {
                 search = search.Trim().ToLower();
-                query = query.Where(x => x.TenLop.ToLower().Contains(search)).ToList();
+                query = query.Where(x => x.TenLop.ToLower().Contains(search));
             }
             if (maCM > 0)
             {
-                query = query.Where(x => x.MaCM == maCM).ToList();
+                query = query.Where(x => x.MaCM == maCM);
             }
+
+            query = query.OrderByDescending(l => l.NgayBatDau);
+
+            int pageSize = 10;
+            int totalRecord = query.Count();
+            int totalPages = (int)Math.Ceiling((double)totalRecord / pageSize);
+
+            var model = query
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+
             ViewBag.ListChuyenMon = new SelectList(_context.ChuyenMons, "MaCM", "TenChuyenMon", maCM);
             ViewBag.CurrentSearch = search;
             ViewBag.CurrentMaCM = maCM;
-            var model = query.OrderByDescending(x => x.MaLop).ToList();
+            ViewBag.TotalPages = totalPages;
+            ViewBag.CurrentPage = page;
+
             return View(model);
         }
-
         public ActionResult Create()
         {
             if (Session["AdminUser"] == null)

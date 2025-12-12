@@ -87,8 +87,39 @@
                 </tbody>
             </table>
         </div>
+
+        @if (ViewBag.TotalPages > 1)
+        {
+            <div class="p-3">
+                <nav aria-label="Page navigation">
+                    <ul class="pagination justify-content-center mb-0">
+                        @if (ViewBag.CurrentPage > 1)
+                        {
+                            <li class="page-item">
+                                <a class="page-link" href="@Url.Action("Index", new { page = ViewBag.CurrentPage - 1, search = ViewBag.CurrentSearch, MaCM = ViewBag.CurrentMaCM })">Trước</a>
+                            </li>
+                        }
+
+                        @for (int i = 1; i <= ViewBag.TotalPages; i++)
+                        {
+                            <li class="page-item @(i == ViewBag.CurrentPage ? "active" : "")">
+                                <a class="page-link" href="@Url.Action("Index", new { page = i, search = ViewBag.CurrentSearch, MaCM = ViewBag.CurrentMaCM })">@i</a>
+                            </li>
+                        }
+
+                        @if (ViewBag.CurrentPage < ViewBag.TotalPages)
+                        {
+                            <li class="page-item">
+                                <a class="page-link" href="@Url.Action("Index", new { page = ViewBag.CurrentPage + 1, search = ViewBag.CurrentSearch, MaCM = ViewBag.CurrentMaCM })">Sau</a>
+                            </li>
+                        }
+                    </ul>
+                </nav>
+            </div>
+        }
     </div>
 </div>
+
 <div class="modal fade" id="scheduleModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">
@@ -112,6 +143,7 @@
         </div>
     </div>
 </div>
+
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
     function deleteClass(id) {
@@ -130,27 +162,21 @@
             });
         }
     }
-</script>
 
-<script>
-    // Hàm gọi Modal Xem Lịch
     function viewSchedule(id) {
         var myModalEl = document.getElementById('scheduleModal');
-        // 1. Hiện Modal lên trước
         var myModal = bootstrap.Modal.getInstance(myModalEl);
         if (!myModal) {
             myModal = new bootstrap.Modal(myModalEl);
         }
         myModal.show();
 
-        // 2. Reset nội dung loading
         document.getElementById('modalScheduleContent').innerHTML = `
         <div class="text-center py-5">
             <div class="spinner-border text-primary" role="status"></div>
             <p class="mt-2">Đang tải dữ liệu...</p>
         </div>`;
 
-        // 3. Gọi Ajax lấy dữ liệu
         fetch('/AdminClass/GetSchedule/' + id)
             .then(response => response.text())
             .then(html => {
@@ -161,6 +187,7 @@
                     '<div class="alert alert-danger m-3">Không thể tải lịch học. Vui lòng thử lại!</div>';
             });
     }
+
     function cancelSession(maLich, maLop) {
         if (confirm('Bạn có chắc muốn HOÃN/HỦY buổi học này không?\nHành động này sẽ đổi trạng thái buổi học thành "Đã hủy".')) {
             $.ajax({
@@ -170,7 +197,6 @@
                 success: function (res) {
                     if (res.success) {
                         alert(res.message);
-
                         viewSchedule(maLop);
                     } else {
                         alert(res.message);
@@ -182,9 +208,7 @@
             });
         }
     }
-</script>
 
-<script>
     function deleteItem(id) {
         if (confirm('Bạn có chắc muốn xóa lớp học này?\n(Lưu ý: Chỉ xóa được nếu lớp chưa có học viên đăng ký).')) {
             $.ajax({
@@ -211,33 +235,47 @@
             var keyword = document.getElementById('txtSearch').value;
             var maCM = document.getElementById('ddlMaCM').value;
             var container = document.getElementById('tableContent');
-            container.style.opacity = '0.5';
-            var url = `/AdminClass/Filter?search=${encodeURIComponent(keyword)}&maCM=${maCM}`;
-            fetch(url)
-                .then(response => {
-                    if (!response.ok) throw new Error("Lỗi mạng");
-                    return response.text();
-                })
-                .then(html => {
-                    container.innerHTML = html;
-                    container.style.opacity = '1';
-                })
-                .catch(error => {
-                    console.error('Lỗi:', error);
-                    alert('Không thể tải dữ liệu.');
-                    container.style.opacity = '1';
-                });
+
+            if(container) {
+                container.style.opacity = '0.5';
+                var url = `/AdminClass/Filter?search=${encodeURIComponent(keyword)}&maCM=${maCM}`;
+                fetch(url)
+                    .then(response => {
+                        if (!response.ok) throw new Error("Lỗi mạng");
+                        return response.text();
+                    })
+                    .then(html => {
+                        container.innerHTML = html;
+                        container.style.opacity = '1';
+                    })
+                    .catch(error => {
+                        console.error('Lỗi:', error);
+                        alert('Không thể tải dữ liệu.');
+                        container.style.opacity = '1';
+                    });
+            }
         }
 
-        document.getElementById('ddlMaCM').addEventListener('change', loadData);
-        document.getElementById('btnSearch').addEventListener('click', loadData);
-        document.getElementById('txtSearch').addEventListener('keypress', function (e) {
-            if (e.key === 'Enter') loadData();
-        });
-        document.getElementById('btnReset').addEventListener('click', function () {
-            document.getElementById('txtSearch').value = '';
-            document.getElementById('ddlMaCM').value = '0';
-            loadData();
-        });
+        var ddlMaCM = document.getElementById('ddlMaCM');
+        if(ddlMaCM) ddlMaCM.addEventListener('change', loadData);
+
+        var btnSearch = document.getElementById('btnSearch');
+        if(btnSearch) btnSearch.addEventListener('click', loadData);
+
+        var txtSearch = document.getElementById('txtSearch');
+        if(txtSearch) {
+            txtSearch.addEventListener('keypress', function (e) {
+                if (e.key === 'Enter') loadData();
+            });
+        }
+
+        var btnReset = document.getElementById('btnReset');
+        if(btnReset) {
+            btnReset.addEventListener('click', function () {
+                document.getElementById('txtSearch').value = '';
+                document.getElementById('ddlMaCM').value = '0';
+                loadData();
+            });
+        }
     });
 </script>

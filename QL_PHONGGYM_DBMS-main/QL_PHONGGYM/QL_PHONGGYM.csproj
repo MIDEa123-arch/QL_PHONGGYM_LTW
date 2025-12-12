@@ -667,6 +667,7 @@
     <Content Include="Views\AdminHome\UserProfile.cshtml" />
     <Content Include="Views\Account\ForgotPassword.cshtml" />
     <Content Include="Views\Account\XacThuc.cshtml" />
+    <Content Include="Views\Shared\_LichHocPartial.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
