@@ -1,11 +1,12 @@
 ﻿using QL_PHONGGYM.Models;
 using System;
 using System.Collections.Generic;
+using System.Data.Entity;
 using System.Linq;
+using System.Net;
+using System.Net.Mail;
 using System.Web;
 using System.Web.Mvc;
-using System.Data.Entity;
-using System.Net;
 
 namespace QL_PHONGGYM.Repositories
 {
@@ -18,6 +19,23 @@ namespace QL_PHONGGYM.Repositories
             _context = context;
         }
 
+        public bool KhoiPhucMK(string email, string mk)
+        {
+            var khach = _context.KhachHangs.FirstOrDefault(x => x.Email == email);
+            if (khach == null)
+                throw new Exception("Tài khoản không tồn tại");
+
+            try
+            {
+                khach.MatKhau = mk;
+                _context.SaveChanges();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
         public bool XoaDiaChi(int maDC)
         {
             try

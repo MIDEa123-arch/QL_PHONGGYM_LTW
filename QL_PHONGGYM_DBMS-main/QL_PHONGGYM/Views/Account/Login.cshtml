@@ -18,6 +18,27 @@
             padding-left: 0;
             margin-left: 0;
         }
+        .success-alert {
+            position: fixed;
+            top: 9%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 390px;
+            max-width: 90%;
+            background-color: #e1f9d1;
+            border: 1px solid #7df739;
+            z-index: 1050;
+        }
+
+            .success-alert .btn-close {
+                outline: none;
+                box-shadow: none;
+            }
+
+                .success-alert .btn-close:focus {
+                    outline: none;
+                    box-shadow: none;
+                }
 
         .login-alert {
             position: fixed;
@@ -183,6 +204,14 @@
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     }
+    @if (TempData["ThongBao"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show success-alert" role="alert">
+            <div class="text-success" style="font-size: 15px; line-height: 1.2;">@TempData["ThongBao"]</div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
 
     <div class="container-fluid h-100 p-0">
         <div class="row h-100 m-0">

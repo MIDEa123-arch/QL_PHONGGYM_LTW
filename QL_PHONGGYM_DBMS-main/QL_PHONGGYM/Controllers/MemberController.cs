@@ -334,11 +334,15 @@ namespace QL_PHONGGYM.Controllers
 
                 bool result = _cusRepo.DoiMatKhau(maKH, CurrentMatKhau, MatKhau);
 
-                if (result) TempData["ThongBao"] = "Đổi mật khẩu thành công.";
+                if (result) TempData["ThongBao"] = "Đổi mật khẩu thành công vui lòng đăng nhập lại.";
 
-                else TempData["Error"] = "Mật khẩu cũ không chính xác.";
-
-                return RedirectToAction("ThongTinTaiKhoan");
+                else
+                {
+                    TempData["Error"] = "Mật khẩu cũ không chính xác.";
+                    return RedirectToAction("ThongTinTaiKhoan");
+                } 
+                                        
+                return RedirectToAction("Login", "Account");
             }
             catch (Exception ex)
             {

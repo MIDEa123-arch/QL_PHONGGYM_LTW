@@ -3,7 +3,7 @@
 @foreach (var item in Model)
 {
     <li class="">
-        <a class="dropdown-item py-2 fs-6 pe-5 ps-3" href="#">@item.TenChuyenMon</a>
+        <a class="dropdown-item py-2 fs-6 pe-5 ps-3" href="@Url.Action("Index", "Class", new {chuyenMonId = item.MaCM})">@item.TenChuyenMon</a>
     </li>
 }
 

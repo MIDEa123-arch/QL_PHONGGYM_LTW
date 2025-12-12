@@ -34,13 +34,13 @@ namespace QL_PHONGGYM.Controllers
         public ActionResult ForgotPassword(FormCollection form)
         {
             if (String.IsNullOrEmpty(form["email"]))
-            {     
+            {
                 TempData["ErrorMessage"] = "Vui lòng nhập email";
                 return View();
             }
-            
+
             try
-            {                
+            {
                 string otp;
                 var result = _khoiPhucRepo.SendOTP(form["email"], out otp);
 
@@ -61,16 +61,16 @@ namespace QL_PHONGGYM.Controllers
             {
                 TempData["ErrorMessage"] = ex.Message;
                 return View();
-            }            
+            }
         }
 
         public ActionResult XacThuc(string email)
         {
             if (Session["AllowOTPPage"] == null)
                 return RedirectToAction("ForgotPassword");
-            
+
             Session.Remove("AllowOTPPage");
-         
+
             if (Session["OTP"] == null || Session["OTP_Expire"] == null)
                 return RedirectToAction("ForgotPassword");
 
@@ -97,8 +97,7 @@ namespace QL_PHONGGYM.Controllers
             if (DateTime.Now > expire)
             {
                 TempData["OtpError"] = "Mã OTP đã hết hạn!";
-                Session["AllowOTPPage"] = true;
-                return RedirectToAction("XacThuc", new { email = emailXacthuc });
+                return RedirectToAction("ForgotPassword");
             }
 
             if (userOtp != savedOtp)
@@ -107,13 +106,49 @@ namespace QL_PHONGGYM.Controllers
                 Session["AllowOTPPage"] = true;
                 return RedirectToAction("XacThuc", new { email = emailXacthuc });
             }
-            
+
+            return RedirectToAction("DatMatKhauMoi", new { email = emailXacthuc });
+        }
+
+        public ActionResult DatMatKhauMoi(string email)
+        {
+            if (Session["OTP"] == null || Session["OTP_Expire"] == null)
+                return RedirectToAction("ForgotPassword");
+
+            ViewBag.Email = email;
+
             Session.Remove("OTP");
             Session.Remove("OTP_Expire");
 
-            return RedirectToAction("DatMatKhauMoi");
+            return View();
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult DatMatKhauMoi(ResetPasswordViewModel model, string email)
+        {
+            if (!ModelState.IsValid)
+            {
+                ViewBag.Email = email;
+                return View(model);
+            }
+            try
+            {
+                var result = _khachhangRepo.KhoiPhucMK(email, model.MatKhau);
+                if (result)
+                {
+                    TempData["ThongBao"] = "Đổi mật khẩu thành công vui lòng đăng nhập lại";
+                    return RedirectToAction("Login");
+                }    
+                else
+                    return View(model);
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = ex.Message;
+                return RedirectToAction("ForgotPassword");
+            }            
+        }
 
         // GET: /Account/Register
         public ActionResult Register(string returnUrl)
@@ -179,7 +214,7 @@ namespace QL_PHONGGYM.Controllers
                     TempData["ErrorMessage"] = "Tên đăng nhập hoặc mật khẩu không chính xác.";
                     return View(model);
                 }
-                
+
                 Session["MaKH"] = user.MaKH;
 
                 string fullName = user.TenKH ?? "";

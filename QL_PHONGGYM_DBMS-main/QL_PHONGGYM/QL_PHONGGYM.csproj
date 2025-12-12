@@ -254,6 +254,7 @@
     <Compile Include="ViewModel\KhachHangLoginViewModel.cs" />
     <Compile Include="ViewModel\KhachHangRegisterViewModel.cs" />
     <Compile Include="ViewModel\LichTapItem.cs" />
+    <Compile Include="ViewModel\ResetPasswordViewModel.cs" />
     <Compile Include="ViewModel\SanPhamViewModel.cs" />
     <Compile Include="ViewModel\ThongTinLop.cs" />
     <Compile Include="ViewModel\UpdatePasswordViewModel.cs" />
@@ -668,6 +669,7 @@
     <Content Include="Views\Account\ForgotPassword.cshtml" />
     <Content Include="Views\Account\XacThuc.cshtml" />
     <Content Include="Views\Shared\_LichHocPartial.cshtml" />
+    <Content Include="Views\Account\DatMatKhauMoi.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

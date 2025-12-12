@@ -25,7 +25,7 @@ namespace QL_PHONGGYM.Helpers
             if (khach == null)
                 throw new Exception("Tài khoản không tồn tại");
 
-            otpCode = new Random().Next(10000, 9999).ToString(); // Tạo mã OTP 6 số
+            otpCode = new Random().Next(1000, 9999).ToString(); // Tạo mã OTP 6 số
             try
             {
                 var fromAddress = new MailAddress("thangdien0169@gmail.com", "The Gym Security");

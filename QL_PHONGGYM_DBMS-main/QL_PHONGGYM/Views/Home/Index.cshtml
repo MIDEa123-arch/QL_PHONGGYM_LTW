@@ -203,13 +203,13 @@
 <div class="container" style="margin-top: 100px">
     <div class="d-flex gap-5 align-items-end">
         <span class="fs-4 text-uppercase fw-bold">Start your training journey</span>
-        <a class="link-dark fw-bold fs-5" href="#">View All</a>
+        <a class="link-dark fw-bold fs-5" href="@Url.Action("Index", "Class")">View All</a>
     </div>
     <div class="row row-cols-2 row-cols-md-3 row-cols-lg-5 g-2 mt-3">
         @foreach (var item in ViewBag.Class)
         {
             <div class="col">
-                <a href=""
+                <a href="@Url.Action("Index", "Class", new {chuyenMonId = item.MaCM})"
                    class="card h-100 border-0 text-decoration-none">
                     <div class="position-relative">
                         <img src="@Url.Content("~/Content/Images/" + @item.TenChuyenMon + ".jpg")"
