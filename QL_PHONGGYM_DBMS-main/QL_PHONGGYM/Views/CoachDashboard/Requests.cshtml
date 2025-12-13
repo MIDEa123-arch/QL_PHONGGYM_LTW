@@ -1,0 +1,199 @@
+﻿@model List<QL_PHONGGYM.Models.DangKyPT>
+@{
+    ViewBag.Title = "Yêu Cầu Đăng Ký PT";
+    Layout = "~/Views/Shared/_LayoutCoach.cshtml";
+}
+
+<div class="card shadow-sm mb-4 border-0">
+    <div class="card-body bg-white rounded d-flex justify-content-between align-items-center py-3">
+        <h5 class="m-0 fw-bold text-primary">
+            <i class="fas fa-user-check me-2"></i> DANH SÁCH YÊU CẦU CHỜ DUYỆT
+        </h5>
+        <span class="badge bg-warning text-dark px-3 py-2 rounded-pill">
+            <i class="fas fa-clock me-1"></i> Chờ xử lý: @(Model != null ? Model.Count : 0)
+        </span>
+    </div>
+</div>
+
+<div class="card shadow-sm border-0">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="bg-light text-secondary text-uppercase small fw-bold">
+                    <tr>
+                        <th class="ps-4 py-3">Học Viên</th>
+                        <th>Ngày Đăng Ký</th>
+                        <th>Chi Tiết Gói</th>
+                        <th>Ghi Chú</th>
+                        <th class="text-end pe-4">Hành Động</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null && Model.Any())
+                    {
+                        foreach (var item in Model)
+                        {
+                            <tr>
+                                <td class="ps-4 py-3">
+                                    <div class="d-flex align-items-center">
+                                        <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center fw-bold me-3 shadow-sm" style="width: 45px; height: 45px; font-size: 1.1rem;">
+                                            @(item.KhachHang != null ? item.KhachHang.TenKH.Substring(0, 1) : "K")
+                                        </div>
+                                        <div>
+                                            <div class="fw-bold text-dark">@(item.KhachHang?.TenKH)</div>
+                                            <div class="small text-muted"><i class="fas fa-phone-alt me-1" style="font-size: 0.7rem;"></i> @(item.KhachHang?.SDT)</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="text-secondary fw-medium">
+                                        <i class="far fa-calendar-alt me-1"></i>
+                                        @item.NgayDangKy.ToString("dd/MM/yyyy")
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="badge bg-info bg-opacity-10 text-info border border-info mb-1">
+                                        @item.SoBuoi Buổi
+                                    </div>
+                                    <div class="small text-success fw-bold">
+                                        <i class="fas fa-money-bill-wave me-1"></i> @string.Format("{0:N0} đ", item.GiaMoiBuoi)/buổi
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="text-muted small fst-italic">
+                                        @(string.IsNullOrEmpty(item.GhiChu) ? "Không có ghi chú" : item.GhiChu)
+                                    </span>
+                                </td>
+                                <td class="text-end pe-4">
+                                    <button onclick="openApproveModal(@item.MaDKPT, '@item.KhachHang.TenKH', @item.SoBuoi)"
+                                            class="btn btn-primary btn-sm fw-bold shadow-sm px-3">
+                                        <i class="fas fa-check me-1"></i> Duyệt
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="5" class="text-center py-5">
+                                <p class="text-muted fw-bold m-0">Hiện không có yêu cầu nào.</p>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalDuyetPT" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title fw-bold"><i class="fas fa-handshake me-2"></i>Duyệt Hợp Đồng PT</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <input type="hidden" id="hiddenIdRequest" />
+
+                <div class="mb-3">
+                    <label class="form-label text-muted small fw-bold">KHÁCH HÀNG</label>
+                    <input type="text" class="form-control bg-light" id="displayTenKH" readonly>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label text-muted small fw-bold">SỐ BUỔI (THỎA THUẬN)</label>
+                    <div class="input-group">
+                        <button class="btn btn-outline-secondary" type="button" onclick="adjustValue(-1)">-</button>
+                        <input type="number" class="form-control text-center fw-bold" id="inputSoBuoi" value="0">
+                        <button class="btn btn-outline-secondary" type="button" onclick="adjustValue(1)">+</button>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label text-success small fw-bold">GIÁ MỖI BUỔI (VNĐ)</label>
+                    <input type="text" class="form-control border-success text-success fw-bold" id="inputGiaTien" placeholder="Nhập giá tiền...">
+                    <small class="text-muted fst-italic">* Nhập giá đã chốt với khách hàng (Ví dụ: 300,000)</small>
+                </div>
+            </div>
+            <div class="modal-footer border-0 bg-light">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy bỏ</button>
+                <button type="button" class="btn btn-success fw-bold px-4" id="btnConfirmDuyet">
+                    <i class="fas fa-check-circle me-1"></i> Xác Nhận Duyệt
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script>
+        // 1. Hàm mở Modal và điền dữ liệu
+        function openApproveModal(id, tenKH, soBuoi) {
+            $('#hiddenIdRequest').val(id);
+            $('#displayTenKH').val(tenKH);
+            $('#inputSoBuoi').val(soBuoi);
+            $('#inputGiaTien').val(''); // Reset giá tiền về rỗng để bắt buộc nhập
+
+            // Hiện modal
+            var myModal = new bootstrap.Modal(document.getElementById('modalDuyetPT'));
+            myModal.show();
+        }
+
+        // Helper: Tăng giảm số buổi
+        function adjustValue(delta) {
+            var val = parseInt($('#inputSoBuoi').val()) || 0;
+            if (val + delta > 0) $('#inputSoBuoi').val(val + delta);
+        }
+
+        // Helper: Format tiền tệ khi nhập (tự thêm dấu phẩy)
+        $('#inputGiaTien').on('input', function () {
+            var val = this.value.replace(/[^0-9]/g, '');
+            if (val) {
+                this.value = parseInt(val).toLocaleString('vi-VN');
+            } else {
+                this.value = '';
+            }
+        });
+
+        // 2. Sự kiện Click nút Xác Nhận trong Modal
+        $('#btnConfirmDuyet').click(function () {
+            var id = $('#hiddenIdRequest').val();
+            var soBuoi = $('#inputSoBuoi').val();
+
+            // Lấy giá tiền và xóa dấu phẩy/chấm để thành số nguyên
+            var rawGia = $('#inputGiaTien').val();
+            var gia = rawGia.replace(/[^0-9]/g, '');
+
+            if (gia == "" || parseInt(gia) <= 0) {
+                alert("Vui lòng nhập giá tiền hợp lệ!");
+                $('#inputGiaTien').focus();
+                return;
+            }
+
+            // Gửi AJAX
+            $.ajax({
+                url: '/CoachDashboard/DuyetYeuCau',
+                type: 'POST',
+                data: {
+                    id: id,
+                    soBuoi: soBuoi,
+                    gia: gia
+                },
+                success: function (res) {
+                    if (res.success) {
+                        alert(res.message);
+                        location.reload();
+                    } else {
+                        alert(res.message);
+                    }
+                },
+                error: function (err) {
+                    console.log(err);
+                    alert('Lỗi kết nối server!');
+                }
+            });
+        });
+    </script>
+}

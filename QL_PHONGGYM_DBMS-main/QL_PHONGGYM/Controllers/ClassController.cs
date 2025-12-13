@@ -62,17 +62,17 @@ namespace QL_PHONGGYM.Controllers
             ViewBag.CurrentSearch = search;
             ViewBag.CurrentChuyenMon = chuyenMonId;
             ViewBag.CurrentFilter = filterType;
-
             var listLop = _productRepo.GetLopHocs(search, chuyenMonId, maKH, filterType);
-
+            listLop = listLop.Where(l => l.NgayBatDau > DateTime.Today).ToList();
             int pageSize = 9;
             int pageNumber = (page ?? 1);
             int totalItems = listLop.Count();
-
             ViewBag.TotalPages = (int)Math.Ceiling((double)totalItems / pageSize);
             ViewBag.CurrentPage = pageNumber;
-
-            var pagedList = listLop.OrderBy(l => l.BiTrungLich).Skip((pageNumber - 1) * pageSize).Take(pageSize).ToList();
+            var pagedList = listLop.OrderBy(l => l.BiTrungLich)
+                                   .Skip((pageNumber - 1) * pageSize)
+                                   .Take(pageSize)
+                                   .ToList();
 
             return View(pagedList);
         }
