@@ -84,11 +84,13 @@ namespace QL_PHONGGYM.Repositories
             return list;
         }
 
-       
+
 
         public List<ThongTinLop> GetLopHocs(string keyword, int? maCM, int? maKH, string filterType)
         {
-            var query = _context.LopHocs.AsQueryable();
+            var query = _context.LopHocs.AsQueryable();            
+            DateTime today = DateTime.Now.Date;
+            query = query.Where(l => l.NgayBatDau > today);            
 
             if (!string.IsNullOrEmpty(keyword))
                 query = query.Where(l => l.TenLop.Contains(keyword));
@@ -96,7 +98,7 @@ namespace QL_PHONGGYM.Repositories
             if (maCM.HasValue)
                 query = query.Where(l => l.MaCM == maCM.Value);
 
-            var listLopRaw = query.OrderByDescending(l => l.NgayBatDau).ToList();
+            var listLopRaw = query.OrderBy(l => l.NgayBatDau).ToList(); 
 
             var result = new List<ThongTinLop>();
 
@@ -139,7 +141,7 @@ namespace QL_PHONGGYM.Repositories
             {
                 bool isJoined = joinedClasses.Contains(lop.MaLop);
                 bool isConflict = false;
-
+                
                 if (maKH.HasValue && !isJoined)
                 {
                     var lichCuaLopNay = _context.LichLops
@@ -150,7 +152,7 @@ namespace QL_PHONGGYM.Repositories
                     {
                         var ngayHocOnly = buoiHoc.NgayHoc.Date;
                         bool biTrung = userSchedule.Any(buoiBan =>
-                            buoiBan.Ngay.Date == ngayHocOnly && 
+                            buoiBan.Ngay.Date == ngayHocOnly &&
                             buoiHoc.GioBatDau < buoiBan.End &&
                             buoiHoc.GioKetThuc > buoiBan.Start
                         );
@@ -158,12 +160,12 @@ namespace QL_PHONGGYM.Repositories
                         if (biTrung)
                         {
                             isConflict = true;
-                            break; 
+                            break;
                         }
                     }
                 }
-                if (filterType == "not-joined" && isJoined) continue;
 
+                if (filterType == "not-joined" && isJoined) continue;                
                 if (filterType == "suitable" && (isJoined || isConflict)) continue;
 
                 var hlvName = _context.NhanViens.FirstOrDefault(nv => nv.MaNV == lop.MaNV)?.TenNV ?? "Đang cập nhật";
@@ -183,7 +185,7 @@ namespace QL_PHONGGYM.Repositories
                     SiSoHienTai = siSo,
                     SiSoToiDa = lop.SiSoToiDa,
                     DaDangKy = isJoined,
-                    BiTrungLich = isConflict, 
+                    BiTrungLich = isConflict,
                 });
             }
 
