@@ -1,0 +1,29 @@
+﻿@{
+    ViewBag.Title = "Truy Cập Bị Từ Chối";
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<div class="container-fluid py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-md-10">
+            <div class="card border-0 shadow-lg">
+                <div class="card-body p-5 text-center">
+                    <i class="fas fa-user-lock text-danger mb-4" style="font-size: 4rem;"></i>
+                    <h1 class="fw-bold text-danger mb-3">403 - TRUY CẬP BỊ TỪ CHỐI</h1>
+
+                    <p class="lead mb-4">
+                        Tài khoản của bạn (**@Session["AdminRole"]**) không có đủ quyền hạn để truy cập vào trang này.
+                    </p>
+
+                    <div class="alert alert-info border-info">
+                        <i class="fas fa-info-circle me-2"></i> Vui lòng liên hệ Quản lý cấp cao để được cấp quyền hoặc quay lại trang chính.
+                    </div>
+
+                    <a href="@Url.Action("Index", "AdminDashboard")" class="btn btn-primary mt-3 px-5">
+                        <i class="fas fa-home me-2"></i> Quay lại Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

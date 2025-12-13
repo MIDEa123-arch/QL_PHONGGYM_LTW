@@ -8,6 +8,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <style>
         :root {
@@ -134,69 +135,105 @@
     </style>
 </head>
 <body>
+    @{
+        int? maChucVu = Session["MaChucVu"] as int?;
+        const int MA_QUANLY = 3;
+        const int MA_VANHANH = 4;
+        string currentController = ViewContext.RouteData.Values["controller"]?.ToString();
+    }
 
     <nav class="sidebar" id="sidebar">
-        <a href="@Url.Action("Index", "AdminDashboard", new { area = "Admin" })" class="sidebar-brand">
+        <a href="@Url.Action("Index", "AdminDashboard")" class="sidebar-brand">
             <i class="fas fa-dumbbell text-primary"></i> THE GYM ADMIN
         </a>
 
         <ul class="sidebar-menu">
+            <li class="sidebar-header text-uppercase small text-muted px-4 mt-3 mb-1">Tổng quan</li>
+            
             <li>
-                <a href="@Url.Action("Index", "AdminDashboard", new { area = "Admin" })" class="@(ViewContext.RouteData.Values["controller"].ToString() == "AdminDashboard" ? "active" : "")">
+                <a href="@Url.Action("Index", "AdminDashboard")" class="@(currentController == "AdminDashboard" ? "active" : "")">
                     <i class="fas fa-tachometer-alt"></i> Tổng quan (Dashboard)
                 </a>
             </li>
+
             <li class="sidebar-header text-uppercase small text-muted px-4 mt-3 mb-1">Quản lý</li>
-            <li>
-                <a href="@Url.Action("Index", "AdminMember", new { area = "Admin" })" class="@(ViewContext.RouteData.Values["controller"].ToString() == "Member" ? "active" : "")">
-                    <i class="fas fa-users"></i> Hội viên
-                </a>
-            </li>
-            <li>
-                <a href="@Url.Action("Index", "AdminService", new { area = "Admin" })" class="@(ViewContext.RouteData.Values["controller"].ToString() == "Service" ? "active" : "")">
-                    <i class="fas fa-dumbbell"></i> Quản lý Gói tập
-                </a>
-            </li>
-            <li>
-                <a href="@Url.Action("Index", "AdminProduct", new { area = "Admin" })" class="@(ViewContext.RouteData.Values["controller"].ToString() == "Product" ? "active" : "")">
-                    <i class="fas fa-box-open"></i> Sản phẩm
-                </a>
-            </li>
-            <li>
-                <a href="@Url.Action("Index", "AdminClass", new { area = "Admin" })" class="@(ViewContext.RouteData.Values["controller"].ToString() == "Class" ? "active" : "")">
-                    <i class="fas fa-calendar-check"></i> Quản lý Lớp học
-                </a>
-            </li>
-            <li>
-                <a href="@Url.Action("Index", "AdminStaff", new { area = "Admin" })" class="@(ViewContext.RouteData.Values["controller"].ToString() == "AdminStaff" ? "active" : "")">
-                    <i class="fas fa-user-tie"></i> Quản lý Nhân viên & PT
-                </a>
-            </li>
-            <li>
-                <a href="@Url.Action("Index", "AdminOrder", new { area = "Admin" })" class="@(ViewContext.RouteData.Values["controller"].ToString() == "Order" ? "active" : "")">
-                    <i class="fas fa-file-invoice-dollar"></i> Quản lý Hóa Đơn
-                </a>
-            </li>
-            <li>
-                <a href="@Url.Action("Index", "AdminQuanLyDonHang", new { area = "Admin" })" class="@(ViewContext.RouteData.Values["controller"].ToString() == "Order" ? "active" : "")">
-                    <i class="fas fa-file-invoice-dollar"></i> Quản lý Đơn Hàng
-                </a>
-            </li>
+            
+            @if (maChucVu == MA_QUANLY || maChucVu == MA_VANHANH)
+            {
+                <li>
+                    <a href="@Url.Action("Index", "AdminMember")" class="@(currentController == "AdminMember" ? "active" : "")">
+                        <i class="fas fa-users"></i> Hội viên
+                    </a>
+                </li>
+            }
+            
+            @if (maChucVu == MA_QUANLY || maChucVu == MA_VANHANH)
+            {
+                <li>
+                    <a href="@Url.Action("Index", "AdminService")" class="@(currentController == "AdminService" ? "active" : "")">
+                        <i class="fas fa-dumbbell"></i> Quản lý Gói tập
+                    </a>
+                </li>
+            }
+            
+            @if (maChucVu == MA_QUANLY)
+            {
+                <li>
+                    <a href="@Url.Action("Index", "AdminClass")" class="@(currentController == "AdminClass" ? "active" : "")">
+                        <i class="fas fa-calendar-check"></i> Quản lý Lớp học
+                    </a>
+                </li>
+            }
+            
+            @if (maChucVu == MA_QUANLY || maChucVu == MA_VANHANH)
+            {
+                <li>
+                    <a href="@Url.Action("Index", "AdminProduct")" class="@(currentController == "AdminProduct" ? "active" : "")">
+                        <i class="fas fa-box-open"></i> Sản phẩm
+                    </a>
+                </li>
+            }
+            
+            @if (maChucVu == MA_QUANLY || maChucVu == MA_VANHANH)
+            {
+                <li>
+                    <a href="@Url.Action("Index", "AdminQuanLyDonHang")" class="@(currentController == "AdminQuanLyDonHang" || currentController == "AdminOrder" ? "active" : "")">
+                        <i class="fas fa-shipping-fast"></i> Xử lý Đơn hàng
+                    </a>
+                </li>
+            }
+            
+            @if (maChucVu == MA_QUANLY)
+            {
+                <li>
+                    <a href="@Url.Action("Index", "AdminStaff")" class="@(currentController == "AdminStaff" ? "active" : "")">
+                        <i class="fas fa-user-tie"></i> Quản lý Nhân viên & PT
+                    </a>
+                </li>
+            }
+
             <li class="sidebar-header text-uppercase small text-muted px-4 mt-3 mb-1">Hệ thống</li>
+
+            @* 8. Báo cáo doanh thu (Chỉ Quản lý thấy) *@
+            @if (maChucVu == MA_QUANLY)
+            {
+                <li>
+                    <a href="@Url.Action("Index", "AdminReport")" class="@(currentController == "AdminReport" ? "active" : "")">
+                        <i class="fas fa-chart-line"></i> Báo cáo doanh thu
+                    </a>
+                </li>
+            }
+
+            @* 9. Cài đặt (Cả hai đều thấy) *@
             <li>
-                <a href="@Url.Action("Index", "AdminReport", new { area = "Admin" })" class="@(ViewContext.RouteData.Values["controller"].ToString() == "Report" ? "active" : "")">
-                    <i class="fas fa-chart-line"></i> Báo cáo doanh thu
-                </a>
-            </li>
-            <li>
-                <a href="@Url.Action("Index", "AdminSetting", new { area = "Admin" })" class="@(ViewContext.RouteData.Values["controller"].ToString() == "AdminSetting" ? "active" : "")">
+                <a href="@Url.Action("Index", "AdminSetting")" class="@(currentController == "AdminSetting" ? "active" : "")">
                     <i class="fas fa-cogs"></i> Cài đặt
                 </a>
             </li>
         </ul>
 
         <div class="p-3 border-top border-secondary">
-            <a href="@Url.Action("Logout", "AdminHome", new { area = "Admin" })" class="btn btn-danger w-100 btn-sm">
+            <a href="@Url.Action("Logout", "AdminHome")" class="btn btn-danger w-100 btn-sm">
                 <i class="fas fa-sign-out-alt me-2"></i> Đăng xuất
             </a>
         </div>
@@ -211,7 +248,7 @@
             <h5 class="m-0 d-none d-md-block text-muted">@ViewBag.Title</h5>
 
             <div class="dropdown">
-                <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle text-dark" data-bs-toggle="dropdown">
+                <a href="@Url.Action("UserProfile", "AdminHome")" class="d-flex align-items-center text-decoration-none dropdown-toggle text-dark" data-bs-toggle="dropdown">
                     <div class="text-end me-2 d-none d-sm-block">
                         <div class="fw-bold small">@Session["AdminName"]</div>
                         <div class="text-muted small" style="font-size: 0.75rem;">@Session["AdminRole"]</div>
@@ -225,7 +262,7 @@
                         </a>
                     </li>
                     <li><hr class="dropdown-divider"></li>
-                    <li><a class="dropdown-item text-danger" href="@Url.Action("Logout", "AdminHome", new { area = "Admin" })"><i class="fas fa-sign-out-alt me-2"></i> Đăng xuất</a></li>
+                    <li><a class="dropdown-item text-danger" href="@Url.Action("Logout", "AdminHome")"><i class="fas fa-sign-out-alt me-2"></i> Đăng xuất</a></li>
                 </ul>
             </div>
         </header>
@@ -235,8 +272,33 @@
         </div>
     </div>
 
+    @if (TempData["ThongBao"] != null)
+    {
+        <script>
+    Swal.fire({
+        icon: 'success',
+        title: '@Html.Raw(TempData["ThongBao"])',
+        showConfirmButton: false,
+        timer: 3000
+    });
+        </script>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <script>
+            Swal.fire({
+                icon: 'error',
+                title: 'Lỗi',
+                text: '@Html.Raw(TempData["Error"])',
+                showConfirmButton: true
+            });
+        </script>
+    }
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+
         const sidebar = document.getElementById('sidebar');
         const overlay = document.getElementById('overlay');
         const btn = document.getElementById('sidebarToggle');
@@ -249,7 +311,22 @@
         overlay?.addEventListener('click', () => {
             sidebar.classList.remove('active');
             overlay.classList.remove('active');
-        });</script>
+        });
+
+        // Active Sidebar dựa trên Controller hiện tại (Đã xử lý trên Razor, JS chỉ cần cho mobile)
+        document.addEventListener('DOMContentLoaded', () => {
+            const currentPath = window.location.pathname;
+            const menuLinks = document.querySelectorAll('.sidebar-menu a');
+
+            menuLinks.forEach(link => {
+                // Kiểm tra nếu link bắt đầu bằng đường dẫn hiện tại (hoặc khớp Controller)
+                if (currentPath.startsWith(link.getAttribute('href'))) {
+                    link.classList.add('active');
+                }
+            });
+        });
+    </script>
+
     @RenderSection("scripts", required: false)
 </body>
 </html>

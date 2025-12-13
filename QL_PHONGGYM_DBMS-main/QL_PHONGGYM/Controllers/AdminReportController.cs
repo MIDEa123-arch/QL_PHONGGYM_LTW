@@ -10,16 +10,23 @@ namespace QL_PHONGGYM.Controllers
     public class AdminReportController : Controller
     {
         private readonly QL_PHONGGYMEntities _context = new QL_PHONGGYMEntities();
+        private const int MA_QUANLY = 3;
 
+        private bool IsAdmin()
+        {
+            return Session["MaChucVu"] != null && (int)Session["MaChucVu"] == MA_QUANLY;
+        }
         public ActionResult Index()
         {
-            if (Session["AdminUser"] == null) return RedirectToAction("Login", "Auth");
+           if (Session["AdminUser"] == null) return RedirectToAction("Login", "AdminHome");
+           if (!IsAdmin()) return RedirectToAction("AccessDenied", "AdminHome");
+
             return View();
         }
 
         [HttpPost]
         public JsonResult GetRevenueData(string fromDate, string toDate)
-        {
+        {            
             DateTime start = DateTime.Parse(fromDate);
             DateTime end = DateTime.Parse(toDate).AddDays(1).AddSeconds(-1);
 
@@ -76,6 +83,9 @@ namespace QL_PHONGGYM.Controllers
         [HttpGet] 
         public ActionResult ExportToExcel(string fromDate, string toDate)
         {
+            if (Session["AdminUser"] == null) return RedirectToAction("Login", "AdminHome");
+            if (!IsAdmin()) return RedirectToAction("AccessDenied", "AdminHome");
+
             try
             {
                 DateTime start = DateTime.Parse(fromDate);

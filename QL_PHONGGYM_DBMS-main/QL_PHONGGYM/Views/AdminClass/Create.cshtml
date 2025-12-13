@@ -16,10 +16,12 @@
             {
                 <div class="alert alert-danger">@ViewBag.Error</div>
             }
-            @Html.ValidationSummary(true, "Vui lòng kiểm tra các lỗi sau:", new { @class = "alert alert-danger mb-3" }) @Html.ValidationSummary(true, "", new { @class = "text-danger mb-3" })
+            @Html.ValidationSummary(true, "Vui lòng kiểm tra các lỗi sau:", new { @class = "alert alert-danger mb-3" })
 
             <div class="row g-3">
-                <div class="col-md-12">
+
+                @* 1. TÊN VÀ BỘ MÔN *@
+                <div class="col-md-6">
                     <label class="form-label fw-bold">Tên lớp học <span class="text-danger">*</span></label>
                     @Html.TextBoxFor(m => m.TenLop, new { @class = "form-control", required = "required", placeholder = "Ví dụ: Yoga Sáng T2-T4-T6" })
                     @Html.ValidationMessageFor(m => m.TenLop, "", new { @class = "text-danger" })
@@ -31,26 +33,9 @@
                     @Html.ValidationMessageFor(m => m.MaCM, "", new { @class = "text-danger" })
                 </div>
 
-                <div class="col-md-6">
-                    <label class="form-label fw-bold">Huấn luyện viên phụ trách</label>
-                    <select name="MaNV" id="ddlMaNV" class="form-select">
-                        <option value="">-- Vui lòng chọn bộ môn trước --</option>
-                    </select>
-                </div>
-
-                <div class="col-md-6">
-                    <label class="form-label fw-bold">Ngày bắt đầu <span class="text-danger">*</span></label>
-                    @Html.TextBoxFor(m => m.NgayBatDau, "{0:yyyy-MM-dd}", new { @class = "form-control", type = "date", required = "required" })
-                    @Html.ValidationMessageFor(m => m.NgayBatDau, "", new { @class = "text-danger" })
-                </div>
-                <div class="col-md-6">
-                    <label class="form-label fw-bold">Ngày kết thúc <span class="text-danger">*</span></label>
-                    @Html.TextBoxFor(m => m.NgayKetThuc, "{0:yyyy-MM-dd}", new { @class = "form-control", type = "date", required = "required" })
-                    @Html.ValidationMessageFor(m => m.NgayKetThuc, "", new { @class = "text-danger" })
-                </div>
+                @* 2. HỌC PHÍ, SỐ BUỔI, SĨ SỐ *@
                 <div class="col-md-4">
                     <label class="form-label fw-bold">Học phí (VNĐ) <span class="text-danger">*</span></label>
-
                     <input type="text"
                            name="strHocPhi"
                            id="txtHocPhi"
@@ -58,116 +43,138 @@
                            required
                            placeholder="0"
                            value="@(Model.HocPhi > 0 ? Model.HocPhi.ToString("#,##0").Replace(",",".") : "")" />
-
                     @Html.ValidationMessageFor(m => m.HocPhi, "", new { @class = "text-danger" })
                 </div>
 
                 <div class="col-md-4">
                     <label class="form-label fw-bold">Số buổi học <span class="text-danger">*</span></label>
-
                     @Html.TextBoxFor(m => m.SoBuoi, new
                     {
                         @class = "form-control",
                         type = "number",
                         required = "required",
                         min = "1",
-                        placeholder = "Nhập tổng số buổi"
+                        placeholder = "Nhập tổng số buổi",
+                        id = "txtSoBuoi"
                     })
-
                     @Html.ValidationMessageFor(m => m.SoBuoi, "", new { @class = "text-danger" })
                 </div>
+
                 <div class="col-md-4">
                     <label class="form-label fw-bold">Sĩ số tối đa <span class="text-danger">*</span></label>
-
                     @Html.TextBoxFor(m => m.SiSoToiDa, new
                     {
                         @class = "form-control",
                         type = "number",
                         required = "required",
                         min = "1",
-                        Value = "30"
+                        Value = Model.SiSoToiDa ?? 30 // Giữ lại giá trị model nếu có
                     })
-
                     @Html.ValidationMessageFor(m => m.SiSoToiDa, "", new { @class = "text-danger" })
                 </div>
-            </div>
-            <div class="col-md-12">
-                <div class="card bg-light border-0">
-                    <div class="card-body">
-                        <h6 class="fw-bold text-primary mb-3">Cấu hình lịch học & Kiểm tra trùng HLV</h6>
 
-                        <div class="row g-3">
-                            <div class="col-md-3">
-                                <label class="form-label fw-bold">Giờ Bắt Đầu</label>
-                                <div class="d-flex gap-1">
-                                    <select class="form-select form-select-sm" id="ddlGioBD" name="GioBatDauHour">
-                                        @for (int h = 0; h < 24; h++)
+                @* 3. NGÀY BẮT ĐẦU/KẾT THÚC (Người dùng chỉ nhập Ngày Bắt Đầu) *@
+                <div class="col-md-6">
+                    <label class="form-label fw-bold">Ngày khai giảng (Bắt đầu) <span class="text-danger">*</span></label>
+                    @Html.TextBoxFor(m => m.NgayBatDau, "{0:yyyy-MM-dd}", new { @class = "form-control", type = "date", required = "required", id = "txtNgayBD" })
+                    @Html.ValidationMessageFor(m => m.NgayBatDau, "", new { @class = "text-danger" })
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label fw-bold">Ngày kết thúc (Tối đa) <span class="text-danger">*</span></label>
+                    @Html.TextBoxFor(m => m.NgayKetThuc, "{0:yyyy-MM-dd}", new { @class = "form-control", type = "date", required = "required", id = "txtNgayKT" })
+                    @Html.ValidationMessageFor(m => m.NgayKetThuc, "", new { @class = "text-danger" })
+                    <div class="form-text small" id="KetThucGoiY"></div>
+                </div>
+
+                @* 4. CẤU HÌNH LỊCH & CHỌN HLV *@
+                <div class="col-md-12">
+                    <div class="card bg-light border-0">
+                        <div class="card-body">
+                            <h6 class="fw-bold text-primary mb-3">Cấu hình lịch học & Huấn luyện viên</h6>
+
+                            <div class="row g-3">
+
+                                @* Giờ học *@
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">Giờ Bắt Đầu/Kết Thúc <span class="text-danger">*</span></label>
+                                    <div class="d-flex align-items-center gap-1">
+                                        <select class="form-select form-select-sm" id="ddlGioBD" name="GioBatDauHour">
+                                            @for (int h = 0; h < 24; h++)
+                                            {
+                                                <option value="@h.ToString("00")" @(Model.MaLop == 0 && h == 8 ? "selected" : "")>@h.ToString("00") giờ</option>
+                                            }
+                                        </select>
+                                        <select class="form-select form-select-sm" id="ddlPhutBD" name="GioBatDauMinute">
+                                            <option value="00">00 phút</option>
+                                            <option value="15">15 phút</option>
+                                            <option value="30">30 phút</option>
+                                            <option value="45">45 phút</option>
+                                        </select>
+                                        <span class="mx-1 fw-bold">-</span>
+                                        <select class="form-select form-select-sm" id="ddlGioKT" name="GioKetThucHour">
+                                            @for (int h = 0; h < 24; h++)
+                                            {
+                                                <option value="@h.ToString("00")" @(Model.MaLop == 0 && h == 9 ? "selected" : "")>@h.ToString("00") giờ</option>
+                                            }
+                                        </select>
+                                        <select class="form-select form-select-sm" id="ddlPhutKT" name="GioKetThucMinute">
+                                            <option value="00">00 phút</option>
+                                            <option value="15">15 phút</option>
+                                            <option value="30">30 phút</option>
+                                            <option value="45">45 phút</option>
+                                        </select>
+                                    </div>
+                                    @Html.ValidationMessage("GioBatDau", new { @class = "text-danger small mt-1" })
+                                    @Html.ValidationMessage("GioKetThuc", new { @class = "text-danger small mt-1" })
+                                </div>
+
+                                @* Dropdown HLV (sẽ được cập nhật bằng JS) *@
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">Huấn luyện viên phụ trách</label>
+                                    <select name="MaNV" id="ddlMaNV" class="form-select">
+                                        @if (ViewBag.MaNV != null)
                                         {
-                                            <option value="@h.ToString("00")">@h.ToString("00") giờ</option>
+                                            @Html.DropDownList("MaNV", (SelectList)ViewBag.MaNV)
+                                        }
+                                        else
+                                        {
+                                            <option value="">-- Vui lòng chọn bộ môn trước --</option>
                                         }
                                     </select>
-                                    <select class="form-select form-select-sm" id="ddlPhutBD" name="GioBatDauMinute">
-                                        <option value="00">00 phút</option>
-                                        <option value="15">15 phút</option>
-                                        <option value="30">30 phút</option>
-                                        <option value="45">45 phút</option>
-                                    </select>
+                                    @Html.ValidationMessageFor(m => m.MaNV, "", new { @class = "text-danger" })
                                 </div>
-                                @Html.ValidationMessage("GioBatDau", new { @class = "text-danger small mt-1" }) 
-                            </div>
 
-                            <div class="col-md-3">
-                                <label class="form-label fw-bold">Giờ Kết Thúc</label>
-                                <div class="d-flex gap-1">
-                                    <select class="form-select form-select-sm" id="ddlGioKT" name="GioKetThucHour">
-                                        @for (int h = 0; h < 24; h++)
-                                        {
-                                            <option value="@h.ToString("00")">@h.ToString("00") giờ</option>
-                                        }
-                                    </select>
-                                    <select class="form-select form-select-sm" id="ddlPhutKT" name="GioKetThucMinute">
-                                        <option value="00">00 phút</option>
-                                        <option value="15">15 phút</option>
-                                        <option value="30">30 phút</option>
-                                        <option value="45">45 phút</option>
-                                    </select>
+
+                                @* Ngày trong tuần *@
+                                <div class="col-md-12">
+                                    <label class="form-label fw-bold d-block">Chọn ngày học trong tuần: <span class="text-danger">*</span></label>
+                                    <div class="btn-group" role="group" id="DayCheckboxGroup">
+                                        <input type="checkbox" class="btn-check" name="SelectedDays" value="1" id="Mon" autocomplete="off">
+                                        <label class="btn btn-outline-primary" for="Mon">Thứ 2</label>
+                                        <input type="checkbox" class="btn-check" name="SelectedDays" value="2" id="Tue" autocomplete="off">
+                                        <label class="btn btn-outline-primary" for="Tue">Thứ 3</label>
+                                        <input type="checkbox" class="btn-check" name="SelectedDays" value="3" id="Wed" autocomplete="off">
+                                        <label class="btn btn-outline-primary" for="Wed">Thứ 4</label>
+                                        <input type="checkbox" class="btn-check" name="SelectedDays" value="4" id="Thu" autocomplete="off">
+                                        <label class="btn btn-outline-primary" for="Thu">Thứ 5</label>
+                                        <input type="checkbox" class="btn-check" name="SelectedDays" value="5" id="Fri" autocomplete="off">
+                                        <label class="btn btn-outline-primary" for="Fri">Thứ 6</label>
+                                        <input type="checkbox" class="btn-check" name="SelectedDays" value="6" id="Sat" autocomplete="off">
+                                        <label class="btn btn-outline-primary" for="Sat">Thứ 7</label>
+                                        <input type="checkbox" class="btn-check" name="SelectedDays" value="0" id="Sun" autocomplete="off">
+                                        <label class="btn btn-outline-primary" for="Sun">CN</label>
+                                    </div>
+                                    <div class="text-danger small mt-1">
+                                        @Html.ValidationMessage("SelectedDays")
+                                    </div>
+                                    <div class="form-text small mt-1">Chọn ít nhất một ngày. Hệ thống sẽ tự động tính Ngày Kết Thúc tối thiểu.</div>
                                 </div>
-                                @Html.ValidationMessage("GioKetThuc", new { @class = "text-danger small mt-1" })
-                            </div>
-
-                            <div class="col-md-12">
-                                <label class="form-label fw-bold d-block">Chọn ngày học trong tuần: <span class="text-danger">*</span></label>
-                                <div class="btn-group" role="group">
-                                    <input type="checkbox" class="btn-check" name="SelectedDays" value="1" id="Mon" autocomplete="off">
-                                    <label class="btn btn-outline-primary" for="Mon">Thứ 2</label>
-
-                                    <input type="checkbox" class="btn-check" name="SelectedDays" value="2" id="Tue" autocomplete="off">
-                                    <label class="btn btn-outline-primary" for="Tue">Thứ 3</label>
-
-                                    <input type="checkbox" class="btn-check" name="SelectedDays" value="3" id="Wed" autocomplete="off">
-                                    <label class="btn btn-outline-primary" for="Wed">Thứ 4</label>
-
-                                    <input type="checkbox" class="btn-check" name="SelectedDays" value="4" id="Thu" autocomplete="off">
-                                    <label class="btn btn-outline-primary" for="Thu">Thứ 5</label>
-
-                                    <input type="checkbox" class="btn-check" name="SelectedDays" value="5" id="Fri" autocomplete="off">
-                                    <label class="btn btn-outline-primary" for="Fri">Thứ 6</label>
-
-                                    <input type="checkbox" class="btn-check" name="SelectedDays" value="6" id="Sat" autocomplete="off">
-                                    <label class="btn btn-outline-primary" for="Sat">Thứ 7</label>
-
-                                    <input type="checkbox" class="btn-check" name="SelectedDays" value="0" id="Sun" autocomplete="off">
-                                    <label class="btn btn-outline-primary" for="Sun">CN</label>
-                                </div>
-                                <div class="text-danger small mt-1">
-                                    @Html.ValidationMessage("SelectedDays")
-                                </div>
-                                <div class="form-text small mt-1">Chọn ít nhất một ngày. Hệ thống sẽ tự động tạo lịch dựa trên các thứ đã chọn.</div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+
             <div class="mt-4 text-end">
                 <a href="@Url.Action("Index")" class="btn btn-light border me-2">Hủy</a>
                 <button type="submit" class="btn btn-primary px-4 fw-bold">Tạo lớp</button>
@@ -179,161 +186,203 @@
 @section scripts {
     <script>
         document.addEventListener("DOMContentLoaded", function () {
-            // Định nghĩa các biến mới (Lấy từ ID của các dropdown giờ/phút)
+            // Định nghĩa các biến DOM
             const ddlMaCM = document.getElementById('ddlMaCM');
             const ddlMaNV = document.getElementById('ddlMaNV');
-            const inpNgayBD = document.querySelector('input[name="NgayBatDau"]');
-            const inpNgayKT = document.querySelector('input[name="NgayKetThuc"]');
+            const txtSoBuoi = document.getElementById('txtSoBuoi');
+            const txtNgayBD = document.getElementById('txtNgayBD');
+            const txtNgayKT = document.getElementById('txtNgayKT');
+            const KetThucGoiY = document.getElementById('KetThucGoiY');
 
             const ddlGioBD = document.getElementById('ddlGioBD');
             const ddlPhutBD = document.getElementById('ddlPhutBD');
             const ddlGioKT = document.getElementById('ddlGioKT');
             const ddlPhutKT = document.getElementById('ddlPhutKT');
-
             const checkboxes = document.querySelectorAll('input[name="SelectedDays"]');
             const currencyInputs = document.querySelectorAll('.currency-input');
 
-            // --- HÀM TÍNH PHÚT VÀ KIỂM TRA LOGIC (FIXED) ---
-            function checkTimeDifference() {
-                // Lấy giá trị giờ và phút (luôn có giá trị vì là dropdown)
-                const gioBD = parseInt(ddlGioBD.value);
-                const phutBD = parseInt(ddlPhutBD.value);
-                const gioKT = parseInt(ddlGioKT.value);
-                const phutKT = parseInt(ddlPhutKT.value);
+            // --- 1. HÀM TÍNH NGÀY KẾT THÚC TỐI THIỂU (CLIENT-SIDE GỢI Ý) ---
+            function calculateMinEndDate() {
+                const soBuoi = parseInt(txtSoBuoi.value);
+                const ngayBDStr = txtNgayBD.value;
 
-                // Chuyển thành tổng số phút từ 00:00
-                var startMinutes = gioBD * 60 + phutBD;
-                var endMinutes = gioKT * 60 + phutKT;
-
-                // 1. KIỂM TRA LOGIC CƠ BẢN (Giờ kết thúc > Giờ bắt đầu)
-                if (endMinutes <= startMinutes) {
-                    alert("Lỗi: Giờ kết thúc phải lớn hơn Giờ bắt đầu!");
-                    // Không cho phép chạy tiếp
+                if (!soBuoi || soBuoi <= 0 || !ngayBDStr) {
+                    KetThucGoiY.textContent = "Vui lòng nhập Số buổi và Ngày bắt đầu.";
                     return;
                 }
 
-                // 2. KIỂM TRA THỜI LƯỢNG TỐI THIỂU (30 phút)
-                if (endMinutes - startMinutes < 30) {
-                    alert("Lỗi: Thời lượng buổi học phải ít nhất 30 phút!");
+                let selectedDays = [];
+                checkboxes.forEach(cb => { if (cb.checked) selectedDays.push(parseInt(cb.value)); });
+
+                if (selectedDays.length === 0) {
+                    KetThucGoiY.textContent = "Vui lòng chọn ngày học trong tuần.";
                     return;
                 }
 
-                // 3. Nếu hợp lệ, tiến hành load HLV
-                loadAvailableTrainers();
+                let ngayHienTai = new Date(ngayBDStr);
+                let buoiDaXep = 0;
+
+                // Hàm chuyển đổi DayOfWeek (JS 0=CN, 1=T2) sang DayOfWeek (C# 0=CN, 1=T2) -> Đã khớp
+                function getDayOfWeek(date) {
+                    let day = date.getDay();
+                    return day;
+                }
+
+                // Vòng lặp tìm ngày cuối cùng
+                while (buoiDaXep < soBuoi) {
+                    let dayOfWeek = getDayOfWeek(ngayHienTai);
+
+                    if (selectedDays.includes(dayOfWeek)) {
+                        buoiDaXep++;
+                        if (buoiDaXep === soBuoi) break; // Thoát ngay khi tìm thấy buổi cuối cùng
+                    }
+                    ngayHienTai.setDate(ngayHienTai.getDate() + 1);
+                }
+
+                const ngayKetThucMin = new Date(ngayHienTai);
+
+                // Format ngày kết thúc thành YYYY-MM-DD
+                const yyyy = ngayKetThucMin.getFullYear();
+                const mm = String(ngayKetThucMin.getMonth() + 1).padStart(2, '0');
+                const dd = String(ngayKetThucMin.getDate()).padStart(2, '0');
+                const ngayKetThucStr = `${dd}/${mm}/${yyyy}`;
+
+                KetThucGoiY.innerHTML = `**Ngày kết thúc tối thiểu:** ${ngayKetThucStr}`;
             }
 
-
+            // --- 2. HÀM TẢI HLV (Dựa trên Chuyên môn, Ngày, Giờ) ---
             function loadAvailableTrainers() {
-                const maCM = ddlMaCM.value;
-                const ngayBD = inpNgayBD.value;
-                const ngayKT = inpNgayKT.value;
+                // Tự động tính ngày kết thúc tối thiểu trước
+                calculateMinEndDate();
 
-                // Lấy giờ phút từ dropdown và ghép thành chuỗi HH:mm (QUAN TRỌNG CHO CONTROLLER)
+                const maCM = ddlMaCM.value;
+                const ngayBD = txtNgayBD.value;
+                const ngayKT = txtNgayKT.value; // Dùng giá trị người dùng nhập (hoặc giá trị cũ)
+
                 const gioBD_str = ddlGioBD.value + ":" + ddlPhutBD.value;
                 const gioKT_str = ddlGioKT.value + ":" + ddlPhutKT.value;
-
 
                 let selectedDays = [];
                 checkboxes.forEach(cb => { if (cb.checked) selectedDays.push(cb.value); });
 
                 ddlMaNV.innerHTML = '';
 
-                if (maCM && ngayBD && ngayKT && selectedDays.length > 0) {
-                    // (Giữ nguyên logic gọi API load Available Trainers)
+                // Nếu thiếu thông tin cần thiết cho việc kiểm tra lịch
+                if (!maCM || !ngayBD || !ngayKT || selectedDays.length === 0 || !gioBD_str || !gioKT_str) {
+                    if (maCM) {
+                         ddlMaNV.innerHTML = '<option value="">-- Nhập đầy đủ ngày/giờ/thứ để check lịch --</option>';
+                         // Nếu chỉ có mã CM, có thể gọi load basic trainers nếu cần
+                    } else {
+                         ddlMaNV.innerHTML = '<option value="">-- Vui lòng chọn bộ môn trước --</option>';
+                    }
+                    return;
+                }
 
-                    let defaultOpt = document.createElement('option');
-                    defaultOpt.text = "-- Đang kiểm tra lịch trống... --";
-                    ddlMaNV.appendChild(defaultOpt);
-                    ddlMaNV.disabled = true;
+                // Gọi API kiểm tra HLV rảnh
+                let defaultOpt = document.createElement('option');
+                defaultOpt.text = "-- Đang kiểm tra lịch trống... --";
+                ddlMaNV.appendChild(defaultOpt);
+                ddlMaNV.disabled = true;
 
-                    let query = `maCM=${maCM}&ngayBatDau=${ngayBD}&ngayKetThuc=${ngayKT}&gioBatDau=${gioBD_str}&gioKetThuc=${gioKT_str}`;
-                    selectedDays.forEach(d => query += `&selectedDays=${d}`);
+                let query = `maCM=${maCM}&ngayBatDau=${ngayBD}&ngayKetThuc=${ngayKT}&gioBatDau=${gioBD_str}&gioKetThuc=${gioKT_str}`;
+                selectedDays.forEach(d => query += `&selectedDays=${d}`);
 
-                    fetch('/AdminClass/GetAvailableTrainers?' + query)
-                        .then(res => res.json())
-                        .then(data => {
-                            ddlMaNV.innerHTML = '';
-                            ddlMaNV.disabled = false;
+                fetch('/AdminClass/GetAvailableTrainers?' + query)
+                    .then(res => res.json())
+                    .then(data => {
+                        ddlMaNV.innerHTML = '';
+                        ddlMaNV.disabled = false;
 
-                            if (data.length > 0) {
-                                let prompt = document.createElement('option');
-                                prompt.value = "";
-                                prompt.text = `-- Tìm thấy ${data.length} HLV rảnh --`;
-                                ddlMaNV.appendChild(prompt);
+                        let prompt = document.createElement('option');
+                        prompt.value = "";
+                        prompt.text = data.length > 0 ? `-- Tìm thấy ${data.length} HLV rảnh --` : "-- Tất cả HLV đều bận giờ này --";
+                        ddlMaNV.appendChild(prompt);
 
-                                data.forEach(item => {
-                                    let opt = document.createElement('option');
-                                    opt.value = item.MaNV;
-                                    opt.text = item.TenNV;
-                                    ddlMaNV.appendChild(opt);
-                                });
-                            } else {
-                                let empty = document.createElement('option');
-                                empty.text = "-- Tất cả HLV đều bận giờ này --";
-                                ddlMaNV.appendChild(empty);
-                            }
-                        })
-                        .catch(err => {
-                            console.error(err);
-                            ddlMaNV.innerHTML = '<option>-- Lỗi tải dữ liệu --</option>';
-                            ddlMaNV.disabled = false;
+                        data.forEach(item => {
+                            let opt = document.createElement('option');
+                            opt.value = item.MaNV;
+                            opt.text = item.TenNV;
+                            ddlMaNV.appendChild(opt);
                         });
-                }
-                else if (maCM) {
-                    // Nếu thiếu thông tin ngày giờ, chỉ load danh sách theo chuyên môn
-                    ddlMaNV.innerHTML = '<option>-- Đang tải danh sách... --</option>';
-                    fetch('/AdminClass/GetTrainersBySpecialty?maCM=' + maCM)
-                        .then(res => res.json())
-                        .then(data => {
-                            // ... (Logic đổ HLV cơ bản) ...
-                            ddlMaNV.innerHTML = '';
-                            if (data.length > 0) {
-                                let prompt = document.createElement('option');
-                                prompt.value = "";
-                                prompt.text = "-- Chọn HLV (Chưa check lịch) --";
-                                ddlMaNV.appendChild(prompt);
-                                data.forEach(item => {
-                                    let opt = document.createElement('option');
-                                    opt.value = item.MaNV;
-                                    opt.text = item.TenNV;
-                                    ddlMaNV.appendChild(opt);
-                                });
-                            } else {
-                                ddlMaNV.innerHTML = '<option>-- Không có HLV dạy môn này --</option>';
-                            }
-                        });
-                }
-                else {
-                    ddlMaNV.innerHTML = '<option value="">-- Vui lòng chọn bộ môn trước --</option>';
-                }
+                    })
+                    .catch(err => {
+                        console.error(err);
+                        ddlMaNV.innerHTML = '<option>-- Lỗi tải dữ liệu --</option>';
+                        ddlMaNV.disabled = false;
+                    });
             }
 
 
-            // Hàm format tiền tệ (giữ nguyên)
-            function formatCurrency(input) {
-                var value = input.value.replace(/\D/g, "");
-                if (value !== "") value = new Intl.NumberFormat('vi-VN').format(value);
-                input.value = value;
+            // --- 3. HÀM KIỂM TRA GIỜ (30 phút tối thiểu và KT > BD) ---
+            function checkTimeDifferenceAndLoad() {
+                const gioBD = parseInt(ddlGioBD.value);
+                const phutBD = parseInt(ddlPhutBD.value);
+                const gioKT = parseInt(ddlGioKT.value);
+                const phutKT = parseInt(ddlPhutKT.value);
+
+                var startMinutes = gioBD * 60 + phutBD;
+                var endMinutes = gioKT * 60 + phutKT;
+
+                if (endMinutes <= startMinutes) {
+                    // Nếu thời gian không hợp lệ, không gọi load HLV
+                    return;
+                }
+
+                if (endMinutes - startMinutes < 30) {
+                    // Nếu thời lượng quá ngắn, không gọi load HLV
+                    return;
+                }
+
+                // Nếu giờ hợp lệ, tiến hành load HLV
+                loadAvailableTrainers();
             }
 
-            // --- GÁN SỰ KIỆN (Cập nhật để lắng nghe 4 dropdown) ---
+
+            // --- 4. GÁN SỰ KIỆN ---
+
+            // Các sự kiện thay đổi phải gọi hàm checkTimeDifferenceAndLoad hoặc loadAvailableTrainers
             if (ddlMaCM) {
                 ddlMaCM.addEventListener('change', loadAvailableTrainers);
-                inpNgayBD.addEventListener('change', loadAvailableTrainers);
-                inpNgayKT.addEventListener('change', loadAvailableTrainers);
+                txtSoBuoi.addEventListener('change', loadAvailableTrainers);
+                txtNgayBD.addEventListener('change', loadAvailableTrainers);
+                txtNgayKT.addEventListener('change', loadAvailableTrainers);
+
                 checkboxes.forEach(cb => cb.addEventListener('change', loadAvailableTrainers));
 
-                // Lắng nghe sự kiện của 4 dropdown giờ/phút
-                ddlGioBD.addEventListener('change', checkTimeDifference);
-                ddlPhutBD.addEventListener('change', checkTimeDifference);
-                ddlGioKT.addEventListener('change', checkTimeDifference);
-                ddlPhutKT.addEventListener('change', checkTimeDifference);
+                ddlGioBD.addEventListener('change', checkTimeDifferenceAndLoad);
+                ddlPhutBD.addEventListener('change', checkTimeDifferenceAndLoad);
+                ddlGioKT.addEventListener('change', checkTimeDifferenceAndLoad);
+                ddlPhutKT.addEventListener('change', checkTimeDifferenceAndLoad);
             }
 
+            // Gán sự kiện format tiền tệ
             currencyInputs.forEach(input => {
-                input.addEventListener('input', function () { formatCurrency(this); });
-                formatCurrency(input);
+                input.addEventListener('input', function () {
+                    var value = this.value.replace(/\D/g, "");
+                    if (value !== "") value = new Intl.NumberFormat('vi-VN').format(value);
+                    this.value = value;
+                    loadAvailableTrainers(); // Gọi load lại khi thay đổi Học phí (không cần thiết nhưng an toàn)
+                });
+
+                // Load trạng thái ban đầu (nếu người dùng quay lại do lỗi validation)
+                var value = input.value.replace(/\D/g, "");
+                if (value !== "") input.value = new Intl.NumberFormat('vi-VN').format(value);
             });
+
+            // Load HLV ban đầu nếu có dữ liệu cũ
+            loadAvailableTrainers();
+
+            // Kiểm tra và set trạng thái checkbox nếu có lỗi validation
+            @if (Model.MaLop != 0 && ViewData["SelectedDays"] is int[] selectedDays)
+            {
+                <text>
+                var selectedDaysArray = @Html.Raw(Json.Encode(selectedDays));
+                selectedDaysArray.forEach(day => {
+                    document.querySelector('input[name="SelectedDays"][value="' + day + '"]').checked = true;
+                });
+                </text>
+            }
+
         });
     </script>
 }

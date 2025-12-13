@@ -15,7 +15,7 @@ namespace QL_PHONGGYM.Controllers
         {
             if (Session["AdminUser"] == null)
             {
-                return RedirectToAction("Login", "Auth");
+                return RedirectToAction("Login", "AdminHome");
             }
 
             var today = DateTime.Now;
