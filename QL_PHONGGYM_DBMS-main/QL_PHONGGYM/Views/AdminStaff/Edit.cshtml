@@ -1,7 +1,8 @@
-﻿@model QL_PHONGGYM.Models.NhanVien
+﻿@model QL_PHONGGYM.ViewModel.NhanVienViewModel
 @{
     ViewBag.Title = "Edit";
     Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    bool isLocked = ViewBag.IsLocked ?? false;
 }
 
 <div class="card border-0 shadow-sm" style="max-width: 800px; margin: 0 auto;">
@@ -12,12 +13,24 @@
         @using (Html.BeginForm())
         {
             @Html.AntiForgeryToken()
+
             @Html.HiddenFor(m => m.MaNV)
-            @Html.HiddenFor(m => m.TenDangNhap) if (ViewBag.Error != null)
+            @Html.HiddenFor(m => m.TenDangNhap)
+            @Html.HiddenFor(m => m.TrangThaiTaiKhoan)
+
+            if (ViewBag.Error != null)
             {
                 <div class="alert alert-danger">@ViewBag.Error</div>
             }
+
             @Html.ValidationSummary(true, "", new { @class = "text-danger mb-3" })
+
+            if (isLocked)
+            {
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle"></i> Nhân viên này đã được gán khách PT hoặc đang phụ trách lớp học. Không thể thay đổi Chức vụ và Chuyên môn.
+                </div>
+            }
 
             <div class="row g-3">
                 <div class="col-md-6">
@@ -27,8 +40,36 @@
                 </div>
                 <div class="col-md-6">
                     <label class="form-label fw-bold">Chức vụ <span class="text-danger">*</span></label>
-                    @Html.DropDownList("MaChucVu", null, new { @class = "form-select", required = "required" })
+                    @Html.DropDownListFor(m => m.MaChucVu, Model.ChucVuList, new { @class = "form-select", required = "required", id = "MaChucVu", disabled = isLocked ? "disabled" : null })
                     @Html.ValidationMessageFor(m => m.MaChucVu, "", new { @class = "text-danger" })
+                </div>
+
+                <div class="col-12" id="ChuyenMonGroup" style="display: none;">
+                    <label class="form-label fw-bold">Chuyên môn <span class="text-danger">*</span></label>
+                    <div class="row">
+                        @if (Model.ChuyenMonList != null)
+                        {
+                            foreach (var cm in Model.ChuyenMonList)
+                            {
+                                <div class="col-md-4">
+                                    <div class="form-check">
+                                        @{
+                                            bool isChecked = Model.SelectedChuyenMonIds != null && Model.SelectedChuyenMonIds.Contains(cm.MaCM);
+                                        }
+                                        <input type="checkbox"
+                                               name="SelectedChuyenMonIds"
+                                               value="@cm.MaCM"
+                                               class="form-check-input"
+                                               id="cm_@cm.MaCM"
+                                               @(isChecked ? "checked" : "")
+                                               @(isLocked ? "disabled" : null) />
+                                        <label class="form-check-label" for="cm_@cm.MaCM">@cm.TenChuyenMon</label>
+                                    </div>
+                                </div>
+                            }
+                        }
+                    </div>
+                    @Html.ValidationMessage("SelectedChuyenMonIds", "", new { @class = "text-danger" })
                 </div>
 
                 <div class="col-md-6">
@@ -98,7 +139,29 @@
 </div>
 
 @section scripts {
-    <script>document.addEventListener("DOMContentLoaded", function () {
+    <script>
+        $(document).ready(function () {
+            var ptHlvCodes = ["1", "2"];
+            var isLocked = @(isLocked.ToString().ToLower());
+
+            function toggleChuyenMon() {
+                var selectedMaChucVu = $('#MaChucVu').val();
+
+                if (ptHlvCodes.includes(selectedMaChucVu)) {
+                    $('#ChuyenMonGroup').show();
+                } else {
+                    $('#ChuyenMonGroup').hide();
+                }
+            }
+
+            if (!isLocked) {
+                $('#MaChucVu').change(function () {
+                    toggleChuyenMon();
+                });
+            }
+
+            toggleChuyenMon();
+
             var btnToggle = document.getElementById('btnTogglePass');
             if (btnToggle) {
                 btnToggle.addEventListener('click', function () {
@@ -115,5 +178,6 @@
                     }
                 });
             }
-        });</script>
+        });
+    </script>
 }

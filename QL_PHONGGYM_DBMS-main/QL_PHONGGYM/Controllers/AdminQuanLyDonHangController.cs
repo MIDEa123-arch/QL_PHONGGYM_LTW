@@ -12,7 +12,8 @@ namespace QL_PHONGGYM.Controllers
         private readonly QL_PHONGGYMEntities _context = new QL_PHONGGYMEntities();
         public ActionResult Index(string search = "", string status = "", int page = 1, bool? isAjax = false)
         {
-            if (Session["AdminUser"] == null) return RedirectToAction("Login", "Auth");
+            if (Session["AdminUser"] == null) return RedirectToAction("Login", "AdminHome");
+
             var query = _context.DonHangs.ToList();
             if (!string.IsNullOrEmpty(search))
             {

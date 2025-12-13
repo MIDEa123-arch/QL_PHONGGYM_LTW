@@ -9,6 +9,11 @@ namespace QL_PHONGGYM.Controllers
 {
     public class AdminHomeController : Controller
     {
+        public ActionResult AccessDenied()
+        {
+            return View();
+        }
+
         public ActionResult Index()
         {
             return View();
@@ -43,6 +48,7 @@ namespace QL_PHONGGYM.Controllers
         public ActionResult Login(string username, string password)
         {
             var nhanVien = _context.NhanViens
+                .Include("ChucVu")
                 .FirstOrDefault(nv => nv.TenDangNhap == username && nv.MatKhau == password);
 
             if (nhanVien != null)
@@ -52,6 +58,7 @@ namespace QL_PHONGGYM.Controllers
                     Session["AdminUser"] = nhanVien;
                     Session["AdminName"] = nhanVien.TenNV;
                     Session["AdminRole"] = nhanVien.ChucVu.TenChucVu;
+                    Session["MaChucVu"] = nhanVien.MaChucVu;
 
                     return RedirectToAction("Index", "AdminDashboard");
                 }
@@ -67,7 +74,6 @@ namespace QL_PHONGGYM.Controllers
 
             return View();
         }
-
         public ActionResult Logout()
         {
             Session.Remove("AdminUser");
