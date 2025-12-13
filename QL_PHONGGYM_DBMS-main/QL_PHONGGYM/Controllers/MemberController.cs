@@ -19,10 +19,32 @@ namespace QL_PHONGGYM.Controllers
             _cusRepo = new KhachHangRepository(new QL_PHONGGYMEntities());
         }
 
-        public ActionResult ChiTietHoaDon(int maHd)
+        public ActionResult ChiTietHoaDon(int? maHd)
         {
-            var hd = _cusRepo.GetHoaDon(maHd);
-            return View(hd);
+            try
+            {
+                if (!KiemTraDangNhap())
+                    return RedirectToAction("Login", "Account");
+
+                HoaDon hd;
+
+                if (maHd != null)
+                {
+                    hd = _cusRepo.GetHoaDon(maHd);
+                    return View(hd);
+                }
+                return RedirectToAction("Login", "Account");
+            }
+            catch (Exception ex)
+            {
+                Session.Clear();
+
+                TempData["ErrorMessage"] = ex.Message;
+
+                return RedirectToAction("Login", "Account");
+            }
+
+
         }
 
         private bool KiemTraDangNhap()

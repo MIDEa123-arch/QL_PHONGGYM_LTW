@@ -142,7 +142,7 @@ namespace QL_PHONGGYM.Repositories
 
         }
 
-        public HoaDon GetHoaDon(int mahd)
+        public HoaDon GetHoaDon(int? mahd)
         {
             return _context.HoaDons.Find(mahd);
         }

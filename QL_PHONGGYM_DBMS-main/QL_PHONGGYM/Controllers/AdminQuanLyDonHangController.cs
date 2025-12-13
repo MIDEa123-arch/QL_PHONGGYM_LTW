@@ -47,6 +47,7 @@ namespace QL_PHONGGYM.Controllers
             return View(model);
         }
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public JsonResult UpdateOrderStatus(int id, string action)
         {
             var dh = _context.DonHangs.Find(id);

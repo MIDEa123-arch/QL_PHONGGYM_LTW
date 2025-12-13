@@ -149,7 +149,7 @@
 
         <ul class="sidebar-menu">
             <li class="sidebar-header text-uppercase small text-muted px-4 mt-3 mb-1">Tổng quan</li>
-            
+
             <li>
                 <a href="@Url.Action("Index", "AdminDashboard")" class="@(currentController == "AdminDashboard" ? "active" : "")">
                     <i class="fas fa-tachometer-alt"></i> Tổng quan (Dashboard)
@@ -157,7 +157,7 @@
             </li>
 
             <li class="sidebar-header text-uppercase small text-muted px-4 mt-3 mb-1">Quản lý</li>
-            
+
             @if (maChucVu == MA_QUANLY || maChucVu == MA_VANHANH)
             {
                 <li>
@@ -166,7 +166,7 @@
                     </a>
                 </li>
             }
-            
+
             @if (maChucVu == MA_QUANLY || maChucVu == MA_VANHANH)
             {
                 <li>
@@ -175,7 +175,7 @@
                     </a>
                 </li>
             }
-            
+
             @if (maChucVu == MA_QUANLY)
             {
                 <li>
@@ -184,7 +184,7 @@
                     </a>
                 </li>
             }
-            
+
             @if (maChucVu == MA_QUANLY || maChucVu == MA_VANHANH)
             {
                 <li>
@@ -193,16 +193,33 @@
                     </a>
                 </li>
             }
-            
-            @if (maChucVu == MA_QUANLY || maChucVu == MA_VANHANH)
+
+            @if (maChucVu == MA_QUANLY)
             {
                 <li>
-                    <a href="@Url.Action("Index", "AdminQuanLyDonHang")" class="@(currentController == "AdminQuanLyDonHang" || currentController == "AdminOrder" ? "active" : "")">
+                    <a href="@Url.Action("Index", "AdminOrder")"
+                       class="@(currentController == "AdminOrder" ? "active" : "")">
+                        <i class="fas fa-file-invoice-dollar"></i> Quản lý Hóa Đơn
+                    </a>
+                </li>
+
+                <li>
+                    <a href="@Url.Action("Index", "AdminQuanLyDonHang")"
+                       class="@(currentController == "AdminQuanLyDonHang" ? "active" : "")">
+                        <i class="fas fa-shipping-fast"></i> Quản lý Đơn Hàng
+                    </a>
+                </li>
+            }
+            @if (maChucVu == MA_VANHANH)
+            {
+                <li>
+                    <a href="@Url.Action("Index", "AdminQuanLyDonHang")"
+                       class="@(currentController == "AdminQuanLyDonHang" ? "active" : "")">
                         <i class="fas fa-shipping-fast"></i> Xử lý Đơn hàng
                     </a>
                 </li>
             }
-            
+
             @if (maChucVu == MA_QUANLY)
             {
                 <li>
