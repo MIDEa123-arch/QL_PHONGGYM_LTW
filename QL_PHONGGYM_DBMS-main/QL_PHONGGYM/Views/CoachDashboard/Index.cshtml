@@ -1,0 +1,286 @@
+﻿@using QL_PHONGGYM.Models
+@model List<ScheduleViewModel>
+
+@{
+    ViewBag.Title = "Lịch Dạy & PT";
+    Layout = "~/Views/Shared/_LayoutCoach.cshtml";
+
+    DateTime startOfWeek = ViewBag.StartOfWeek;
+    DateTime endOfWeek = ViewBag.EndOfWeek;
+    DateTime selectedDate = ViewBag.SelectedDate ?? DateTime.Today;
+    var daysInWeek = new List<DateTime>();
+    for (int i = 0; i < 7; i++) { daysInWeek.Add(startOfWeek.AddDays(i)); }
+}
+
+<div class="card border-0 shadow-sm mb-3">
+    <div class="card-body py-2 bg-white rounded">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <div class="d-flex align-items-center gap-2">
+                <form action="@Url.Action("Index")" method="get" id="dateForm" class="d-flex align-items-center gap-2">
+                    <input type="date" name="date" class="form-control form-control-sm fw-bold border-secondary text-primary"
+                           value="@selectedDate.ToString("yyyy-MM-dd")"
+                           onchange="this.form.submit()" style="width: 140px;">
+                </form>
+                <div class="btn-group">
+                    <a href="@Url.Action("Index", new { date = selectedDate.AddDays(-7).ToString("yyyy-MM-dd") })" class="btn btn-sm btn-success fw-bold text-white"><i class="fas fa-chevron-left"></i> Trước</a>
+                    <a href="@Url.Action("Index", new { date = selectedDate.AddDays(7).ToString("yyyy-MM-dd") })" class="btn btn-sm btn-success fw-bold text-white">Sau <i class="fas fa-chevron-right"></i></a>
+                </div>
+            </div>
+
+            <div class="d-flex gap-2">
+                <button class="btn btn-sm btn-primary fw-bold shadow-sm" onclick="openModalCreateClass()">
+                    <i class="fas fa-chalkboard-teacher me-1"></i> Thêm Lịch Lớp
+                </button>
+                <button class="btn btn-sm btn-warning text-dark fw-bold shadow-sm" onclick="openModalCreatePT()">
+                    <i class="fas fa-dumbbell me-1"></i> Thêm Lịch PT
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm">
+    <div class="table-responsive">
+        <table class="table table-bordered text-center align-middle mb-0" style="table-layout: fixed;">
+            <thead class="text-white" style="background-color: #0f3d64;">
+                <tr>
+                    <th style="width: 80px;" class="align-middle">CA</th>
+                    @foreach (var day in daysInWeek)
+                    {
+                        var isToday = day.Date == DateTime.Today;
+                        <th class="@(isToday ? "bg-primary" : "")">
+                            <div class="small fw-normal text-uppercase">@("Thứ " + ((int)day.DayOfWeek + 1 == 1 ? "CN" : ((int)day.DayOfWeek + 1).ToString()))</div>
+                            <div class="fs-5">@day.Day</div>
+                        </th>
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                @RenderRow("SÁNG", 0, 12, daysInWeek, Model)
+                @RenderRow("CHIỀU", 12, 17, daysInWeek, Model)
+                @RenderRow("TỐI", 17, 24, daysInWeek, Model)
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@helper RenderRow(string sessionName, int startHour, int endHour, List<DateTime> days, List<ScheduleViewModel> allData)
+{
+    <tr>
+        <td class="fw-bold bg-light text-secondary">@sessionName</td>
+        @foreach (var day in days)
+        {
+            <td class="p-1 align-top bg-white position-relative" style="height: 120px;">
+                @{
+                    var items = allData.Where(x => x.Date.Date == day.Date
+                                                && x.Start.Hours >= startHour
+                                                && x.Start.Hours < endHour)
+                                        .OrderBy(x => x.Start).ToList();
+                }
+
+                @if (items.Any())
+                {
+                    foreach (var item in items)
+                    {
+                        bool isClass = item.Type == "CLASS";
+                        string borderClass = isClass ? "border-primary" : "border-warning";
+                        string badgeClass = isClass ? "bg-primary" : "bg-warning text-dark";
+                        string icon = isClass ? "fa-users" : "fa-user";
+                        bool isDone = (item.Status != null && item.Status.Contains("Đã"));
+
+                        if (isDone) { borderClass = "border-secondary bg-light"; badgeClass = "bg-secondary"; }
+
+                        <div class="card border-0 border-start border-4 mb-1 shadow-sm @borderClass text-start">
+                            <div class="card-body p-1">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <span class="badge @badgeClass" style="font-size: 0.6rem;">
+                                        @item.Start.ToString(@"hh\:mm") <i class="fas @icon ms-1"></i>
+                                    </span>
+                                </div>
+                                <div class="fw-bold text-dark text-truncate" style="font-size: 0.75rem;" title="@item.Title">
+                                    @item.Title
+                                </div>
+                                <div class="text-muted fst-italic" style="font-size: 0.65rem;">@item.SubTitle</div>
+
+                                @if (!isDone)
+                                {
+                                    <button onclick="diemDanh(@item.Id, '@item.Type')" class="btn btn-sm btn-outline-success w-100 mt-1 py-0 px-1" style="font-size: 0.65rem;">
+                                        <i class="far fa-square"></i> Điểm danh
+                                    </button>
+                                }
+                                else
+                                {
+                                    <div class="text-secondary text-center mt-1" style="font-size: 0.65rem;">
+                                        <i class="fas fa-check-circle"></i> Xong
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+                }
+            </td>
+        }
+    </tr>
+}
+
+<div class="modal fade" id="modalCreateClass" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title fw-bold"><i class="fas fa-calendar-plus me-2"></i> Lên Lịch Lớp Học</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formCreateClass">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small text-secondary">CHỌN LỚP CẦN DẠY</label>
+                        @if (ViewBag.MyClasses != null)
+                        {
+                            @Html.DropDownList("maLop", (SelectList)ViewBag.MyClasses, "-- Chọn lớp phụ trách --", new { @class = "form-select", @id = "ddlClass" })
+                        }
+                        else
+                        {
+                            <p class="text-danger small">Không tìm thấy danh sách lớp.</p>
+                        }
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small text-secondary">NGÀY HỌC</label>
+                        <input type="date" id="txtDateClass" class="form-control" value="@DateTime.Today.ToString("yyyy-MM-dd")">
+                    </div>
+                    <div class="row">
+                        <div class="col-6 mb-3">
+                            <label class="form-label fw-bold small text-secondary">BẮT ĐẦU</label>
+                            <input type="time" id="txtStartClass" class="form-control">
+                        </div>
+                        <div class="col-6 mb-3">
+                            <label class="form-label fw-bold small text-secondary">KẾT THÚC</label>
+                            <input type="time" id="txtEndClass" class="form-control">
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-primary fw-bold" onclick="submitClassSchedule()">Lưu Lịch Lớp</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalCreatePT" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-warning">
+                <h5 class="modal-title fw-bold text-dark"><i class="fas fa-dumbbell me-2"></i> Lên Lịch Tập PT (1-1)</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formCreatePT">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small text-secondary">CHỌN KHÁCH HÀNG</label>
+                        <select class="form-select" id="ddlClientPT">
+                            @if (ViewBag.MyPTClients != null)
+                            {
+                                foreach (var item in ViewBag.MyPTClients)
+                                {
+                                    <option value="@item.MaDKPT">@item.KhachHang.TenKH (Gói: @item.SoBuoi buổi)</option>
+                                }
+                            }
+                        </select>
+                        <small class="text-muted fst-italic">Chỉ hiện khách hàng còn hiệu lực hợp đồng.</small>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small text-secondary">NGÀY TẬP</label>
+                        <input type="date" id="txtDatePT" class="form-control" value="@DateTime.Today.ToString("yyyy-MM-dd")">
+                    </div>
+                    <div class="row">
+                        <div class="col-6 mb-3">
+                            <label class="form-label fw-bold small text-secondary">BẮT ĐẦU</label>
+                            <input type="time" id="txtStartPT" class="form-control" value="07:00">
+                        </div>
+                        <div class="col-6 mb-3">
+                            <label class="form-label fw-bold small text-secondary">KẾT THÚC</label>
+                            <input type="time" id="txtEndPT" class="form-control" value="08:00">
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-warning text-dark fw-bold" onclick="submitPTSchedule()">Lưu Lịch PT</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script>
+        function diemDanh(id, type) {
+            if (!confirm("Xác nhận đã dạy/tập xong buổi này?")) return;
+            $.post('/CoachDashboard/DiemDanh', { id: id, type: type }, function (res) {
+                if (res.success) { location.reload(); }
+                else { alert("Lỗi: " + res.message); }
+            });
+        }
+
+        function openModalCreateClass() {
+            var myModal = new bootstrap.Modal(document.getElementById('modalCreateClass'));
+            myModal.show();
+        }
+
+        function openModalCreatePT() {
+            var myModal = new bootstrap.Modal(document.getElementById('modalCreatePT'));
+            myModal.show();
+        }
+
+        function submitClassSchedule() {
+            var maLop = $('#ddlClass').val();
+            var ngay = $('#txtDateClass').val();
+            var start = $('#txtStartClass').val();
+            var end = $('#txtEndClass').val();
+
+            if (!maLop || !ngay || !start || !end) {
+                alert("Vui lòng nhập đầy đủ thông tin lớp học!");
+                return;
+            }
+
+            $.ajax({
+                url: '/CoachDashboard/ThemLich',
+                type: 'POST',
+                data: { maLop: maLop, ngayHoc: ngay, gioBatDau: start, gioKetThuc: end },
+                success: function (res) {
+                    if (res.success) { alert(res.message); location.reload(); }
+                    else { alert("Lỗi: " + res.message); }
+                },
+                error: function () { alert("Lỗi kết nối server!"); }
+            });
+        }
+
+        function submitPTSchedule() {
+            var maDK = $('#ddlClientPT').val();
+            var ngay = $('#txtDatePT').val();
+            var start = $('#txtStartPT').val();
+            var end = $('#txtEndPT').val();
+
+            if (!maDK) {
+                alert("Bạn chưa có khách hàng PT nào để xếp lịch!");
+                return;
+            }
+            if (!ngay || !start || !end) {
+                alert("Vui lòng nhập đầy đủ thời gian!");
+                return;
+            }
+
+            $.ajax({
+                url: '/CoachDashboard/ThemLichPT',
+                type: 'POST',
+                data: { maDKPT: maDK, ngayTap: ngay, gioBatDau: start, gioKetThuc: end },
+                success: function (res) {
+                    if (res.success) { alert(res.message); location.reload(); }
+                    else { alert("Lỗi: " + res.message); }
+                },
+                error: function () { alert("Lỗi kết nối server!"); }
+            });
+        }
+    </script>
+}
