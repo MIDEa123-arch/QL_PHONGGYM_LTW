@@ -1,8 +1,7 @@
 ﻿@model QL_PHONGGYM.Models.KhachHang
 @{
     ViewBag.Title = "Thông tin tài khoản";
-    Layout = "~/Views/Shared/_LayoutMember.cshtml";
-    QL_PHONGGYM.ViewModel.UpdatePasswordViewModel m;
+    Layout = "~/Views/Shared/_LayoutMember.cshtml";    
 }
 
 <style>
@@ -409,7 +408,7 @@
         @using (Html.BeginForm("ThemDiaChi", "Member", FormMethod.Post, new { @class = "modal-content h-100 rounded-4 shadow-lg border-0 position-relative" }))
         {
             @Html.AntiForgeryToken()
-            @Html.HiddenFor(m => m.MaKH)
+            <input type="number" name="MaKH" value="@Model.MaKH"/>
 
             <div class="modal-body p-0 d-flex flex-column hide-scrollbar">
 
