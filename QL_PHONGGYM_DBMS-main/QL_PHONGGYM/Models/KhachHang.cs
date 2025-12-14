@@ -17,14 +17,12 @@ namespace QL_PHONGGYM.Models
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
         public KhachHang()
         {
-            this.CheckIns = new HashSet<CheckIn>();
             this.ChiTietGioHangs = new HashSet<ChiTietGioHang>();
             this.DangKyGoiTaps = new HashSet<DangKyGoiTap>();
             this.DangKyLops = new HashSet<DangKyLop>();
             this.DangKyPTs = new HashSet<DangKyPT>();
             this.DiaChis = new HashSet<DiaChi>();
             this.HoaDons = new HashSet<HoaDon>();
-            this.YeuCauHoTroes = new HashSet<YeuCauHoTro>();
         }
     
         public int MaKH { get; set; }
@@ -39,8 +37,6 @@ namespace QL_PHONGGYM.Models
         public Nullable<int> TrangThaiTaiKhoan { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<CheckIn> CheckIns { get; set; }
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<ChiTietGioHang> ChiTietGioHangs { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<DangKyGoiTap> DangKyGoiTaps { get; set; }
@@ -53,7 +49,5 @@ namespace QL_PHONGGYM.Models
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<HoaDon> HoaDons { get; set; }
         public virtual LoaiKhachHang LoaiKhachHang { get; set; }
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<YeuCauHoTro> YeuCauHoTroes { get; set; }
     }
 }

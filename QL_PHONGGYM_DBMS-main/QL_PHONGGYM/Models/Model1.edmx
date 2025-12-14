@@ -5,16 +5,6 @@
     <!-- SSDL content -->
     <edmx:StorageModels>
     <Schema Namespace="qlgymModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
-        <EntityType Name="CheckIn">
-          <Key>
-            <PropertyRef Name="MaCheckIn" />
-          </Key>
-          <Property Name="MaCheckIn" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
-          <Property Name="MaKH" Type="int" Nullable="false" />
-          <Property Name="ThoiGianVao" Type="datetime" Nullable="false" />
-          <Property Name="ThoiGianRa" Type="datetime" />
-          <Property Name="TrangThai" Type="nvarchar" MaxLength="50" />
-        </EntityType>
         <EntityType Name="ChiTietGioHang">
           <Key>
             <PropertyRef Name="MaChiTietGH" />
@@ -254,45 +244,24 @@
           <Property Name="MoTaChiTiet" Type="nvarchar(max)" />
           <Property Name="TrangThai" Type="int" />
         </EntityType>
-        <EntityType Name="YeuCauHoTro">
+        <!--Errors Found During Generation:
+warning 6002: The table/view 'QL_PHONGGYM.sys.database_firewall_rules' does not have a primary key defined. The key has been inferred and the definition was created as a read-only table/view.-->
+        <EntityType Name="database_firewall_rules">
           <Key>
-            <PropertyRef Name="MaYC" />
+            <PropertyRef Name="id" />
+            <PropertyRef Name="name" />
+            <PropertyRef Name="start_ip_address" />
+            <PropertyRef Name="end_ip_address" />
+            <PropertyRef Name="create_date" />
+            <PropertyRef Name="modify_date" />
           </Key>
-          <Property Name="MaYC" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
-          <Property Name="MaKH" Type="int" Nullable="false" />
-          <Property Name="TieuDe" Type="nvarchar" MaxLength="200" Nullable="false" />
-          <Property Name="NoiDung" Type="nvarchar(max)" Nullable="false" />
-          <Property Name="LoaiYeuCau" Type="nvarchar" MaxLength="50" />
-          <Property Name="TrangThai" Type="nvarchar" MaxLength="50" Nullable="false" />
-          <Property Name="MaNV" Type="int" />
-          <Property Name="PhanHoi" Type="nvarchar(max)" />
-          <Property Name="NgayGui" Type="datetime" />
-          <Property Name="NgayXuLy" Type="datetime" />
+          <Property Name="id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="name" Type="nvarchar" MaxLength="128" Nullable="false" />
+          <Property Name="start_ip_address" Type="varchar" MaxLength="45" Nullable="false" />
+          <Property Name="end_ip_address" Type="varchar" MaxLength="45" Nullable="false" />
+          <Property Name="create_date" Type="datetime" Nullable="false" />
+          <Property Name="modify_date" Type="datetime" Nullable="false" />
         </EntityType>
-        <Association Name="FK_CheckIn_KH">
-          <End Role="KhachHang" Type="Self.KhachHang" Multiplicity="1" />
-          <End Role="CheckIn" Type="Self.CheckIn" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="KhachHang">
-              <PropertyRef Name="MaKH" />
-            </Principal>
-            <Dependent Role="CheckIn">
-              <PropertyRef Name="MaKH" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <Association Name="FK_ChiTietGioHang_KhachHang">
-          <End Role="KhachHang" Type="Self.KhachHang" Multiplicity="1" />
-          <End Role="ChiTietGioHang" Type="Self.ChiTietGioHang" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="KhachHang">
-              <PropertyRef Name="MaKH" />
-            </Principal>
-            <Dependent Role="ChiTietGioHang">
-              <PropertyRef Name="MaKH" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
         <Association Name="FK_CT_HD">
           <End Role="HoaDon" Type="Self.HoaDon" Multiplicity="1" />
           <End Role="ChiTietHoaDon" Type="Self.ChiTietHoaDon" Multiplicity="*" />
@@ -350,6 +319,18 @@
             </Principal>
             <Dependent Role="ChiTietHoaDon">
               <PropertyRef Name="MaSP" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_ChiTietGioHang_KhachHang">
+          <End Role="KhachHang" Type="Self.KhachHang" Multiplicity="1" />
+          <End Role="ChiTietGioHang" Type="Self.ChiTietGioHang" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="KhachHang">
+              <PropertyRef Name="MaKH" />
+            </Principal>
+            <Dependent Role="ChiTietGioHang">
+              <PropertyRef Name="MaKH" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
@@ -563,18 +544,6 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK_NhanVien_ChucVu">
-          <End Role="ChucVu" Type="Self.ChucVu" Multiplicity="0..1" />
-          <End Role="NhanVien" Type="Self.NhanVien" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="ChucVu">
-              <PropertyRef Name="MaChucVu" />
-            </Principal>
-            <Dependent Role="NhanVien">
-              <PropertyRef Name="MaChucVu" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
         <Association Name="FK_NVCM_CM">
           <End Role="ChuyenMon" Type="Self.ChuyenMon" Multiplicity="1" />
           <End Role="NhanVienChuyenMon" Type="Self.NhanVienChuyenMon" Multiplicity="*" />
@@ -599,6 +568,18 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <Association Name="FK_NhanVien_ChucVu">
+          <End Role="ChucVu" Type="Self.ChucVu" Multiplicity="0..1" />
+          <End Role="NhanVien" Type="Self.NhanVien" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="ChucVu">
+              <PropertyRef Name="MaChucVu" />
+            </Principal>
+            <Dependent Role="NhanVien">
+              <PropertyRef Name="MaChucVu" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
         <Association Name="FK_SP_LSP">
           <End Role="LoaiSanPham" Type="Self.LoaiSanPham" Multiplicity="0..1" />
           <End Role="SanPham" Type="Self.SanPham" Multiplicity="*" />
@@ -608,32 +589,6 @@
             </Principal>
             <Dependent Role="SanPham">
               <PropertyRef Name="MaLoaiSP" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <Association Name="FK_YeuCau_KhachHang">
-          <End Role="KhachHang" Type="Self.KhachHang" Multiplicity="1">
-            <OnDelete Action="Cascade" />
-          </End>
-          <End Role="YeuCauHoTro" Type="Self.YeuCauHoTro" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="KhachHang">
-              <PropertyRef Name="MaKH" />
-            </Principal>
-            <Dependent Role="YeuCauHoTro">
-              <PropertyRef Name="MaKH" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <Association Name="FK_YeuCau_NhanVien">
-          <End Role="NhanVien" Type="Self.NhanVien" Multiplicity="0..1" />
-          <End Role="YeuCauHoTro" Type="Self.YeuCauHoTro" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="NhanVien">
-              <PropertyRef Name="MaNV" />
-            </Principal>
-            <Dependent Role="YeuCauHoTro">
-              <PropertyRef Name="MaNV" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
@@ -804,7 +759,6 @@
           <Parameter Name="MaLop" Type="int" Mode="In" />
         </Function>
         <EntityContainer Name="qlgymModelStoreContainer">
-          <EntitySet Name="CheckIn" EntityType="Self.CheckIn" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="ChiTietGioHang" EntityType="Self.ChiTietGioHang" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="ChiTietHoaDon" EntityType="Self.ChiTietHoaDon" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="ChucVu" EntityType="Self.ChucVu" Schema="dbo" store:Type="Tables" />
@@ -826,15 +780,16 @@
           <EntitySet Name="NhanVien" EntityType="Self.NhanVien" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="NhanVienChuyenMon" EntityType="Self.NhanVienChuyenMon" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="SanPham" EntityType="Self.SanPham" Schema="dbo" store:Type="Tables" />
-          <EntitySet Name="YeuCauHoTro" EntityType="Self.YeuCauHoTro" Schema="dbo" store:Type="Tables" />
-          <AssociationSet Name="FK_CheckIn_KH" Association="Self.FK_CheckIn_KH">
-            <End Role="KhachHang" EntitySet="KhachHang" />
-            <End Role="CheckIn" EntitySet="CheckIn" />
-          </AssociationSet>
-          <AssociationSet Name="FK_ChiTietGioHang_KhachHang" Association="Self.FK_ChiTietGioHang_KhachHang">
-            <End Role="KhachHang" EntitySet="KhachHang" />
-            <End Role="ChiTietGioHang" EntitySet="ChiTietGioHang" />
-          </AssociationSet>
+          <EntitySet Name="database_firewall_rules" EntityType="Self.database_firewall_rules" store:Type="Views" store:Schema="sys">
+            <DefiningQuery>SELECT 
+    [database_firewall_rules].[id] AS [id], 
+    [database_firewall_rules].[name] AS [name], 
+    [database_firewall_rules].[start_ip_address] AS [start_ip_address], 
+    [database_firewall_rules].[end_ip_address] AS [end_ip_address], 
+    [database_firewall_rules].[create_date] AS [create_date], 
+    [database_firewall_rules].[modify_date] AS [modify_date]
+    FROM [sys].[database_firewall_rules] AS [database_firewall_rules]</DefiningQuery>
+          </EntitySet>
           <AssociationSet Name="FK_CT_HD" Association="Self.FK_CT_HD">
             <End Role="HoaDon" EntitySet="HoaDon" />
             <End Role="ChiTietHoaDon" EntitySet="ChiTietHoaDon" />
@@ -854,6 +809,10 @@
           <AssociationSet Name="FK_CT_SP" Association="Self.FK_CT_SP">
             <End Role="SanPham" EntitySet="SanPham" />
             <End Role="ChiTietHoaDon" EntitySet="ChiTietHoaDon" />
+          </AssociationSet>
+          <AssociationSet Name="FK_ChiTietGioHang_KhachHang" Association="Self.FK_ChiTietGioHang_KhachHang">
+            <End Role="KhachHang" EntitySet="KhachHang" />
+            <End Role="ChiTietGioHang" EntitySet="ChiTietGioHang" />
           </AssociationSet>
           <AssociationSet Name="FK_DiaChi_KhachHang" Association="Self.FK_DiaChi_KhachHang">
             <End Role="KhachHang" EntitySet="KhachHang" />
@@ -923,10 +882,6 @@
             <End Role="NhanVien" EntitySet="NhanVien" />
             <End Role="LopHoc" EntitySet="LopHoc" />
           </AssociationSet>
-          <AssociationSet Name="FK_NhanVien_ChucVu" Association="Self.FK_NhanVien_ChucVu">
-            <End Role="ChucVu" EntitySet="ChucVu" />
-            <End Role="NhanVien" EntitySet="NhanVien" />
-          </AssociationSet>
           <AssociationSet Name="FK_NVCM_CM" Association="Self.FK_NVCM_CM">
             <End Role="ChuyenMon" EntitySet="ChuyenMon" />
             <End Role="NhanVienChuyenMon" EntitySet="NhanVienChuyenMon" />
@@ -935,34 +890,19 @@
             <End Role="NhanVien" EntitySet="NhanVien" />
             <End Role="NhanVienChuyenMon" EntitySet="NhanVienChuyenMon" />
           </AssociationSet>
+          <AssociationSet Name="FK_NhanVien_ChucVu" Association="Self.FK_NhanVien_ChucVu">
+            <End Role="ChucVu" EntitySet="ChucVu" />
+            <End Role="NhanVien" EntitySet="NhanVien" />
+          </AssociationSet>
           <AssociationSet Name="FK_SP_LSP" Association="Self.FK_SP_LSP">
             <End Role="LoaiSanPham" EntitySet="LoaiSanPham" />
             <End Role="SanPham" EntitySet="SanPham" />
-          </AssociationSet>
-          <AssociationSet Name="FK_YeuCau_KhachHang" Association="Self.FK_YeuCau_KhachHang">
-            <End Role="KhachHang" EntitySet="KhachHang" />
-            <End Role="YeuCauHoTro" EntitySet="YeuCauHoTro" />
-          </AssociationSet>
-          <AssociationSet Name="FK_YeuCau_NhanVien" Association="Self.FK_YeuCau_NhanVien">
-            <End Role="NhanVien" EntitySet="NhanVien" />
-            <End Role="YeuCauHoTro" EntitySet="YeuCauHoTro" />
           </AssociationSet>
         </EntityContainer>
       </Schema></edmx:StorageModels>
     <!-- CSDL content -->
     <edmx:ConceptualModels>
       <Schema Namespace="qlgymModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
-        <EntityType Name="CheckIn">
-          <Key>
-            <PropertyRef Name="MaCheckIn" />
-          </Key>
-          <Property Name="MaCheckIn" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="MaKH" Type="Int32" Nullable="false" />
-          <Property Name="ThoiGianVao" Type="DateTime" Nullable="false" Precision="3" />
-          <Property Name="ThoiGianRa" Type="DateTime" Precision="3" />
-          <Property Name="TrangThai" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
-          <NavigationProperty Name="KhachHang" Relationship="Self.FK_CheckIn_KH" FromRole="CheckIn" ToRole="KhachHang" />
-        </EntityType>
         <EntityType Name="ChiTietGioHang">
           <Key>
             <PropertyRef Name="MaChiTietGH" />
@@ -1136,7 +1076,6 @@
           <Property Name="TenDangNhap" Type="String" MaxLength="300" FixedLength="false" Unicode="false" />
           <Property Name="MatKhau" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
           <Property Name="TrangThaiTaiKhoan" Type="Int32" />
-          <NavigationProperty Name="CheckIns" Relationship="Self.FK_CheckIn_KH" FromRole="KhachHang" ToRole="CheckIn" />
           <NavigationProperty Name="ChiTietGioHangs" Relationship="Self.FK_ChiTietGioHang_KhachHang" FromRole="KhachHang" ToRole="ChiTietGioHang" />
           <NavigationProperty Name="DangKyGoiTaps" Relationship="Self.FK_DKGT_KH" FromRole="KhachHang" ToRole="DangKyGoiTap" />
           <NavigationProperty Name="DangKyLops" Relationship="Self.FK_DKLop_KH" FromRole="KhachHang" ToRole="DangKyLop" />
@@ -1144,7 +1083,6 @@
           <NavigationProperty Name="DiaChis" Relationship="Self.FK_DiaChi_KhachHang" FromRole="KhachHang" ToRole="DiaChi" />
           <NavigationProperty Name="HoaDons" Relationship="Self.FK_HoaDon_KH" FromRole="KhachHang" ToRole="HoaDon" />
           <NavigationProperty Name="LoaiKhachHang" Relationship="Self.FK_KhachHang_LoaiKH" FromRole="KhachHang" ToRole="LoaiKhachHang" />
-          <NavigationProperty Name="YeuCauHoTroes" Relationship="Self.FK_YeuCau_KhachHang" FromRole="KhachHang" ToRole="YeuCauHoTro" />
         </EntityType>
         <EntityType Name="LichLop">
           <Key>
@@ -1225,7 +1163,6 @@
           <NavigationProperty Name="DangKyPTs" Relationship="Self.FK_DKPT_NV" FromRole="NhanVien" ToRole="DangKyPT" />
           <NavigationProperty Name="LichLops" Relationship="Self.FK_LichLop_NhanVien_MaNV" FromRole="NhanVien" ToRole="LichLop" />
           <NavigationProperty Name="LopHocs" Relationship="Self.FK_LopHoc_NhanVien_MaNV" FromRole="NhanVien" ToRole="LopHoc" />
-          <NavigationProperty Name="YeuCauHoTroes" Relationship="Self.FK_YeuCau_NhanVien" FromRole="NhanVien" ToRole="YeuCauHoTro" />
           <NavigationProperty Name="ChuyenMons" Relationship="Self.NhanVienChuyenMon" FromRole="NhanVien" ToRole="ChuyenMon" />
         </EntityType>
         <EntityType Name="SanPham">
@@ -1249,35 +1186,6 @@
           <NavigationProperty Name="HINHANHs" Relationship="Self.FK_HinhAnh_SanPham" FromRole="SanPham" ToRole="HINHANH" />
           <NavigationProperty Name="LoaiSanPham" Relationship="Self.FK_SP_LSP" FromRole="SanPham" ToRole="LoaiSanPham" />
         </EntityType>
-        <EntityType Name="YeuCauHoTro">
-          <Key>
-            <PropertyRef Name="MaYC" />
-          </Key>
-          <Property Name="MaYC" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="MaKH" Type="Int32" Nullable="false" />
-          <Property Name="TieuDe" Type="String" MaxLength="200" FixedLength="false" Unicode="true" Nullable="false" />
-          <Property Name="NoiDung" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" Nullable="false" />
-          <Property Name="LoaiYeuCau" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
-          <Property Name="TrangThai" Type="String" MaxLength="50" FixedLength="false" Unicode="true" Nullable="false" />
-          <Property Name="MaNV" Type="Int32" />
-          <Property Name="PhanHoi" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
-          <Property Name="NgayGui" Type="DateTime" Precision="3" />
-          <Property Name="NgayXuLy" Type="DateTime" Precision="3" />
-          <NavigationProperty Name="KhachHang" Relationship="Self.FK_YeuCau_KhachHang" FromRole="YeuCauHoTro" ToRole="KhachHang" />
-          <NavigationProperty Name="NhanVien" Relationship="Self.FK_YeuCau_NhanVien" FromRole="YeuCauHoTro" ToRole="NhanVien" />
-        </EntityType>
-        <Association Name="FK_CheckIn_KH">
-          <End Role="KhachHang" Type="Self.KhachHang" Multiplicity="1" />
-          <End Role="CheckIn" Type="Self.CheckIn" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="KhachHang">
-              <PropertyRef Name="MaKH" />
-            </Principal>
-            <Dependent Role="CheckIn">
-              <PropertyRef Name="MaKH" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
         <Association Name="FK_ChiTietGioHang_KhachHang">
           <End Role="KhachHang" Type="Self.KhachHang" Multiplicity="1" />
           <End Role="ChiTietGioHang" Type="Self.ChiTietGioHang" Multiplicity="*" />
@@ -1536,20 +1444,6 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK_YeuCau_KhachHang">
-          <End Role="KhachHang" Type="Self.KhachHang" Multiplicity="1">
-            <OnDelete Action="Cascade" />
-          </End>
-          <End Role="YeuCauHoTro" Type="Self.YeuCauHoTro" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="KhachHang">
-              <PropertyRef Name="MaKH" />
-            </Principal>
-            <Dependent Role="YeuCauHoTro">
-              <PropertyRef Name="MaKH" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
         <Association Name="FK_LichLop_Lop">
           <End Role="LopHoc" Type="Self.LopHoc" Multiplicity="1" />
           <End Role="LichLop" Type="Self.LichLop" Multiplicity="*" />
@@ -1598,24 +1492,11 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK_YeuCau_NhanVien">
-          <End Role="NhanVien" Type="Self.NhanVien" Multiplicity="0..1" />
-          <End Role="YeuCauHoTro" Type="Self.YeuCauHoTro" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="NhanVien">
-              <PropertyRef Name="MaNV" />
-            </Principal>
-            <Dependent Role="YeuCauHoTro">
-              <PropertyRef Name="MaNV" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
         <Association Name="NhanVienChuyenMon">
           <End Role="ChuyenMon" Type="Self.ChuyenMon" Multiplicity="*" />
           <End Role="NhanVien" Type="Self.NhanVien" Multiplicity="*" />
         </Association>
         <EntityContainer Name="QL_PHONGGYMEntities" annotation:LazyLoadingEnabled="true">
-          <EntitySet Name="CheckIns" EntityType="Self.CheckIn" />
           <EntitySet Name="ChiTietGioHangs" EntityType="Self.ChiTietGioHang" />
           <EntitySet Name="ChiTietHoaDons" EntityType="Self.ChiTietHoaDon" />
           <EntitySet Name="ChucVus" EntityType="Self.ChucVu" />
@@ -1636,11 +1517,6 @@
           <EntitySet Name="LopHocs" EntityType="Self.LopHoc" />
           <EntitySet Name="NhanViens" EntityType="Self.NhanVien" />
           <EntitySet Name="SanPhams" EntityType="Self.SanPham" />
-          <EntitySet Name="YeuCauHoTroes" EntityType="Self.YeuCauHoTro" />
-          <AssociationSet Name="FK_CheckIn_KH" Association="Self.FK_CheckIn_KH">
-            <End Role="KhachHang" EntitySet="KhachHangs" />
-            <End Role="CheckIn" EntitySet="CheckIns" />
-          </AssociationSet>
           <AssociationSet Name="FK_ChiTietGioHang_KhachHang" Association="Self.FK_ChiTietGioHang_KhachHang">
             <End Role="KhachHang" EntitySet="KhachHangs" />
             <End Role="ChiTietGioHang" EntitySet="ChiTietGioHangs" />
@@ -1725,10 +1601,6 @@
             <End Role="LoaiKhachHang" EntitySet="LoaiKhachHangs" />
             <End Role="KhachHang" EntitySet="KhachHangs" />
           </AssociationSet>
-          <AssociationSet Name="FK_YeuCau_KhachHang" Association="Self.FK_YeuCau_KhachHang">
-            <End Role="KhachHang" EntitySet="KhachHangs" />
-            <End Role="YeuCauHoTro" EntitySet="YeuCauHoTroes" />
-          </AssociationSet>
           <AssociationSet Name="FK_LichLop_Lop" Association="Self.FK_LichLop_Lop">
             <End Role="LopHoc" EntitySet="LopHocs" />
             <End Role="LichLop" EntitySet="LichLops" />
@@ -1744,10 +1616,6 @@
           <AssociationSet Name="FK_LopHoc_NhanVien_MaNV" Association="Self.FK_LopHoc_NhanVien_MaNV">
             <End Role="NhanVien" EntitySet="NhanViens" />
             <End Role="LopHoc" EntitySet="LopHocs" />
-          </AssociationSet>
-          <AssociationSet Name="FK_YeuCau_NhanVien" Association="Self.FK_YeuCau_NhanVien">
-            <End Role="NhanVien" EntitySet="NhanViens" />
-            <End Role="YeuCauHoTro" EntitySet="YeuCauHoTroes" />
           </AssociationSet>
           <AssociationSet Name="NhanVienChuyenMon" Association="Self.NhanVienChuyenMon">
             <End Role="ChuyenMon" EntitySet="ChuyenMons" />
@@ -1919,6 +1787,7 @@
           <FunctionImport Name="XoaLichVaLop">
           <Parameter Name="MaLop" Mode="In" Type="Int32" />
           </FunctionImport>
+          <EntitySet Name="database_firewall_rules" EntityType="qlgymModel.database_firewall_rules" />
         </EntityContainer>
         <ComplexType Name="sp_KhachHangLogin_Result">
           <Property Type="Int32" Name="MaKH" Nullable="false" />
@@ -1926,23 +1795,28 @@
           <Property Type="String" Name="SDT" Nullable="true" MaxLength="15" />
           <Property Type="String" Name="Email" Nullable="true" MaxLength="100" />
         </ComplexType>
+        <EntityType Name="database_firewall_rules">
+          <Key>
+            <PropertyRef Name="id" />
+            <PropertyRef Name="name" />
+            <PropertyRef Name="start_ip_address" />
+            <PropertyRef Name="end_ip_address" />
+            <PropertyRef Name="create_date" />
+            <PropertyRef Name="modify_date" />
+          </Key>
+          <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="name" Type="String" Nullable="false" MaxLength="128" FixedLength="false" Unicode="true" />
+          <Property Name="start_ip_address" Type="String" Nullable="false" MaxLength="45" FixedLength="false" Unicode="false" />
+          <Property Name="end_ip_address" Type="String" Nullable="false" MaxLength="45" FixedLength="false" Unicode="false" />
+          <Property Name="create_date" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="modify_date" Type="DateTime" Nullable="false" Precision="3" />
+        </EntityType>
       </Schema>
     </edmx:ConceptualModels>
     <!-- C-S mapping content -->
     <edmx:Mappings>
       <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
         <EntityContainerMapping StorageEntityContainer="qlgymModelStoreContainer" CdmEntityContainer="QL_PHONGGYMEntities">
-          <EntitySetMapping Name="CheckIns">
-            <EntityTypeMapping TypeName="qlgymModel.CheckIn">
-              <MappingFragment StoreEntitySet="CheckIn">
-                <ScalarProperty Name="MaCheckIn" ColumnName="MaCheckIn" />
-                <ScalarProperty Name="MaKH" ColumnName="MaKH" />
-                <ScalarProperty Name="ThoiGianVao" ColumnName="ThoiGianVao" />
-                <ScalarProperty Name="ThoiGianRa" ColumnName="ThoiGianRa" />
-                <ScalarProperty Name="TrangThai" ColumnName="TrangThai" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
           <EntitySetMapping Name="ChiTietGioHangs">
             <EntityTypeMapping TypeName="qlgymModel.ChiTietGioHang">
               <MappingFragment StoreEntitySet="ChiTietGioHang">
@@ -2194,22 +2068,6 @@
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
-          <EntitySetMapping Name="YeuCauHoTroes">
-            <EntityTypeMapping TypeName="qlgymModel.YeuCauHoTro">
-              <MappingFragment StoreEntitySet="YeuCauHoTro">
-                <ScalarProperty Name="MaYC" ColumnName="MaYC" />
-                <ScalarProperty Name="MaKH" ColumnName="MaKH" />
-                <ScalarProperty Name="TieuDe" ColumnName="TieuDe" />
-                <ScalarProperty Name="NoiDung" ColumnName="NoiDung" />
-                <ScalarProperty Name="LoaiYeuCau" ColumnName="LoaiYeuCau" />
-                <ScalarProperty Name="TrangThai" ColumnName="TrangThai" />
-                <ScalarProperty Name="MaNV" ColumnName="MaNV" />
-                <ScalarProperty Name="PhanHoi" ColumnName="PhanHoi" />
-                <ScalarProperty Name="NgayGui" ColumnName="NgayGui" />
-                <ScalarProperty Name="NgayXuLy" ColumnName="NgayXuLy" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
           <AssociationSetMapping Name="NhanVienChuyenMon" TypeName="qlgymModel.NhanVienChuyenMon" StoreEntitySet="NhanVienChuyenMon">
             <EndProperty Name="ChuyenMon">
               <ScalarProperty Name="MaCM" ColumnName="MaCM" />
@@ -2256,6 +2114,18 @@
           <FunctionImportMapping FunctionImportName="sp_XoaNhanVienChuyenMon" FunctionName="qlgymModel.Store.sp_XoaNhanVienChuyenMon" />
           <FunctionImportMapping FunctionImportName="sp_XoaSanPham" FunctionName="qlgymModel.Store.sp_XoaSanPham" />
           <FunctionImportMapping FunctionImportName="XoaLichVaLop" FunctionName="qlgymModel.Store.XoaLichVaLop" />
+          <EntitySetMapping Name="database_firewall_rules">
+            <EntityTypeMapping TypeName="qlgymModel.database_firewall_rules">
+              <MappingFragment StoreEntitySet="database_firewall_rules">
+                <ScalarProperty Name="modify_date" ColumnName="modify_date" />
+                <ScalarProperty Name="create_date" ColumnName="create_date" />
+                <ScalarProperty Name="end_ip_address" ColumnName="end_ip_address" />
+                <ScalarProperty Name="start_ip_address" ColumnName="start_ip_address" />
+                <ScalarProperty Name="name" ColumnName="name" />
+                <ScalarProperty Name="id" ColumnName="id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
         </EntityContainerMapping>
       </Mapping>
     </edmx:Mappings>

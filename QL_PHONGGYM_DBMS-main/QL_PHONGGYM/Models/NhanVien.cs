@@ -20,7 +20,6 @@ namespace QL_PHONGGYM.Models
             this.DangKyPTs = new HashSet<DangKyPT>();
             this.LichLops = new HashSet<LichLop>();
             this.LopHocs = new HashSet<LopHoc>();
-            this.YeuCauHoTroes = new HashSet<YeuCauHoTro>();
             this.ChuyenMons = new HashSet<ChuyenMon>();
         }
     
@@ -41,8 +40,6 @@ namespace QL_PHONGGYM.Models
         public virtual ICollection<LichLop> LichLops { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<LopHoc> LopHocs { get; set; }
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<YeuCauHoTro> YeuCauHoTroes { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<ChuyenMon> ChuyenMons { get; set; }
     }

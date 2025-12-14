@@ -34,7 +34,7 @@ namespace QL_PHONGGYM.Repositories
 
                 return true;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return false;
             }
@@ -240,9 +240,6 @@ namespace QL_PHONGGYM.Repositories
 
                             _context.ChiTietHoaDons.Add(ct);
                             sp.SoLuongTon = sp.SoLuongTon - item.SoLuong;
-
-                            if (sp.SoLuongTon <= 0)
-                                sp.TrangThai = 0;
 
                             var list = _context.ChiTietGioHangs
                                 .Where(x => x.MaKH == maKH && x.MaSP == item.MaSP);

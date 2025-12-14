@@ -12,14 +12,13 @@ namespace QL_PHONGGYM.Models
     using System;
     using System.Collections.Generic;
     
-    public partial class CheckIn
+    public partial class database_firewall_rules
     {
-        public int MaCheckIn { get; set; }
-        public int MaKH { get; set; }
-        public System.DateTime ThoiGianVao { get; set; }
-        public Nullable<System.DateTime> ThoiGianRa { get; set; }
-        public string TrangThai { get; set; }
-    
-        public virtual KhachHang KhachHang { get; set; }
+        public int id { get; set; }
+        public string name { get; set; }
+        public string start_ip_address { get; set; }
+        public string end_ip_address { get; set; }
+        public System.DateTime create_date { get; set; }
+        public System.DateTime modify_date { get; set; }
     }
 }
