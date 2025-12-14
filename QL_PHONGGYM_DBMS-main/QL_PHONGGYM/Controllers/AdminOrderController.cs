@@ -13,7 +13,7 @@ namespace QL_PHONGGYM.Controllers
 
         public ActionResult Index(string search = "", string status = "", int page = 1)
         {
-            if (Session["AdminUser"] == null) return RedirectToAction("Login", "Auth");
+            if (Session["AdminUser"] == null) return RedirectToAction("Login", "AdminHome");
 
             var query = _context.HoaDons
                 .Include("KhachHang")
@@ -47,7 +47,7 @@ namespace QL_PHONGGYM.Controllers
 
         public ActionResult Details(int id)
         {
-            if (Session["AdminUser"] == null) return RedirectToAction("Login", "Auth");
+            if (Session["AdminUser"] == null) return RedirectToAction("Login", "AdminHome");
 
             var order = _context.HoaDons.Find(id);
             if (order == null) return HttpNotFound();

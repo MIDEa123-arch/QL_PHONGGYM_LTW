@@ -13,7 +13,7 @@ namespace QL_PHONGGYM.Controllers
 
         public ActionResult Index(string search = "", int? maLoai = 0, int page = 1) 
         {
-            if (Session["AdminUser"] == null) return RedirectToAction("Login", "Auth");
+            if (Session["AdminUser"] == null) return RedirectToAction("Login", "AdminHome");
 
             var query = _context.KhachHangs.Include("LoaiKhachHang").AsQueryable();
             ViewBag.DanhSachLoai = _context.LoaiKhachHangs.ToList();
@@ -53,7 +53,7 @@ namespace QL_PHONGGYM.Controllers
 
         public ActionResult Edit(int id)
         {
-            if (Session["AdminUser"] == null) return RedirectToAction("Login", "Auth");
+            if (Session["AdminUser"] == null) return RedirectToAction("Login", "AdminHome");
             var item = _context.KhachHangs.Find(id);
             if (item == null) return HttpNotFound();
 
@@ -116,7 +116,7 @@ namespace QL_PHONGGYM.Controllers
 
             if (Session["AdminUser"] == null)
             {
-                return RedirectToAction("Login", "Auth");
+                return RedirectToAction("Login", "AdminHome");
             }
 
             ViewBag.MaLoaiKH = new SelectList(_context.LoaiKhachHangs, "MaLoaiKH", "TenLoai");

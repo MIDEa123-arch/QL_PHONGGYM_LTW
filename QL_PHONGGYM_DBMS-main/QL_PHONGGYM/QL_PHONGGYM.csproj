@@ -687,6 +687,7 @@
     <Content Include="Views\CoachDashboard\Profile.cshtml" />
     <Content Include="Views\CoachDashboard\MyStudents.cshtml" />
     <Content Include="Views\AdminHome\AccessDenied.cshtml" />
+    <Content Include="Views\AdminServiceApi\Index.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

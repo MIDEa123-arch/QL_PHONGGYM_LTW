@@ -13,7 +13,7 @@ namespace QL_PHONGGYM.Controllers
 
         public ActionResult Index(string search = "", int maCM = 0, int page = 1)
         {
-            if (Session["AdminUser"] == null) return RedirectToAction("Login", "Auth");
+            if (Session["AdminUser"] == null) return RedirectToAction("Login", "AdminHome");
 
             var query = _context.LopHocs
                 .Include("ChuyenMon")
@@ -327,7 +327,7 @@ namespace QL_PHONGGYM.Controllers
         }
         public ActionResult Edit(int id)
         {
-            if (Session["AdminUser"] == null) return RedirectToAction("Login", "Auth");
+            if (Session["AdminUser"] == null) return RedirectToAction("Login", "AdminHome");
             var item = _context.LopHocs.Find(id);
             if (item == null) return HttpNotFound();
             ViewBag.MaCM = new SelectList(_context.ChuyenMons, "MaCM", "TenChuyenMon", item.MaCM);
@@ -512,7 +512,7 @@ namespace QL_PHONGGYM.Controllers
         }
         public ActionResult Calendar(DateTime? date, int? id)
         {
-            if (Session["AdminUser"] == null) return RedirectToAction("Login", "Auth");
+            if (Session["AdminUser"] == null) return RedirectToAction("Login", "AdminHome");
             DateTime selectedDate = date ?? DateTime.Today;
             int delta = DayOfWeek.Monday - selectedDate.DayOfWeek;
             if (delta > 0) delta -= 7;

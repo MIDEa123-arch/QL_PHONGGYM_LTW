@@ -3,19 +3,22 @@
     ViewBag.Title = "Edit";
     Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
 }
+
 <div class="card border-0 shadow-sm" style="max-width: 800px; margin: 0 auto;">
     <div class="card-header bg-white py-3">
         <h5 class="mb-0 fw-bold text-primary">Cập nhật: @Model.TenGoi</h5>
     </div>
     <div class="card-body">
-        @using (Html.BeginForm("Edit", "AdminService", FormMethod.Post))
+        @using (Html.BeginForm("Edit", "AdminService", FormMethod.Post, new { id = "editForm" }))
         {
             @Html.AntiForgeryToken()
             @Html.HiddenFor(m => m.MaGoiTap)
 
-            if (ViewBag.Error != null)
+            if (!ViewData.ModelState.IsValid)
             {
-                <div class="alert alert-danger">@ViewBag.Error</div>
+                <div class="alert alert-danger">
+                    @Html.ValidationSummary(false, "", new { @class = "mb-0" })
+                </div>
             }
 
             <div class="row g-3">
@@ -33,18 +36,14 @@
                 <div class="col-md-6">
                     <label class="form-label fw-bold">Giá gói tập (VNĐ)</label>
 
-                    @Html.TextBoxFor(m => m.Gia, new
-               {
-                   @class = "form-control",
-                   type = "text",
-                   id = "txtGia",
-                   placeholder = "Nhập giá gói tập",
-                   Value = (Model != null && Model.Gia > 0) ? Model.Gia.ToString("#,##0").Replace(',', '.') : "",
-                   required = "required"
-               })
+                    <input type="text" id="txtGiaDisplay" class="form-control" required placeholder="Nhập giá gói tập"
+                           value="@(Model != null && Model.Gia > 0 ? Model.Gia.ToString("#,##0").Replace(',', '.') : "")" />
+
+                    @Html.HiddenFor(m => m.Gia, new { id = "hdnGia" })
 
                     @Html.ValidationMessageFor(m => m.Gia, "", new { @class = "text-danger small" })
                 </div>
+
                 <div class="col-md-12">
                     <label class="form-label fw-bold">Trạng thái kinh doanh</label>
                     @Html.DropDownListFor(m => m.TrangThai, new List<SelectListItem>
@@ -54,6 +53,7 @@
                     }, new { @class = "form-control form-select" })
                     @Html.ValidationMessageFor(m => m.TrangThai, "", new { @class = "text-danger" })
                 </div>
+
                 <div class="col-md-12">
                     <label class="form-label fw-bold">Mô tả quyền lợi</label>
                     @Html.TextAreaFor(m => m.MoTa, new { @class = "form-control", rows = "4" })
@@ -68,26 +68,35 @@
         }
     </div>
 </div>
+
 <script>
     document.addEventListener("DOMContentLoaded", function () {
-        var inputGia = document.getElementById('txtGia');
-        var form = document.querySelector('form');
-        if (inputGia) {
-            inputGia.addEventListener('input', function (e) {
-                var value = e.target.value;
-                value = value.replace(/\D/g, '');
-                value = value.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-                e.target.value = value;
+        var inputDisplay = document.getElementById('txtGiaDisplay');
+        var inputHidden = document.getElementById('hdnGia');
+
+        if (inputDisplay && inputHidden) {
+            // Hàm định dạng số: 1000000 => 1.000.000
+            function formatNumber(n) {
+                return n.replace(/\D/g, "").replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+            }
+
+            // Khi người dùng nhập liệu
+            inputDisplay.addEventListener('input', function (e) {
+                // 1. Lấy giá trị thô
+                var rawValue = e.target.value.replace(/\./g, '');
+
+                // 2. Cập nhật vào ô Hidden để gửi đi
+                inputHidden.value = rawValue;
+
+                // 3. Format lại ô hiển thị
+                e.target.value = formatNumber(rawValue);
             });
 
-            if (form) {
-                form.addEventListener('submit', function () {
-                    var rawValue = inputGia.value.replace(/\./g, '');
-                    inputGia.value = rawValue;
-                });
+       
+            // (Trường hợp này quan trọng khi form load lại do lỗi validation)
+            if (inputDisplay.value !== "") {
+                inputHidden.value = inputDisplay.value.replace(/\./g, '');
             }
-        } else {
-            console.error("Lỗi: Không tìm thấy ô nhập liệu có id='txtGia'. Kiểm tra lại code HTML.");
         }
     });
 </script>

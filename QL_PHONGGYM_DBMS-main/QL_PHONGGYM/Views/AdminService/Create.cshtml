@@ -3,12 +3,13 @@
     ViewBag.Title = "Create";
     Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
 }
+
 <div class="card border-0 shadow-sm" style="max-width: 800px; margin: 0 auto;">
     <div class="card-header bg-white py-3">
         <h5 class="mb-0 fw-bold text-primary">Thêm gói tập mới</h5>
     </div>
     <div class="card-body">
-        @using (Html.BeginForm("Create", "AdminService", FormMethod.Post))
+        @using (Html.BeginForm("Create", "AdminService", FormMethod.Post, new { id = "createForm" }))
         {
             @Html.AntiForgeryToken()
 
@@ -32,22 +33,16 @@
                 <div class="col-md-6">
                     <label class="form-label fw-bold">Giá gói tập (VNĐ)<span class="text-danger">*</span></label>
 
-                    @Html.TextBoxFor(m => m.Gia, new
-               {
-                   @class = "form-control",
-                   type = "text",
-                   id = "txtGia",
-                   placeholder = "Nhập giá gói tập",
-                   Value = (Model != null && Model.Gia > 0) ? Model.Gia.ToString("#,##0").Replace(',', '.') : "",
-                   required = "required"
-               })
+                    <input type="text" id="txtGiaDisplay" class="form-control" required placeholder="Nhập giá gói tập"
+                           value="@(Model != null && Model.Gia > 0 ? Model.Gia.ToString("#,##0").Replace(',', '.') : "")" />
+
+                    @Html.HiddenFor(m => m.Gia, new { id = "hdnGia" })
 
                     @Html.ValidationMessageFor(m => m.Gia, "", new { @class = "text-danger small" })
                 </div>
-
             </div>
 
-            <div class="col-md-12">
+            <div class="col-md-12 mt-3">
                 <label class="form-label fw-bold">Mô tả quyền lợi</label>
                 @Html.TextAreaFor(m => m.MoTa, new { @class = "form-control", rows = "4", required = "required" })
                 @Html.ValidationMessageFor(model => model.MoTa, "", new { @class = "text-danger" })
@@ -60,26 +55,26 @@
         }
     </div>
 </div>
+
 <script>
     document.addEventListener("DOMContentLoaded", function () {
-        var inputGia = document.getElementById('txtGia');
-        var form = document.querySelector('form'); 
-        if (inputGia) {
-            inputGia.addEventListener('input', function (e) {
-                var value = e.target.value;
-                value = value.replace(/\D/g, '');
-                value = value.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-                e.target.value = value;
+        var inputDisplay = document.getElementById('txtGiaDisplay');
+        var inputHidden = document.getElementById('hdnGia');
+
+        if (inputDisplay && inputHidden) {
+            function formatNumber(n) {
+                return n.replace(/\D/g, "").replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+            }
+
+            inputDisplay.addEventListener('input', function (e) {
+                var rawValue = e.target.value.replace(/\./g, '');
+                inputHidden.value = rawValue;
+                e.target.value = formatNumber(rawValue);
             });
 
-            if (form) {
-                form.addEventListener('submit', function () {
-                    var rawValue = inputGia.value.replace(/\./g, '');
-                    inputGia.value = rawValue;
-                });
+            if (inputDisplay.value !== "") {
+                inputHidden.value = inputDisplay.value.replace(/\./g, '');
             }
-        } else {
-            console.error("Lỗi: Không tìm thấy ô nhập liệu có id='txtGia'. Kiểm tra lại code HTML.");
         }
     });
 </script>
