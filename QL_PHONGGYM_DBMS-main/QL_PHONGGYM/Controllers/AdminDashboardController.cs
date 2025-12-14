@@ -32,9 +32,6 @@ namespace QL_PHONGGYM.Controllers
             model.HoiVienMoi = _context.DangKyGoiTaps
                 .Count(dk => dk.NgayDangKy >= startOfMonth);
 
-            model.KhachDangTap = _context.CheckIns
-                .Count(c => c.ThoiGianVao >= startOfDay && c.ThoiGianRa == null);
-
             model.DonHangThang = _context.HoaDons
                 .Count(h => h.NgayLap >= startOfMonth);
 
