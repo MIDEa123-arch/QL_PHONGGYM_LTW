@@ -53,16 +53,18 @@ namespace QL_PHONGGYM.Controllers
         {
             if (Session["AdminUser"] == null)
             {
-                return RedirectToAction("Login", "Auth");
+                return RedirectToAction("Login", "AdminHome");
             }
             ViewBag.MaCM = new SelectList(_context.ChuyenMons, "MaCM", "TenChuyenMon");
             ViewBag.MaNV = new SelectList(new List<NhanVien>(), "MaNV", "TenNV");
+
             LopHoc defaultModel = new LopHoc();
             defaultModel.SiSoToiDa = 30;
             defaultModel.HocPhi = 0;
             defaultModel.SoBuoi = 12;
-            defaultModel.NgayBatDau = DateTime.Now;
-            defaultModel.NgayKetThuc = DateTime.Now.AddMonths(1);
+            defaultModel.NgayBatDau = DateTime.Now.Date;
+            defaultModel.NgayKetThuc = DateTime.Now.Date.AddMonths(1);
+
             return View(defaultModel);
         }
 
@@ -72,6 +74,9 @@ namespace QL_PHONGGYM.Controllers
         {
             TimeSpan? GioBatDau = null;
             TimeSpan? GioKetThuc = null;
+            List<DateTime> danhSachNgayHoc = new List<DateTime>();
+            DateTime ngayKetThucGoc = model.NgayKetThuc.Date;            
+
             try
             {
                 GioBatDau = new TimeSpan(GioBatDauHour, GioBatDauMinute, 0);
@@ -81,6 +86,7 @@ namespace QL_PHONGGYM.Controllers
             {
                 ModelState.AddModelError("GioBatDau", "Giờ học không hợp lệ.");
             }
+
             if (SelectedDays == null || SelectedDays.Length == 0)
             {
                 ModelState.AddModelError("SelectedDays", "Vui lòng chọn ít nhất một thứ trong tuần (T2-CN)!");
@@ -92,15 +98,15 @@ namespace QL_PHONGGYM.Controllers
             else
             {
                 TimeSpan thoiLuong = GioKetThuc.Value - GioBatDau.Value;
-                if (thoiLuong.TotalMinutes < 30)
+                if (thoiLuong.TotalMinutes < 30 || thoiLuong.TotalMinutes < 0)
                 {
                     ModelState.AddModelError("GioKetThuc", "Thời lượng buổi học quá ngắn! Giờ kết thúc phải sau giờ bắt đầu ít nhất 30 phút.");
                 }
             }
+
             if (!string.IsNullOrEmpty(strHocPhi))
             {
                 string cleanGia = strHocPhi.Replace(".", "").Replace(",", "").Trim();
-
                 if (decimal.TryParse(cleanGia, out decimal hocPhiParse))
                 {
                     model.HocPhi = hocPhiParse;
@@ -114,87 +120,70 @@ namespace QL_PHONGGYM.Controllers
             {
                 model.HocPhi = 0;
             }
-            if (string.IsNullOrEmpty(model.TenLop))
-            {
-                ModelState.AddModelError("TenLop", "Vui lòng nhập tên lớp học!");
-            }
 
-            if (model.MaCM == 0)
-            {
-                ModelState.AddModelError("MaCM", "Vui lòng chọn bộ môn!");
-            }
-            if (model.HocPhi <= 0)
-            {
-                ModelState.AddModelError("HocPhi", "Vui lòng nhập học phí");
-            }
+            if (string.IsNullOrEmpty(model.TenLop)) ModelState.AddModelError("TenLop", "Vui lòng nhập tên lớp học!");
+            if (model.MaCM == 0) ModelState.AddModelError("MaCM", "Vui lòng chọn bộ môn!");
+            if (model.HocPhi <= 0) ModelState.AddModelError("HocPhi", "Vui lòng nhập học phí");
+            if (model.SoBuoi <= 0) ModelState.AddModelError("SoBuoi", "Vui lòng nhập số buổi học của lớp");
+            if (model.SiSoToiDa <= 0) ModelState.AddModelError("SiSoToiDa", "Vui lòng nhập sĩ số của lớp");
+            if (model.NgayBatDau < DateTime.Today.Date) ModelState.AddModelError("NgayBatDau", "Ngày bắt đầu không được nhỏ hơn ngày hiện tại!");
 
-            if (model.NgayBatDau < DateTime.Today)
-            {
-                ModelState.AddModelError("NgayBatDau", "Ngày bắt đầu không được nhỏ hơn ngày hiện tại!");
-            }
-            if (model.NgayKetThuc <= model.NgayBatDau)
-            {
-                ModelState.AddModelError("NgayKetThuc", "Ngày kết thúc phải lớn hơn ngày bắt đầu!");
-            }
-            else
-            {
-                double tongSoNgay = (model.NgayKetThuc - model.NgayBatDau).TotalDays + 1;
-                if (model.SoBuoi >= tongSoNgay)
-                {
-                    ModelState.AddModelError("SoBuoi",
-                        $"Số buổi ({model.SoBuoi}) không được lớn hơn tổng số ngày của khóa học ({tongSoNgay} ngày). Vui lòng tăng thời hạn hoặc giảm số buổi.");
-                }
-            }
-            if (model.SoBuoi <= 0)
-            {
-                ModelState.AddModelError("SoBuoi", "Vui lòng nhập số buổi học của lớp");
-            }
-            if (model.SiSoToiDa <= 0)
-            {
-                ModelState.AddModelError("SiSoToiDa", "Vui lòng nhập sĩ số của lớp");
-            }
+
             if (ModelState.IsValid)
             {
                 try
                 {
-                    List<DateTime> danhSachNgayHoc = new List<DateTime>();
-                    for (DateTime date = model.NgayBatDau; date <= model.NgayKetThuc; date = date.AddDays(1))
+                    DateTime current = model.NgayBatDau.Date;
+                    int soBuoiConLai = model.SoBuoi.Value;
+
+                    DateTime ngayKetThucTinhToan = model.NgayBatDau.Date;
+                    int buoiDaXep = 0;
+
+                    while (buoiDaXep < model.SoBuoi)
                     {
-                        if (SelectedDays.Contains((int)date.DayOfWeek))
+                        if (SelectedDays.Contains((int)ngayKetThucTinhToan.DayOfWeek))
                         {
-                            danhSachNgayHoc.Add(date);
-                            if (danhSachNgayHoc.Count == model.SoBuoi) break;
-                        }
-                    }
-                    if (danhSachNgayHoc.Count < model.SoBuoi)
-                    {
-                        DateTime ngayGoiY = model.NgayKetThuc;
-                        int soBuoiConThieu = model.SoBuoi.Value - danhSachNgayHoc.Count;
-                        int count = 0;
-                        while (count < soBuoiConThieu)
-                        {
-                            ngayGoiY = ngayGoiY.AddDays(1);
-                            if (SelectedDays.Contains((int)ngayGoiY.DayOfWeek))
+                            buoiDaXep++;
+                            if (buoiDaXep < model.SoBuoi)
                             {
-                                count++;
+                                ngayKetThucTinhToan = ngayKetThucTinhToan.AddDays(1);
                             }
                         }
-                        ModelState.AddModelError("NgayKetThuc",
-                            $"Khoảng thời gian bạn chọn quá ngắn! Chỉ xếp được {danhSachNgayHoc.Count}/{model.SoBuoi} buổi. " +
-                            $"Với lịch học này, ngày kết thúc phải ít nhất là {ngayGoiY.ToString("dd/MM/yyyy")}.");
+                        else
+                        {
+                            ngayKetThucTinhToan = ngayKetThucTinhToan.AddDays(1);
+                        }
                     }
-                    else if (model.MaNV.HasValue)
+
+                    if (ngayKetThucGoc < ngayKetThucTinhToan)
+                    {
+                        ModelState.AddModelError("NgayKetThuc",
+                            $"Khoảng thời gian bạn chọn quá ngắn! Để đủ {model.SoBuoi} buổi với lịch này, ngày kết thúc phải ít nhất là {ngayKetThucTinhToan.ToString("dd/MM/yyyy")}.");
+                    }
+                    else
+                    {
+                        for (DateTime date = model.NgayBatDau.Date; date <= ngayKetThucGoc; date = date.AddDays(1))
+                        {
+                            if (SelectedDays.Contains((int)date.DayOfWeek))
+                            {
+                                danhSachNgayHoc.Add(date);
+                                if (danhSachNgayHoc.Count == model.SoBuoi) break; // Chỉ lấy đủ số buổi
+                            }
+                        }
+
+                        model.NgayKetThuc = danhSachNgayHoc.LastOrDefault();
+                    }
+
+                    if (ModelState.IsValid && model.MaNV.HasValue)
                     {
                         foreach (var ngay in danhSachNgayHoc)
                         {
                             bool isTrung = _context.LichLops.Any(l =>
                                 l.MaNV == model.MaNV
-                        && l.NgayHoc == ngay
-                        && l.TrangThai != "Đã hủy"
-                        && (
-                            (GioBatDau >= l.GioBatDau && GioBatDau < l.GioKetThuc) ||
-                            (GioKetThuc > l.GioBatDau && GioKetThuc <= l.GioKetThuc) ||
-                            (GioBatDau <= l.GioBatDau && GioKetThuc >= l.GioKetThuc)
+                            && l.NgayHoc == ngay
+                            && l.TrangThai != "Đã hủy"
+                            && (
+                                (GioBatDau < l.GioKetThuc) && (GioKetThuc > l.GioBatDau)
                             ));
 
                             if (isTrung)
@@ -204,11 +193,14 @@ namespace QL_PHONGGYM.Controllers
                             }
                         }
                     }
+
                     if (ModelState.IsValid)
                     {
                         model.SiSoHienTai = 0;
                         _context.LopHocs.Add(model);
                         _context.SaveChanges();
+
+                        // Tạo lịch học chi tiết
                         foreach (var ngay in danhSachNgayHoc)
                         {
                             LichLop lich = new LichLop();
@@ -235,8 +227,8 @@ namespace QL_PHONGGYM.Controllers
             if (model.MaCM > 0)
             {
                 var listNV = _context.NhanViens
-                             .Where(nv => nv.ChuyenMons.Any(cm => cm.MaCM == model.MaCM))
-                             .ToList();
+                                 .Where(nv => nv.ChuyenMons.Any(cm => cm.MaCM == model.MaCM))
+                                 .ToList();
                 ViewBag.MaNV = new SelectList(listNV, "MaNV", "TenNV", model.MaNV);
             }
             else

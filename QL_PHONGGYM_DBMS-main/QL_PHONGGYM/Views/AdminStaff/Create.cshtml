@@ -1,4 +1,4 @@
-﻿@model QL_PHONGGYM.Models.NhanVien
+﻿@model QL_PHONGGYM.ViewModel.NhanVienViewModel
 
 @{
     ViewBag.Title = "Create";
@@ -9,10 +9,11 @@
         <h5 class="mb-0 fw-bold text-primary">Thêm nhân viên mới</h5>
     </div>
     <div class="card-body">
-        @using (Html.BeginForm())
+        @using (Html.BeginForm("Create", "AdminStaff", FormMethod.Post))
         {
             @Html.AntiForgeryToken()
 
+            @* Hiển thị lỗi tổng thể hoặc lỗi hệ thống *@
             if (ViewBag.Error != null)
             {
                 <div class="alert alert-danger">@ViewBag.Error</div>
@@ -28,8 +29,37 @@
                 </div>
                 <div class="col-md-6">
                     <label class="form-label fw-bold">Chức vụ <span class="text-danger">*</span></label>
-                    @Html.DropDownList("MaChucVu", null, "-- Chọn chức vụ --", new { @class = "form-select", required = "required" })
+                    @Html.DropDownListFor(m => m.MaChucVu, Model.ChucVuList, "-- Chọn chức vụ --", new { @class = "form-select", required = "required", id = "MaChucVu" })
                     @Html.ValidationMessageFor(m => m.MaChucVu, "", new { @class = "text-danger" })
+                </div>
+
+                @* KHỐI CHỌN CHUYÊN MÔN: Chỉ hiển thị khi chọn HLV Lớp (1) hoặc PT (2) *@
+                <div class="col-12" id="ChuyenMonGroup" style="display: none;">
+                    <label class="form-label fw-bold">Chuyên môn <span class="text-danger">*</span></label>
+                    <div class="row">
+                        @if (Model.ChuyenMonList != null)
+                        {
+                            foreach (var cm in Model.ChuyenMonList)
+                            {
+                                <div class="col-md-4">
+                                    <div class="form-check">
+                                        @{
+                                            bool isChecked = Model.SelectedChuyenMonIds != null && Model.SelectedChuyenMonIds.Contains(cm.MaCM);
+                                        }
+                                        <input type="checkbox"
+                                               name="SelectedChuyenMonIds"
+                                               value="@cm.MaCM"
+                                               class="form-check-input"
+                                               id="cm_@cm.MaCM"
+                                               @(isChecked ? "checked" : "") />
+                                        <label class="form-check-label" for="cm_@cm.MaCM">@cm.TenChuyenMon</label>
+                                    </div>
+                                </div>
+                            }
+                        }
+                    </div>
+                    @* Validation message cho việc chưa chọn chuyên môn *@
+                    @Html.ValidationMessage("SelectedChuyenMonIds", "", new { @class = "text-danger" })
                 </div>
 
                 <div class="col-md-6">
@@ -60,8 +90,8 @@
                 <div class="col-md-6">
                     <label class="form-label fw-bold">Giới tính</label>
                     <select name="GioiTinh" class="form-select">
-                        <option value="Nam">Nam</option>
-                        <option value="Nữ">Nữ</option>
+                        <option value="Nam" @(Model.GioiTinh == "Nam" ? "selected" : "")>Nam</option>
+                        <option value="Nữ" @(Model.GioiTinh == "Nữ" ? "selected" : "")>Nữ</option>
                     </select>
                 </div>
 
@@ -85,7 +115,7 @@
                             type = "password",
                             required = "required",
                             id = "txtMatKhau",
-                            placeholder = "Nhập mật khẩu..."
+                            placeholder = "Nhập mật khẩu...",
                         })
 
                         <span class="position-absolute top-50 end-0 translate-middle-y me-3"
@@ -93,9 +123,7 @@
                               style="cursor: pointer; z-index: 10;">
                             <i class="fas fa-eye text-secondary" id="iconEye"></i>
                         </span>
-                    </div>
-
-                    @Html.ValidationMessageFor(m => m.MatKhau, "", new { @class = "text-danger" })
+                    </div>                    
                 </div>
             </div>
 
@@ -109,23 +137,43 @@
 
 @section scripts {
     <script>
-        document.addEventListener("DOMContentLoaded", function () {
+        $(document).ready(function () {
+            // MÃ CHỨC VỤ HLV LỚP (1) VÀ PT (2)
+            var ptHlvCodes = ["1", "2"];
+
+            function toggleChuyenMon() {
+                var selectedMaChucVu = $('#MaChucVu').val();
+
+                if (ptHlvCodes.includes(selectedMaChucVu)) {
+                    $('#ChuyenMonGroup').show();
+                } else {
+                    $('#ChuyenMonGroup').hide();
+                    $('#ChuyenMonGroup input[type=checkbox]').prop('checked', false);
+                }
+            }
+
+            $('#MaChucVu').change(function () {
+                toggleChuyenMon();
+            });
+
+            // Gọi hàm khi tải trang để hiển thị nếu có lỗi validation
+            toggleChuyenMon();
+
             // Xử lý ẩn/hiện mật khẩu
             var btnToggle = document.getElementById('btnTogglePass');
-
             if (btnToggle) {
                 btnToggle.addEventListener('click', function () {
                     var inputPass = document.getElementById('txtMatKhau');
                     var icon = document.getElementById('iconEye');
 
                     if (inputPass.type === "password") {
-                        inputPass.type = "text"; // Hiện mật khẩu
+                        inputPass.type = "text";
                         icon.classList.remove("fa-eye");
-                        icon.classList.add("fa-eye-slash"); // Đổi icon thành gạch chéo
+                        icon.classList.add("fa-eye-slash");
                     } else {
-                        inputPass.type = "password"; // Ẩn mật khẩu
+                        inputPass.type = "password";
                         icon.classList.remove("fa-eye-slash");
-                        icon.classList.add("fa-eye"); // Đổi lại icon thường
+                        icon.classList.add("fa-eye");
                     }
                 });
             }

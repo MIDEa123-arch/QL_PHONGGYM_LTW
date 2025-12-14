@@ -76,21 +76,21 @@
 @section scripts {
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
-    <script>
+    @Html.AntiForgeryToken()
 
+    <script>
         function FilterOrders(page) {
             var search = $('#txtSearch').val();
             var status = $('#ddlStatus').val();
-
             if (!page) page = 1;
 
             $.ajax({
-                url: '/AdminOrder/Index',
+                url: '/AdminQuanLyDonHang/Index',
                 type: 'GET',
                 data: {
                     search: search,
                     status: status,
-                    page: page, 
+                    page: page,
                     isAjax: true
                 },
                 success: function (res) {
@@ -109,8 +109,7 @@
             }
 
             var msg = "Bạn có chắc chắn muốn thực hiện hành động này?";
-            if (action == 'cancel') msg = "CẢNH BÁO: Bạn có chắc muốn HỦY đơn hàng này không?";
-
+            if (action === 'cancel') msg = "CẢNH BÁO: Bạn có chắc muốn HỦY đơn hàng này không?";
             if (!confirm(msg)) return;
 
             var btn = e ? e.target : null;
@@ -123,18 +122,21 @@
                 btn.disabled = true;
             }
 
-            $.ajax({
-                url: '/AdminOrder/UpdateStatus', 
-                type: 'POST',
-                data: { id: id, status: (action == 'cancel' ? 'Hủy' : (action == 'ship' ? 'Đã giao hàng' : 'Chờ giao hàng')) },
+            var token = $('input[name="__RequestVerificationToken"]').val();
 
+            $.ajax({
+                url: '/AdminQuanLyDonHang/UpdateOrderStatus',
+                type: 'POST',
+                data: {
+                    __RequestVerificationToken: token,
+                    id: id,
+                    action: action
+                },
                 success: function (res) {
                     if (res.success) {
                         alert("Cập nhật thành công!");
-
                         var currentPage = $('.pagination .page-item.active .page-link').text();
                         FilterOrders(currentPage ? currentPage : 1);
-
                     } else {
                         alert("Lỗi: " + res.message);
                         if (btn) {
@@ -159,7 +161,7 @@
             myModal.show();
 
             $.ajax({
-                url: '/AdminOrder/Details', 
+                url: '/AdminQuanLyDonHang/Details',
                 type: 'GET',
                 data: { id: id },
                 success: function (res) {

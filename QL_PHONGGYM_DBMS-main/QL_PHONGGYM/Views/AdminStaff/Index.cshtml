@@ -12,22 +12,27 @@
             </a>
         </div>
 
+        @* Cập nhật Form: Thêm maCM và thay đổi class cho phù hợp với 4 cột lọc *@
         @using (Html.BeginForm("Index", "AdminStaff", FormMethod.Get, new { @class = "row g-3" }))
         {
-            <div class="col-md-5">
+            <div class="col-md-4">
                 <div class="input-group">
                     <span class="input-group-text bg-light"><i class="fas fa-search"></i></span>
                     <input type="text" name="search" value="@ViewBag.CurrentSearch" class="form-control" placeholder="Tìm theo tên, SĐT hoặc tài khoản..." />
                 </div>
             </div>
             <div class="col-md-3">
-                @Html.DropDownList("MaChucVu", (SelectList)ViewBag.ListChucVu, "-- Tất cả chức vụ --", new { @class = "form-select", onchange = "this.form.submit()" })
+                @Html.DropDownList("MaChucVu", (SelectList)ViewBag.ListChucVu, "-- Tất cả chức vụ --", new { @class = "form-select" })
             </div>
-            <div class="col-md-2">
-                <button type="submit" class="btn btn-primary w-100"><i class="fas fa-filter me-1"></i> Lọc</button>
+
+            <div class="col-md-3">
+                @* Thêm Dropdown Chuyên môn *@
+                @Html.DropDownList("MaCM", (List<SelectListItem>)ViewBag.ListChuyenMon, new { @class = "form-select" })
             </div>
-            <div class="col-md-2">
-                <a href="@Url.Action("Index")" class="btn btn-outline-secondary ms-1" title="Tải lại / Xóa bộ lọc">
+
+            <div class="col-md-2 d-flex">
+                <button type="submit" class="btn btn-primary me-1"><i class="fas fa-filter me-1"></i> Lọc</button>
+                <a href="@Url.Action("Index")" class="btn btn-outline-secondary" title="Tải lại / Xóa bộ lọc">
                     <i class="fas fa-sync-alt"></i>
                 </a>
             </div>
@@ -41,6 +46,7 @@
                     <tr>
                         <th class="ps-4">Họ tên</th>
                         <th>Chức vụ</th>
+                        <th>Chuyên môn</th> @* Thêm cột Chuyên môn *@
                         <th>Liên hệ</th>
                         <th>Tài khoản</th>
                         <th>Trạng thái</th>
@@ -66,18 +72,21 @@
                                 <td>
                                     @if (item.ChucVu != null)
                                     {
-                                        if (item.ChucVu.TenChucVu.Contains("Quản lý"))
-                                        {
-                                            <span class="badge bg-danger">@item.ChucVu.TenChucVu</span>
-                                        }
-                                        else if (item.ChucVu.TenChucVu == "PT")
-                                        {
-                                            <span class="badge bg-warning text-dark">@item.ChucVu.TenChucVu</span>
-                                        }
-                                        else
-                                        {
-                                            <span class="badge bg-info text-dark">@item.ChucVu.TenChucVu</span>
-                                        }
+                                        string badgeClass = item.ChucVu.TenChucVu.Contains("Quản lý") ? "bg-danger" :
+                                                            (item.ChucVu.TenChucVu == "PT" ? "bg-warning text-dark" : "bg-info text-dark");
+                                        <span class="badge @badgeClass">@item.ChucVu.TenChucVu</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (item.ChuyenMons != null && item.ChuyenMons.Any())
+                                    {
+                                        // Hiển thị danh sách chuyên môn (Boxing, Yoga,...)
+                                        string cmList = string.Join(", ", item.ChuyenMons.Select(cm => cm.TenChuyenMon));
+                                        <span class="small text-success">@cmList</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary">Không có</span>
                                     }
                                 </td>
                                 <td>
@@ -119,7 +128,7 @@
                     }
                     else
                     {
-                        <tr><td colspan="6" class="text-center py-4 text-muted">Không tìm thấy nhân viên nào.</td></tr>
+                        <tr><td colspan="7" class="text-center py-4 text-muted">Không tìm thấy nhân viên nào phù hợp với điều kiện lọc.</td></tr>
                     }
                 </tbody>
             </table>
@@ -133,21 +142,21 @@
                     @if (ViewBag.CurrentPage > 1)
                     {
                         <li class="page-item">
-                            <a class="page-link" href="@Url.Action("Index", new { page = ViewBag.CurrentPage - 1, search = ViewBag.CurrentSearch, maChucVu = ViewBag.CurrentMaChucVu })">Trước</a>
+                            <a class="page-link" href="@Url.Action("Index", new { page = ViewBag.CurrentPage - 1, search = ViewBag.CurrentSearch, maChucVu = ViewBag.CurrentMaChucVu, maCM = ViewBag.CurrentMaCM })">Trước</a>
                         </li>
                     }
 
                     @for (int i = 1; i <= ViewBag.TotalPages; i++)
                     {
                         <li class="page-item @(i == ViewBag.CurrentPage ? "active" : "")">
-                            <a class="page-link" href="@Url.Action("Index", new { page = i, search = ViewBag.CurrentSearch, maChucVu = ViewBag.CurrentMaChucVu })">@i</a>
+                            <a class="page-link" href="@Url.Action("Index", new { page = i, search = ViewBag.CurrentSearch, maChucVu = ViewBag.CurrentMaChucVu, maCM = ViewBag.CurrentMaCM })">@i</a>
                         </li>
                     }
 
                     @if (ViewBag.CurrentPage < ViewBag.TotalPages)
                     {
                         <li class="page-item">
-                            <a class="page-link" href="@Url.Action("Index", new { page = ViewBag.CurrentPage + 1, search = ViewBag.CurrentSearch, maChucVu = ViewBag.CurrentMaChucVu })">Sau</a>
+                            <a class="page-link" href="@Url.Action("Index", new { page = ViewBag.CurrentPage + 1, search = ViewBag.CurrentSearch, maChucVu = ViewBag.CurrentMaChucVu, maCM = ViewBag.CurrentMaCM })">Sau</a>
                         </li>
                     }
                 </ul>
@@ -180,7 +189,8 @@
 
                         if (res.success) {
                             alert(res.message);
-                            window.location.href = window.location.href.split('?')[0] + "?t=" + new Date().getTime();
+                            // Tải lại trang hiện tại sau khi cập nhật trạng thái
+                            window.location.reload(true);
                         } else {
                             alert(res.message);
                         }
@@ -189,10 +199,19 @@
                         btn.innerHTML = oldHtml;
                         btn.disabled = false;
                         console.log(xhr);
-                        alert("Lỗi kết nối! (Mã lỗi: " + xhr.status + "). Kiểm tra lại tên Controller.");
+                        alert("Lỗi kết nối! (Mã lỗi: " + xhr.status + "). Vui lòng thử lại.");
                     }
                 });
             }
         }
+
+        // Tự động gửi form khi thay đổi dropdown Chức vụ hoặc Chuyên môn
+        $(document).ready(function() {
+            $('#MaChucVu, #MaCM').change(function() {
+                // Đặt lại trang về 1 khi lọc
+                $('input[name="page"]').val(1);
+                $(this).closest('form').submit();
+            });
+        });
     </script>
 }
