@@ -12,7 +12,7 @@ namespace QL_PHONGGYM.Controllers
     {
         private readonly QL_PHONGGYMEntities _context = new QL_PHONGGYMEntities();
 
-        public ActionResult Index(string search = "", int status = -1, int page = 1)
+        public ActionResult Index(string search = "", int status = -1, int page = 1, int category = -1)
         {
             if (Session["AdminUser"] == null) return RedirectToAction("Login", "Auth");
 
@@ -29,7 +29,10 @@ namespace QL_PHONGGYM.Controllers
             {
                 query = query.Where(x => x.TrangThai == status);
             }
-
+            if (category != -1)
+            {
+                query = query.Where(x => x.MaLoaiSP == category);
+            }
             int pageSize = 10;
             int totalRecord = query.Count();
             int totalPages = (int)Math.Ceiling((double)totalRecord / pageSize);
@@ -38,9 +41,11 @@ namespace QL_PHONGGYM.Controllers
                             .Skip((page - 1) * pageSize)
                             .Take(pageSize)
                             .ToList();
-
+            List<LoaiSanPham> LoaiSanPham=_context.LoaiSanPhams.ToList();
+            ViewBag.loaiSanPham=LoaiSanPham;
             ViewBag.CurrentSearch = search;
             ViewBag.CurrentStatus = status;
+            ViewBag.CurrentCategory = category;
             ViewBag.TotalPages = totalPages;
             ViewBag.CurrentPage = page;
 

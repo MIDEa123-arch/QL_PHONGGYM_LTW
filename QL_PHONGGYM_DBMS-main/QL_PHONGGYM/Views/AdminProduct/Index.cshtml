@@ -2,7 +2,9 @@
 @{
     ViewBag.Title = "Index";
     Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    var categories = ViewBag.Categories as List<QL_PHONGGYM.Models.LoaiSanPham>;
 }
+
 <div class="card border-0 shadow-sm">
     <div class="card-header bg-white py-3">
         <div class="d-flex justify-content-between align-items-center mb-3">
@@ -14,7 +16,7 @@
         <div>
             @using (Html.BeginForm("Index", "AdminProduct", FormMethod.Get, new { @class = "row g-3" }))
             {
-                <div class="col-md-5">
+                <div class="col-md-3">
                     <div class="input-group">
                         <span class="input-group-text bg-light"><i class="fas fa-search"></i></span>
                         <input type="text" name="search" value="@ViewBag.CurrentSearch" class="form-control" placeholder="Nhập tên sản phẩm..." />
@@ -28,8 +30,21 @@
                         <option value="0" @(ViewBag.CurrentStatus == 0 ? "selected" : "")>Ngừng kinh doanh</option>
                     </select>
                 </div>
-
-                <div class="col-md-4">
+                <div class="col-md-3">
+                    <select name="category" class="form-select" onchange="this.form.submit()">
+                        <option value="-1" @(ViewBag.CurrentCategory == -1 ? "selected" : "")>-- Tất cả danh mục --</option>
+                        @if (ViewBag.loaiSanPham != null)
+                        {
+                            foreach (var cat in ViewBag.loaiSanPham)
+                            {
+                                <option value="@cat.MaLoaiSP" @(ViewBag.CurrentCategory == cat.MaLoaiSP ? "selected" : "")>
+                                    @cat.TenLoaiSP
+                                </option>
+                            }
+                        }
+                    </select>
+                </div>
+                <div class="col-md-3">
                     <button type="submit" class="btn btn-primary"><i class="fas fa-filter me-1"></i> Lọc</button>
                     <a href="@Url.Action("Index")" class="btn btn-outline-secondary ms-1" title="Xóa bộ lọc">
                         <i class="fas fa-sync-alt"></i>
