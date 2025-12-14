@@ -14,7 +14,7 @@ namespace QL_PHONGGYM.Controllers
 
         public ActionResult Index(string search = "", int status = -1, int page = 1, int category = -1)
         {
-            if (Session["AdminUser"] == null) return RedirectToAction("Login", "Auth");
+            if (Session["AdminUser"] == null) return RedirectToAction("Login", "AdminHome");
 
             var query = _context.SanPhams
                 .Include(s => s.LoaiSanPham)
@@ -53,7 +53,7 @@ namespace QL_PHONGGYM.Controllers
         }
         public ActionResult Create()
         {
-            if (Session["AdminUser"] == null) return RedirectToAction("Login", "Auth");
+            if (Session["AdminUser"] == null) return RedirectToAction("Login", "AdminHome");
 
             ViewBag.MaLoaiSP = new SelectList(_context.LoaiSanPhams, "MaLoaiSP", "TenLoaiSP");
             return View(new SanPham { SoLuongTon = 100, DonGia = 0 });
@@ -172,7 +172,7 @@ namespace QL_PHONGGYM.Controllers
         }
         public ActionResult Edit(int id)
         {
-            if (Session["AdminUser"] == null) return RedirectToAction("Login", "Auth");
+            if (Session["AdminUser"] == null) return RedirectToAction("Login", "AdminHome");
 
             var sanPham = _context.SanPhams.Find(id);
             if (sanPham == null) return HttpNotFound();

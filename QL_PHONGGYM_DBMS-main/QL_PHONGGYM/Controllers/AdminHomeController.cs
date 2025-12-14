@@ -85,7 +85,7 @@ namespace QL_PHONGGYM.Controllers
         public ActionResult UserProfile()
         {
             if (Session["AdminUser"] == null)
-                return RedirectToAction("Login", "Auth"); 
+                return RedirectToAction("Login", "AdminHome");
             var adminSession = Session["AdminUser"] as NhanVien;
             var nhanVien = _context.NhanViens
                                    .Include("ChucVu") 
