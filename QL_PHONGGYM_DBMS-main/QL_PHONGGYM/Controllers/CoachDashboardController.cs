@@ -314,19 +314,6 @@ namespace QL_PHONGGYM.Controllers
             }
         }
 
-        public ActionResult Profile()
-        {
-            var hlv = Session["CoachUser"] as NhanVien;
-            if (hlv == null) return RedirectToAction("Login", "HLV");
-
-            var currentHLV = _context.NhanViens.Find(hlv.MaNV);
-
-            ViewBag.ActiveMenu = "Profile";
-            ViewBag.Title = "Hồ Sơ Cá Nhân";
-
-            return View(currentHLV);
-        }
-
         [HttpPost]
         public JsonResult UpdateProfile(string hoTen, string sdt, string gioiTinh)
         {
