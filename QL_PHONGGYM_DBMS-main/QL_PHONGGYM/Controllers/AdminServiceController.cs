@@ -43,9 +43,10 @@ namespace QL_PHONGGYM.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+ 
         public ActionResult Edit(GoiTap model)
         {
-            if (!IsAdminLoggedIn()) return RedirectToAction("Login", "AdminHome");
+            if (!IsAdminLoggedIn()) return RedirectToAction("Login", "Auth");
 
             if (ModelState.IsValid)
             {
@@ -71,6 +72,8 @@ namespace QL_PHONGGYM.Controllers
                     temp.MoTa = model.MoTa;
 
                     _context.SaveChanges();
+
+                    TempData["SuccessMessage"] = "Cập nhật gói tập thành công!";
                     return RedirectToAction("Index");
                 }
                 catch (Exception ex)
@@ -227,8 +230,10 @@ namespace QL_PHONGGYM.Controllers
         [HttpPost]
         public JsonResult Delete(int id)
         {
+            // Check quyền Admin
             if (!IsAdminLoggedIn()) return Json(new { success = false, message = "Unauthorized" });
 
+            // Tìm gói tập
             var goiTap = _context.GoiTaps.FirstOrDefault(t => t.MaGoiTap == id);
             if (goiTap == null)
             {
@@ -237,19 +242,22 @@ namespace QL_PHONGGYM.Controllers
 
             try
             {
-                var checkDangKyGoiTap = _context.DangKyGoiTaps.FirstOrDefault(x => x.MaGoiTap == id);
 
-                if (checkDangKyGoiTap == null)
+                var checkDangKy = _context.DangKyGoiTaps.Any(x => x.MaGoiTap == id);
+
+
+                if (checkDangKy)
                 {
-                    _context.GoiTaps.Remove(goiTap);
-                    _context.SaveChanges();
-                    return Json(new { success = true, message = "Đã xóa vĩnh viễn gói tập!" });
+                    // Yêu cầu: Gói đang có người tập thì KHÔNG ĐƯỢC làm gì cả
+                    return Json(new { success = false, message = "Gói tập này đang có hội viên sử dụng, không thể ngừng kinh doanh!" });
                 }
                 else
                 {
-                    goiTap.TrangThai = 0;
+               
+                    goiTap.TrangThai = 0; // Giả sử 0 là Ngừng kinh doanh
                     _context.SaveChanges();
-                    return Json(new { success = true, message = "Gói tập đang được sử dụng nên hệ thống đã chuyển sang trạng thái 'Ngừng kinh doanh'!" });
+
+                    return Json(new { success = true, message = "Đã chuyển gói tập sang trạng thái 'Ngừng kinh doanh' thành công!" });
                 }
             }
             catch (Exception ex)

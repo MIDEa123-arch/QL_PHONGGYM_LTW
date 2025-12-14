@@ -92,7 +92,7 @@
                 e.target.value = formatNumber(rawValue);
             });
 
-            // Xử lý khi load trang: Đảm bảo ô Hidden có giá trị nếu Model có dữ liệu
+       
             // (Trường hợp này quan trọng khi form load lại do lỗi validation)
             if (inputDisplay.value !== "") {
                 inputHidden.value = inputDisplay.value.replace(/\./g, '');
