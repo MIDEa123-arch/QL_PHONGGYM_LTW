@@ -13,6 +13,7 @@
             <p class="mb-1"><strong>Họ tên:</strong> @Model.HoaDons.FirstOrDefault().KhachHang.TenKH</p>
             <p class="mb-1"><strong>SĐT:</strong> @Model.HoaDons.FirstOrDefault().KhachHang.SDT</p>
             <p class="mb-1"><strong>Email:</strong> @(Model.HoaDons.FirstOrDefault().KhachHang.Email ?? "Chưa cập nhật")</p>
+            <p class="mb-1"><strong>Ghi chú:</strong> @(Model.HoaDons.FirstOrDefault().DonHang.GhiChu ?? "Chưa cập nhật")</p>
         </div>
         <div class="col-md-6">
             <h6 class="text-primary fw-bold text-uppercase border-bottom pb-2">Thông tin giao hàng</h6>
@@ -78,7 +79,7 @@
                         <tfoot class="bg-light">
                             <tr>
                                 <td colspan="4" class="text-end">Tổng tiền hàng:</td>
-                                <td class="text-end fw-bold">@((hoaDon.ThanhTien ?? 0).ToString("#,##0")) đ</td>
+                                <td class="text-end fw-bold">@((giamGia+ hoaDon.ThanhTien ?? 0).ToString("#,##0")) đ</td>
                             </tr>
                             @if (giamGia > 0)
                             {
@@ -90,6 +91,10 @@
                             <tr>
                                 <td colspan="4" class="text-end">Phí vận chuyển:</td>
                                 <td class="text-end fw-bold">@Model.PhiShip.ToString("#,##0") đ</td>
+                            </tr>
+                            <tr>
+                                <td colspan="4" class="text-end">Tổng tiền:</td>
+                                <td class="text-end fw-bold">@((hoaDon.ThanhTien ?? 0).ToString("#,##0")) đ</td>
                             </tr>
                             <tr class="text-primary h5">
                                 <td colspan="4" class="text-end fw-bold">TỔNG THANH TOÁN:</td>
