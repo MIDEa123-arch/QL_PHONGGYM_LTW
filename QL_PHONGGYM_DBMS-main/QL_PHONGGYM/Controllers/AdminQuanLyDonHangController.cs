@@ -17,7 +17,7 @@ namespace QL_PHONGGYM.Controllers
             var query = _context.DonHangs.ToList();
             if (!string.IsNullOrEmpty(search))
             {
-                query = query.Where(dh => dh.HoaDons.Any(hd => hd.KhachHang.TenKH.Contains(search) || dh.MaDonHang.ToString() == search)).ToList();
+                query = query.Where(dh => dh.HoaDons.Any(hd => hd.KhachHang.TenKH.ToLower().Contains(search.ToLower()) || dh.MaDonHang.ToString()==search)).ToList();
             }
 
             if (!string.IsNullOrEmpty(status))
