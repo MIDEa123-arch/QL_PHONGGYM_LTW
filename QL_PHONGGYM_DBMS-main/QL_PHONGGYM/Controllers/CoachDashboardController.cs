@@ -74,48 +74,6 @@ namespace QL_PHONGGYM.Controllers
         }
 
         [HttpPost]
-        public JsonResult ThemLich(int maLop, DateTime ngayHoc, TimeSpan gioBatDau, TimeSpan gioKetThuc)
-        {
-            var hlv = Session["CoachUser"] as NhanVien;
-            if (hlv == null) return Json(new { success = false, message = "Hết phiên đăng nhập" });
-
-            try
-            {
-                if (gioBatDau >= gioKetThuc)
-                    return Json(new { success = false, message = "Giờ kết thúc phải lớn hơn giờ bắt đầu!" });
-
-                bool isConflict = _context.LichLops.Any(l =>
-                    l.MaNV == hlv.MaNV &&
-                    l.NgayHoc == ngayHoc &&
-                    ((gioBatDau >= l.GioBatDau && gioBatDau < l.GioKetThuc) ||
-                     (gioKetThuc > l.GioBatDau && gioKetThuc <= l.GioKetThuc))
-                );
-
-                if (isConflict)
-                    return Json(new { success = false, message = "Bạn bị trùng lịch vào khung giờ này!" });
-
-                var newLich = new LichLop
-                {
-                    MaLop = maLop,
-                    MaNV = hlv.MaNV,
-                    NgayHoc = ngayHoc,
-                    GioBatDau = gioBatDau,
-                    GioKetThuc = gioKetThuc,
-                    TrangThai = "Sắp diễn ra"
-                };
-
-                _context.LichLops.Add(newLich);
-                _context.SaveChanges();
-
-                return Json(new { success = true, message = "Đã thêm lịch dạy thành công!" });
-            }
-            catch (Exception ex)
-            {
-                return Json(new { success = false, message = ex.Message });
-            }
-        }
-
-        [HttpPost]
         public JsonResult ThemLichPT(int maDKPT, DateTime ngayTap, TimeSpan gioBatDau, TimeSpan gioKetThuc)
         {
             var hlv = Session["CoachUser"] as NhanVien;
@@ -126,14 +84,72 @@ namespace QL_PHONGGYM.Controllers
                 if (gioBatDau >= gioKetThuc)
                     return Json(new { success = false, message = "Giờ kết thúc phải lớn hơn giờ bắt đầu!" });
 
-                bool isConflict = _context.LichTapPTs.Any(l =>
-                    l.DangKyPT.MaNV == hlv.MaNV &&
+                var dangKy = _context.DangKyPTs.Find(maDKPT);
+                if (dangKy == null) return Json(new { success = false, message = "Không tìm thấy thông tin đăng ký!" });
+
+                var hoaDon = _context.ChiTietHoaDons
+                                     .Where(ct => ct.MaDKPT == maDKPT)
+                                     .Select(ct => ct.HoaDon)
+                                     .FirstOrDefault();
+
+                if (hoaDon == null || hoaDon.TrangThai != "Đã thanh toán")
+                {
+                    return Json(new { success = false, message = "Khách hàng chưa thanh toán gói tập này!" });
+                }
+
+                int soBuoiDaLenLich = _context.LichTapPTs.Count(l => l.MaDKPT == maDKPT);
+                if (soBuoiDaLenLich >= dangKy.SoBuoi)
+                {
+                    return Json(new { success = false, message = "Gói tập này đã hết số buổi (" + dangKy.SoBuoi + " buổi)!" });
+                }
+
+                bool khachBanPT = _context.LichTapPTs.Any(l =>
+                    l.DangKyPT.MaKH == dangKy.MaKH &&
                     l.NgayTap == ngayTap &&
-                    ((gioBatDau >= l.GioBatDau && gioBatDau < l.GioKetThuc) ||
-                     (gioKetThuc > l.GioBatDau && gioKetThuc <= l.GioKetThuc))
+                    (
+                        (gioBatDau >= l.GioBatDau && gioBatDau < l.GioKetThuc) ||
+                        (gioKetThuc > l.GioBatDau && gioKetThuc <= l.GioKetThuc) ||
+                        (gioBatDau <= l.GioBatDau && gioKetThuc >= l.GioKetThuc)
+                    )
                 );
 
-                if (isConflict) return Json(new { success = false, message = "Bạn đã có lịch dạy khác vào giờ này!" });
+                if (khachBanPT) return Json(new { success = false, message = "Khách hàng đã có lịch tập PT khác vào khung giờ này!" });
+
+                bool khachBanLop = _context.LichLops.Any(l =>
+                    l.NgayHoc == ngayTap &&
+                    (
+                        (gioBatDau >= l.GioBatDau && gioBatDau < l.GioKetThuc) ||
+                        (gioKetThuc > l.GioBatDau && gioKetThuc <= l.GioKetThuc) ||
+                        (gioBatDau <= l.GioBatDau && gioKetThuc >= l.GioKetThuc)
+                    ) &&
+                    _context.DangKyLops.Any(dk => dk.MaKH == dangKy.MaKH && dk.MaLop == l.MaLop)
+                );
+
+                if (khachBanLop) return Json(new { success = false, message = "Khách hàng đang có lịch học Lớp Nhóm vào khung giờ này!" });
+
+                bool hlvBanPT = _context.LichTapPTs.Any(l =>
+                    l.DangKyPT.MaNV == hlv.MaNV &&
+                    l.NgayTap == ngayTap &&
+                    (
+                        (gioBatDau >= l.GioBatDau && gioBatDau < l.GioKetThuc) ||
+                        (gioKetThuc > l.GioBatDau && gioKetThuc <= l.GioKetThuc) ||
+                        (gioBatDau <= l.GioBatDau && gioKetThuc >= l.GioKetThuc)
+                    )
+                );
+
+                if (hlvBanPT) return Json(new { success = false, message = "Bạn đã có lịch dạy PT khác vào khung giờ này!" });
+
+                bool hlvBanLop = _context.LichLops.Any(l =>
+                    l.MaNV == hlv.MaNV &&
+                    l.NgayHoc == ngayTap &&
+                    (
+                        (gioBatDau >= l.GioBatDau && gioBatDau < l.GioKetThuc) ||
+                        (gioKetThuc > l.GioBatDau && gioKetThuc <= l.GioKetThuc) ||
+                        (gioBatDau <= l.GioBatDau && gioKetThuc >= l.GioKetThuc)
+                    )
+                );
+
+                if (hlvBanLop) return Json(new { success = false, message = "Bạn bị trùng lịch dạy Lớp Học vào khung giờ này!" });
 
                 var lich = new LichTapPT
                 {
@@ -147,11 +163,12 @@ namespace QL_PHONGGYM.Controllers
                 _context.LichTapPTs.Add(lich);
                 _context.SaveChanges();
 
-                return Json(new { success = true, message = "Đã lên lịch tập thành công!" });
+                return Json(new { success = true, message = "Đã lên lịch tập thành công! (" + (soBuoiDaLenLich + 1) + "/" + dangKy.SoBuoi + ")" });
             }
             catch (Exception ex)
             {
-                return Json(new { success = false, message = ex.Message });
+                var msg = ex.InnerException != null ? ex.InnerException.Message : ex.Message;
+                return Json(new { success = false, message = "Lỗi hệ thống: " + msg });
             }
         }
 
@@ -185,12 +202,28 @@ namespace QL_PHONGGYM.Controllers
                 if (type == "CLASS")
                 {
                     var item = _context.LichLops.Find(id);
-                    if (item != null) { item.TrangThai = "Đã diễn ra"; _context.SaveChanges(); }
+                    if (item != null)
+                    {
+                        if (item.NgayHoc > DateTime.Today)
+                        {
+                            return Json(new { success = false, message = "Chưa đến ngày học, không thể điểm danh!" });
+                        }
+                        item.TrangThai = "Đã diễn ra";
+                        _context.SaveChanges();
+                    }
                 }
                 else
                 {
                     var item = _context.LichTapPTs.Find(id);
-                    if (item != null) { item.TrangThai = "Đã tập"; _context.SaveChanges(); }
+                    if (item != null)
+                    {
+                        if (item.NgayTap > DateTime.Today)
+                        {
+                            return Json(new { success = false, message = "Chưa đến ngày tập, không thể điểm danh!" });
+                        }
+                        item.TrangThai = "Đã tập";
+                        _context.SaveChanges();
+                    }
                 }
                 return Json(new { success = true });
             }
@@ -217,9 +250,34 @@ namespace QL_PHONGGYM.Controllers
                     req.GiaMoiBuoi = gia;
                     req.NgayDangKy = DateTime.Now;
 
+                    decimal tongTien = soBuoi * gia;
+                    decimal giamGia = 0;
+                    decimal thanhTien = tongTien - giamGia;
+
+                    var hoaDon = new HoaDon();
+
+                    hoaDon.MaKH = req.MaKH;
+                    hoaDon.NgayLap = DateTime.Now;
+                    hoaDon.TongTien = tongTien;
+                    hoaDon.ThanhTien = thanhTien;
+                    hoaDon.GiamGia = giamGia;
+                    hoaDon.TrangThai = "Chưa thanh toán";
+
+                    _context.HoaDons.Add(hoaDon);
                     _context.SaveChanges();
 
-                    return Json(new { success = true, message = "Đã duyệt và cập nhật hợp đồng thành công!" });
+                    var chiTietHD = new ChiTietHoaDon();
+                    chiTietHD.MaHD = hoaDon.MaHD;
+                    chiTietHD.MaDKPT = req.MaDKPT;
+                    chiTietHD.MaDKGT = null;
+                    chiTietHD.MaDKLop = null;
+                    chiTietHD.MaSP = null;
+                    chiTietHD.SoLuong = 1;
+                    chiTietHD.DonGia = thanhTien;
+                    _context.ChiTietHoaDons.Add(chiTietHD);
+                    _context.SaveChanges();
+
+                    return Json(new { success = true, message = "Đã duyệt, cập nhật hợp đồng và tạo hóa đơn thành công!" });
                 }
                 return Json(new { success = false, message = "Không tìm thấy yêu cầu!" });
             }
@@ -229,6 +287,33 @@ namespace QL_PHONGGYM.Controllers
                 return Json(new { success = false, message = "Lỗi hệ thống: " + errorMsg });
             }
         }
+
+        [HttpPost]
+        public JsonResult HuyYeuCau(int id)
+        {
+            var hlv = Session["CoachUser"] as NhanVien;
+            if (hlv == null) return Json(new { success = false, message = "Mất phiên đăng nhập!" });
+
+            try
+            {
+                var req = _context.DangKyPTs.Find(id);
+                if (req != null)
+                {
+                    req.TrangThai = "Đã hủy";
+                    req.MaNV = null;
+                    _context.SaveChanges();
+
+                    return Json(new { success = true, message = "Đã hủy yêu cầu đăng ký PT thành công!" });
+                }
+                return Json(new { success = false, message = "Không tìm thấy yêu cầu!" });
+            }
+            catch (Exception ex)
+            {
+                var errorMsg = ex.InnerException != null ? ex.InnerException.Message : ex.Message;
+                return Json(new { success = false, message = "Lỗi hệ thống: " + errorMsg });
+            }
+        }
+
         public ActionResult Profile()
         {
             var hlv = Session["CoachUser"] as NhanVien;
@@ -258,7 +343,7 @@ namespace QL_PHONGGYM.Controllers
                     user.GioiTinh = gioiTinh;
 
                     _context.SaveChanges();
-                    Session["CoachUser"] = user; 
+                    Session["CoachUser"] = user;
 
                     return Json(new { success = true, message = "Cập nhật hồ sơ thành công!" });
                 }
@@ -270,7 +355,6 @@ namespace QL_PHONGGYM.Controllers
             }
         }
 
-
         [HttpPost]
         public JsonResult ChangePassword(string matKhauCu, string matKhauMoi)
         {
@@ -280,7 +364,7 @@ namespace QL_PHONGGYM.Controllers
             try
             {
                 var user = _context.NhanViens.Find(hlv.MaNV);
-   
+
                 if (user.MatKhau != matKhauCu)
                 {
                     return Json(new { success = false, message = "Mật khẩu cũ không đúng!" });
@@ -293,6 +377,126 @@ namespace QL_PHONGGYM.Controllers
             catch (Exception ex)
             {
                 return Json(new { success = false, message = "Lỗi: " + ex.Message });
+            }
+        }
+        public ActionResult MyStudents()
+        {
+            var hlv = Session["CoachUser"] as NhanVien;
+            if (hlv == null) return RedirectToAction("Login", "HLV");
+
+            ViewBag.ActiveMenu = "MyStudents";
+            ViewBag.Title = "Học Viên & Lớp Học";
+
+            var model = new MyStudentPageViewModel();
+
+            model.PtStudents = _context.DangKyPTs
+                .Include(d => d.KhachHang)
+                .Where(d => d.MaNV == hlv.MaNV)
+                .ToList()
+                .Select(d => new StudentViewModel
+                {
+                    MaDKPT = d.MaDKPT,
+                    TenKH = d.KhachHang?.TenKH ?? "Khách vãng lai",
+                    SDT = d.KhachHang?.SDT,
+                    GioiTinh = d.KhachHang?.GioiTinh,
+                    TongBuoi = d.SoBuoi,
+                    DaTap = _context.LichTapPTs.Count(l => l.MaDKPT == d.MaDKPT && l.TrangThai == "Đã tập"),
+                    TrangThai = d.TrangThai,
+              
+                    NgayDangKy = d.NgayDangKy,
+                    GhiChuMucTieu = d.GhiChu
+                })
+                .OrderByDescending(x => x.TrangThai == "Còn hiệu lực")
+                .ToList();
+
+            var myClasses = _context.LopHocs
+                .Include(l => l.ChuyenMon)
+                .Where(l => l.MaNV == hlv.MaNV)
+                .ToList();
+
+            model.MyClasses = new List<ClassViewModel>();
+
+            foreach (var c in myClasses)
+            {
+                int total = _context.LichLops.Count(l => l.MaLop == c.MaLop);
+
+                int done = _context.LichLops.Count(l => l.MaLop == c.MaLop && l.TrangThai == "Đã diễn ra");
+
+                int countStudents = _context.DangKyLops.Count(d => d.MaLop == c.MaLop);
+
+                model.MyClasses.Add(new ClassViewModel
+                {
+                    MaLop = c.MaLop,
+                    TenLop = c.TenLop,
+                    ChuyenMon = c.ChuyenMon?.TenChuyenMon,
+                    SoLuongHocVien = countStudents,
+                    TongBuoi = total,
+                    DaDay = done
+                });
+            }
+
+            return View(model);
+        }
+
+        [HttpPost]
+        public JsonResult GetStudentHistory(int maDKPT)
+        {
+            try
+            {
+                var history = _context.LichTapPTs
+                    .Where(l => l.MaDKPT == maDKPT)
+                    .OrderByDescending(l => l.NgayTap)
+                    .ToList()
+                    .Select(l => new
+                    {
+                        Ngay = l.NgayTap,
+                        Gio = l.GioBatDau,
+                        TrangThai = l.TrangThai
+                    })
+                    .Select(x => new {
+                        Ngay = x.Ngay.ToString("dd/MM/yyyy"),
+                        Gio = x.Gio.ToString(@"hh\:mm"),
+                        TrangThai = x.TrangThai
+                    });
+
+                return Json(new { success = true, data = history });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+        [HttpPost]
+        public JsonResult GetClassMembers(int maLop)
+        {
+            try
+            {
+                int total = _context.LichLops.Count(l => l.MaLop == maLop);
+                int done = _context.LichLops.Count(l => l.MaLop == maLop && l.TrangThai == "Đã diễn ra");
+                int remain = total - done;
+
+                var members = _context.DangKyLops
+                    .Include(d => d.KhachHang)
+                    .Where(d => d.MaLop == maLop)
+                    .ToList()
+                    .Select(m => new ClassMemberViewModel
+                    {
+                        TenKH = m.KhachHang?.TenKH,
+                        SDT = m.KhachHang?.SDT,
+                        GioiTinh = m.KhachHang?.GioiTinh,
+                        NgayDangKy = m.NgayDangKy,
+                        TongBuoi = total,
+                        DaHoc = done,
+                        ConLai = remain
+                    })
+                    .ToList();
+
+                return Json(new { success = true, data = members, className = _context.LopHocs.Find(maLop)?.TenLop });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
             }
         }
     }

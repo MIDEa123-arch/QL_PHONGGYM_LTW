@@ -13,7 +13,7 @@ namespace QL_PHONGGYM.ViewModel
         [Required(ErrorMessage = "Vui lòng nhập họ tên nhân viên!")]
         public string TenNV { get; set; }
 
-        [Required(ErrorMessage = "Vui lòng chọn chức vụ!")]
+        //[Required(ErrorMessage = "Vui lòng chọn chức vụ!")]
         public int? MaChucVu { get; set; }
 
         [Required(ErrorMessage = "Vui lòng nhập số điện thoại!")]

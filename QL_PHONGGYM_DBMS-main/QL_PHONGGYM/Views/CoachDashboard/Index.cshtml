@@ -12,7 +12,7 @@
     for (int i = 0; i < 7; i++) { daysInWeek.Add(startOfWeek.AddDays(i)); }
 }
 
-<div class="card border-0 shadow-sm mb-3">
+<<div class="card border-0 shadow-sm mb-3">
     <div class="card-body py-2 bg-white rounded">
         <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
             <div class="d-flex align-items-center gap-2">
@@ -28,9 +28,6 @@
             </div>
 
             <div class="d-flex gap-2">
-                <button class="btn btn-sm btn-primary fw-bold shadow-sm" onclick="openModalCreateClass()">
-                    <i class="fas fa-chalkboard-teacher me-1"></i> Thêm Lịch Lớp
-                </button>
                 <button class="btn btn-sm btn-warning text-dark fw-bold shadow-sm" onclick="openModalCreatePT()">
                     <i class="fas fa-dumbbell me-1"></i> Thêm Lịch PT
                 </button>
@@ -50,7 +47,7 @@
                         var isToday = day.Date == DateTime.Today;
                         <th class="@(isToday ? "bg-primary" : "")">
                             <div class="small fw-normal text-uppercase">@("Thứ " + ((int)day.DayOfWeek + 1 == 1 ? "CN" : ((int)day.DayOfWeek + 1).ToString()))</div>
-                            <div class="fs-5">@day.Day</div>
+                            <div class="fs-6 fw-bold">@day.ToString("dd/MM/yyyy")</div>
                         </th>
                     }
                 </tr>
@@ -73,8 +70,8 @@
             <td class="p-1 align-top bg-white position-relative" style="height: 120px;">
                 @{
                     var items = allData.Where(x => x.Date.Date == day.Date
-                                                && x.Start.Hours >= startHour
-                                                && x.Start.Hours < endHour)
+                                                 && x.Start.Hours >= startHour
+                                                 && x.Start.Hours < endHour)
                                         .OrderBy(x => x.Start).ToList();
                 }
 
@@ -102,7 +99,7 @@
                                 </div>
                                 <div class="text-muted fst-italic" style="font-size: 0.65rem;">@item.SubTitle</div>
 
-                                @if (!isDone)
+                                @if (!isDone && item.Date.Date <= DateTime.Today)
                                 {
                                     <button onclick="diemDanh(@item.Id, '@item.Type')" class="btn btn-sm btn-outline-success w-100 mt-1 py-0 px-1" style="font-size: 0.65rem;">
                                         <i class="far fa-square"></i> Điểm danh
@@ -111,7 +108,14 @@
                                 else
                                 {
                                     <div class="text-secondary text-center mt-1" style="font-size: 0.65rem;">
-                                        <i class="fas fa-check-circle"></i> Xong
+                                        @if (isDone)
+                                        {
+                                            <i class="fas fa-check-circle"></i> <span>Xong</span>
+                                        }
+                                        else
+                                        {
+                                            <i class="far fa-clock"></i> <span>Chưa diễn ra</span>
+                                        }
                                     </div>
                                 }
                             </div>
@@ -122,50 +126,6 @@
         }
     </tr>
 }
-
-<div class="modal fade" id="modalCreateClass" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title fw-bold"><i class="fas fa-calendar-plus me-2"></i> Lên Lịch Lớp Học</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <form id="formCreateClass">
-                    <div class="mb-3">
-                        <label class="form-label fw-bold small text-secondary">CHỌN LỚP CẦN DẠY</label>
-                        @if (ViewBag.MyClasses != null)
-                        {
-                            @Html.DropDownList("maLop", (SelectList)ViewBag.MyClasses, "-- Chọn lớp phụ trách --", new { @class = "form-select", @id = "ddlClass" })
-                        }
-                        else
-                        {
-                            <p class="text-danger small">Không tìm thấy danh sách lớp.</p>
-                        }
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-bold small text-secondary">NGÀY HỌC</label>
-                        <input type="date" id="txtDateClass" class="form-control" value="@DateTime.Today.ToString("yyyy-MM-dd")">
-                    </div>
-                    <div class="row">
-                        <div class="col-6 mb-3">
-                            <label class="form-label fw-bold small text-secondary">BẮT ĐẦU</label>
-                            <input type="time" id="txtStartClass" class="form-control">
-                        </div>
-                        <div class="col-6 mb-3">
-                            <label class="form-label fw-bold small text-secondary">KẾT THÚC</label>
-                            <input type="time" id="txtEndClass" class="form-control">
-                        </div>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Hủy</button>
-                <button type="button" class="btn btn-primary fw-bold" onclick="submitClassSchedule()">Lưu Lịch Lớp</button>
-            </div>
-        </div>
-    </div>
-</div>
 
 <div class="modal fade" id="modalCreatePT" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
@@ -223,37 +183,9 @@
             });
         }
 
-        function openModalCreateClass() {
-            var myModal = new bootstrap.Modal(document.getElementById('modalCreateClass'));
-            myModal.show();
-        }
-
         function openModalCreatePT() {
             var myModal = new bootstrap.Modal(document.getElementById('modalCreatePT'));
             myModal.show();
-        }
-
-        function submitClassSchedule() {
-            var maLop = $('#ddlClass').val();
-            var ngay = $('#txtDateClass').val();
-            var start = $('#txtStartClass').val();
-            var end = $('#txtEndClass').val();
-
-            if (!maLop || !ngay || !start || !end) {
-                alert("Vui lòng nhập đầy đủ thông tin lớp học!");
-                return;
-            }
-
-            $.ajax({
-                url: '/CoachDashboard/ThemLich',
-                type: 'POST',
-                data: { maLop: maLop, ngayHoc: ngay, gioBatDau: start, gioKetThuc: end },
-                success: function (res) {
-                    if (res.success) { alert(res.message); location.reload(); }
-                    else { alert("Lỗi: " + res.message); }
-                },
-                error: function () { alert("Lỗi kết nối server!"); }
-            });
         }
 
         function submitPTSchedule() {

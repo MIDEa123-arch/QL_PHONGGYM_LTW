@@ -27,7 +27,6 @@ namespace QL_PHONGGYM.Models
             throw new UnintentionalCodeFirstException();
         }
     
-        public virtual DbSet<CheckIn> CheckIns { get; set; }
         public virtual DbSet<ChiTietGioHang> ChiTietGioHangs { get; set; }
         public virtual DbSet<ChiTietHoaDon> ChiTietHoaDons { get; set; }
         public virtual DbSet<ChucVu> ChucVus { get; set; }
@@ -48,7 +47,7 @@ namespace QL_PHONGGYM.Models
         public virtual DbSet<LopHoc> LopHocs { get; set; }
         public virtual DbSet<NhanVien> NhanViens { get; set; }
         public virtual DbSet<SanPham> SanPhams { get; set; }
-        public virtual DbSet<YeuCauHoTro> YeuCauHoTroes { get; set; }
+        public virtual DbSet<database_firewall_rules> database_firewall_rules { get; set; }
     
         public virtual int sp_DangKyLop_KiemTra(Nullable<int> maKH, Nullable<int> maLop, ObjectParameter maDKLop)
         {

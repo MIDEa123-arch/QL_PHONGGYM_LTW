@@ -126,7 +126,7 @@ namespace QL_PHONGGYM.Repositories
                 _context.SaveChanges();
                 return true;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 throw;
             }

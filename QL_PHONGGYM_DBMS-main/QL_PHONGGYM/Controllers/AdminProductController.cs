@@ -22,7 +22,7 @@ namespace QL_PHONGGYM.Controllers
 
             if (!string.IsNullOrEmpty(search))
             {
-                query = query.Where(t => t.TenSP.ToLower().Contains(search.ToLower()));
+                query = query.Where(t => t.TenSP.ToLower().Contains(search.ToLower())||t.MaSP.ToString()==search);
             }
 
             if (status != -1)
