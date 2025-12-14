@@ -40,7 +40,11 @@
                 </div>
                 <div class="col-md-6">
                     <label class="form-label fw-bold">Chức vụ <span class="text-danger">*</span></label>
-                    @Html.DropDownListFor(m => m.MaChucVu, Model.ChucVuList, new { @class = "form-select", required = "required", id = "MaChucVu", disabled = isLocked ? "disabled" : null })
+                    @Html.DropDownListFor(m => m.MaChucVu, Model.ChucVuList, new { @class = "form-select " + (isLocked ? "bg-light" : ""), required = "required", id = "MaChucVu", @readonly = isLocked ? "readonly" : null, style = isLocked ? "pointer-events: none;" : null /* Khóa click/change */})
+                    @if (isLocked)
+                    {
+                        @Html.HiddenFor(m => m.MaChucVu)
+                    }
                     @Html.ValidationMessageFor(m => m.MaChucVu, "", new { @class = "text-danger" })
                 </div>
 

@@ -19,8 +19,6 @@
             @Html.ValidationSummary(true, "Vui lòng kiểm tra các lỗi sau:", new { @class = "alert alert-danger mb-3" })
 
             <div class="row g-3">
-
-                @* 1. TÊN VÀ BỘ MÔN *@
                 <div class="col-md-6">
                     <label class="form-label fw-bold">Tên lớp học <span class="text-danger">*</span></label>
                     @Html.TextBoxFor(m => m.TenLop, new { @class = "form-control", required = "required", placeholder = "Ví dụ: Yoga Sáng T2-T4-T6" })
@@ -33,7 +31,6 @@
                     @Html.ValidationMessageFor(m => m.MaCM, "", new { @class = "text-danger" })
                 </div>
 
-                @* 2. HỌC PHÍ, SỐ BUỔI, SĨ SỐ *@
                 <div class="col-md-4">
                     <label class="form-label fw-bold">Học phí (VNĐ) <span class="text-danger">*</span></label>
                     <input type="text"
@@ -128,13 +125,13 @@
                                     @Html.ValidationMessage("GioKetThuc", new { @class = "text-danger small mt-1" })
                                 </div>
 
-                                @* Dropdown HLV (sẽ được cập nhật bằng JS) *@
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Huấn luyện viên phụ trách</label>
                                     <select name="MaNV" id="ddlMaNV" class="form-select">
                                         @if (ViewBag.MaNV != null)
                                         {
-                                            @Html.DropDownList("MaNV", (SelectList)ViewBag.MaNV)
+                                            <option value="@Model.MaNV" selected>@(Model.NhanVien != null ? Model.NhanVien.TenNV : "HLV Đã Chọn")</option>
+                                            //@Html.DropDownList("MaNV", (SelectList)ViewBag.MaNV)
                                         }
                                         else
                                         {
@@ -264,7 +261,7 @@
 
                 let selectedDays = [];
                 checkboxes.forEach(cb => { if (cb.checked) selectedDays.push(cb.value); });
-
+                const currentMaNV = ddlMaNV.value;
                 ddlMaNV.innerHTML = '';
 
                 // Nếu thiếu thông tin cần thiết cho việc kiểm tra lịch

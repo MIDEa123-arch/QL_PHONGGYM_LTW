@@ -1,8 +1,9 @@
 ﻿@model QL_PHONGGYM.Models.DonHang
 
 @{
-    Layout = null; 
+    Layout = null;
     var hoaDon = Model.HoaDons.FirstOrDefault();
+    decimal giamGia = hoaDon?.GiamGia ?? 0;
 }
 
 <div class="container-fluid p-0">
@@ -19,11 +20,23 @@
             <p class="mb-1"><strong>Ngày đặt:</strong> @Model.NgayDat.ToString("dd/MM/yyyy HH:mm")</p>
             <p class="mb-1"><strong>Địa chỉ:</strong> @(Model.DiaChi_Full ?? "Nhận tại phòng tập")</p>
             <p class="mb-1">
-                <strong>Trạng thái:</strong>
+                <strong>Trạng thái đơn hàng:</strong>
                 <span class="badge @(Model.TrangThaiDonHang == "Đã giao hàng" ? "bg-success" : "bg-warning text-dark")">
                     @Model.TrangThaiDonHang
                 </span>
             </p>
+            @if (hoaDon != null)
+            {
+                string statusPayment = hoaDon.TrangThai ?? "Chưa rõ";
+                string colorPayment = (statusPayment == "Đã thanh toán" ? "bg-success" : "bg-danger");
+
+                <p class="mb-1">
+                    <strong>Trạng thái hóa đơn:</strong>
+                    <span class="badge @colorPayment">
+                        @statusPayment
+                    </span>
+                </p>
+            }
         </div>
     </div>
 
@@ -67,6 +80,13 @@
                                 <td colspan="4" class="text-end">Tổng tiền hàng:</td>
                                 <td class="text-end fw-bold">@((hoaDon.ThanhTien ?? 0).ToString("#,##0")) đ</td>
                             </tr>
+                            @if (giamGia > 0)
+                            {
+                                <tr class="text-danger">
+                                    <td colspan="4" class="text-end">Giảm giá:</td>
+                                    <td class="text-end text-danger fw-bold">- @giamGia.ToString("#,##0") đ</td>
+                                </tr>
+                            }
                             <tr>
                                 <td colspan="4" class="text-end">Phí vận chuyển:</td>
                                 <td class="text-end fw-bold">@Model.PhiShip.ToString("#,##0") đ</td>

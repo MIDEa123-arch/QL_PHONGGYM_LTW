@@ -21,7 +21,7 @@ namespace QL_PHONGGYM.Controllers
 
             if (!string.IsNullOrEmpty(search))
             {
-                query = query.Where(h => h.KhachHang.TenKH.Contains(search));
+                query = query.Where(h => h.KhachHang.TenKH.ToLower().Contains(search.ToLower())||h.MaHD.ToString()==search);
             }
             if (!string.IsNullOrEmpty(status))
             {
