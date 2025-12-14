@@ -27,7 +27,14 @@ namespace QL_PHONGGYM.Controllers
 
             if (status != -1)
             {
-                query = query.Where(x => x.TrangThai == status);
+                if (status == 2)
+                {
+                    query = query.Where(x => x.SoLuongTon <= 0);
+                }
+                else
+                {
+                    query = query.Where(x => x.TrangThai == status);
+                }
             }
             if (category != -1)
             {
@@ -342,14 +349,7 @@ namespace QL_PHONGGYM.Controllers
                 }
                 else
                 {
-                    if (sp.SoLuongTon <= 0)
-                    {
-                        return Json(new
-                        {
-                            success = false,
-                            message = "LỖI: Sản phẩm này đã hết hàng (Tồn kho = 0). Vui lòng nhập thêm hàng trước khi mở bán!"
-                        });
-                    }
+                    
 
                     sp.TrangThai = 1;
                     message = "Đã mở bán lại sản phẩm thành công.";
