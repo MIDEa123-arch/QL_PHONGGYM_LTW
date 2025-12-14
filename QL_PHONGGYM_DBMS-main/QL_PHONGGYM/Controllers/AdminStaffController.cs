@@ -370,58 +370,42 @@ namespace QL_PHONGGYM.Controllers
             var adminDangNhap = Session["AdminUser"] as QL_PHONGGYM.Models.NhanVien;
             if (adminDangNhap == null)
             {
-                // Có thể session bị mất (timeout), yêu cầu đăng nhập lại
                 return Json(new { success = false, message = "Phiên đăng nhập hết hạn. Vui lòng F5 đăng nhập lại!" });
             }
             if (adminDangNhap != null && adminDangNhap.MaNV == id)
             {
                 return Json(new { success = false, message = "Bạn không thể tự khóa tài khoản đang đăng nhập!" });
             }
-            // Lấy thông tin NV (Không cần Include ChuyenMons nếu chỉ check status)
             var nv = _context.NhanViens.Find(id);
             if (nv == null) return Json(new { success = false, message = "Không tìm thấy nhân viên!" });
-
-            // Lấy thông tin Admin đăng nhập (giả sử Admin không thể tự khóa mình)
-            
-
             try
             {
-                // --- 1. TRƯỜNG HỢP MỞ KHÓA (0 -> 1) ---
                 if (nv.TrangThaiTaiKhoan == 0)
                 {
-                    nv.TrangThaiTaiKhoan = 1; // Mở khóa
+                    nv.TrangThaiTaiKhoan = 1; 
                     _context.SaveChanges();
                     return Json(new { success = true, message = "Đã mở khóa tài khoản thành công! (Trạng thái: Đang hoạt động)" });
                 }
-
-                // --- 2. TRƯỜNG HỢP KHÓA (1 -> 0) ---
-
-                // TỐI ƯU HÓA: Kiểm tra Ràng buộc bằng AsNoTracking() để tránh Timeout
                 bool coHopDongPT = _context.DangKyPTs
                     .AsNoTracking().Any(x => x.MaNV == id);
-
-                // Kiểm tra lịch dạy (cả LopHoc chủ nhiệm và LichLop buổi lẻ)
                 bool coLichDay = _context.LopHocs
                     .AsNoTracking().Any(x => x.MaNV == id)
                     || _context.LichLops
-                    .AsNoTracking().Any(x => x.MaNV == id && x.NgayHoc >= DateTime.Today); // Chỉ check lịch TƯƠNG LAI
+                    .AsNoTracking().Any(x => x.MaNV == id && x.NgayHoc >= DateTime.Today); 
 
                 if (coHopDongPT || coLichDay)
                 {
-                    // Nếu có ràng buộc -> Ngăn chặn Khóa
                     return Json(new { success = false, message = "Lỗi: Nhân viên đang có hợp đồng PT hoặc lịch dạy tương lai. Vui lòng gỡ ràng buộc trước khi Khóa/Cho nghỉ." });
                 }
                 else
                 {
-                    // KHÔNG có ràng buộc -> Cho phép Khóa (Soft Delete)
                     nv.TrangThaiTaiKhoan = 0;
-                    _context.SaveChanges(); // Lệnh lưu sẽ chạy cực nhanh ở đây
+                    _context.SaveChanges(); 
                     return Json(new { success = true, message = "Đã khóa tài khoản thành công. (Trạng thái: Đã nghỉ việc)" });
                 }
             }
             catch (Exception ex)
             {
-                // Nếu có lỗi SQL/EF không xác định
                 return Json(new { success = false, message = "Lỗi hệ thống: " + ex.Message });
             }
         }

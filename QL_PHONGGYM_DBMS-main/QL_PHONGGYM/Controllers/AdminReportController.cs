@@ -100,7 +100,7 @@ namespace QL_PHONGGYM.Controllers
                                 && ct.HoaDon.NgayLap <= end)
                     .ToList();
                 var sb = new System.Text.StringBuilder();
-                sb.AppendLine("Mã HĐ,Ngày Lập,Nội Dung Chi Tiết,Loại Hình,Số Lượng,Đơn Giá,Thành Tiền");
+                sb.AppendLine("Mã Hóa Đơn,Ngày Lập,Nội Dung Chi Tiết,Loại Hình,Số Lượng,Đơn Giá,Thành Tiền");
 
                 foreach (var item in listHoaDon)
                 {

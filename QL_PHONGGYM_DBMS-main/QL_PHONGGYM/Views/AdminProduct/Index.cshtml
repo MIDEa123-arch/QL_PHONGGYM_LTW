@@ -28,6 +28,7 @@
                         <option value="-1" @(ViewBag.CurrentStatus == -1 ? "selected" : "")>-- Tất cả trạng thái --</option>
                         <option value="1" @(ViewBag.CurrentStatus == 1 ? "selected" : "")>Đang kinh doanh</option>
                         <option value="0" @(ViewBag.CurrentStatus == 0 ? "selected" : "")>Ngừng kinh doanh</option>
+                        <option value="2" @(ViewBag.CurrentStatus == 2 ? "selected" : "")>Hết hàng</option>
                     </select>
                 </div>
                 <div class="col-md-3">
@@ -128,11 +129,11 @@
                                     }
                                     else
                                     {
-                                        <span class="badge bg-secondary">Ngừng bán</span>
+                                        <span class="badge bg-danger">Hết hàng</span>
                                     }
                                 </td>
 
-                                <td class="text-end pe-4">
+                                <td class="text-center pe-4">
                                     <a href="@Url.Action("Edit", "AdminProduct", new { id = item.MaSP })" class="btn btn-outline-primary btn-sm me-1" title="Sửa">
                                         <i class="fas fa-edit"></i>
                                     </a>
@@ -165,7 +166,6 @@
             </table>
         </div>
     </div>
-
     @if (ViewBag.TotalPages > 1)
     {
         <div class="card-footer bg-white py-3">
@@ -174,21 +174,21 @@
                     @if (ViewBag.CurrentPage > 1)
                     {
                         <li class="page-item">
-                            <a class="page-link" href="@Url.Action("Index", new { page = ViewBag.CurrentPage - 1, search = ViewBag.CurrentSearch, status = ViewBag.CurrentStatus })">Trước</a>
+                            <a class="page-link" href="@Url.Action("Index", new { page = ViewBag.CurrentPage - 1, search = ViewBag.CurrentSearch, status = ViewBag.CurrentStatus, category = ViewBag.CurrentCategory })">Trước</a>
                         </li>
                     }
 
                     @for (int i = 1; i <= ViewBag.TotalPages; i++)
                     {
                         <li class="page-item @(i == ViewBag.CurrentPage ? "active" : "")">
-                            <a class="page-link" href="@Url.Action("Index", new { page = i, search = ViewBag.CurrentSearch, status = ViewBag.CurrentStatus })">@i</a>
+                            <a class="page-link" href="@Url.Action("Index", new { page = i, search = ViewBag.CurrentSearch, status = ViewBag.CurrentStatus, category = ViewBag.CurrentCategory })">@i</a>
                         </li>
                     }
 
                     @if (ViewBag.CurrentPage < ViewBag.TotalPages)
                     {
                         <li class="page-item">
-                            <a class="page-link" href="@Url.Action("Index", new { page = ViewBag.CurrentPage + 1, search = ViewBag.CurrentSearch, status = ViewBag.CurrentStatus })">Sau</a>
+                            <a class="page-link" href="@Url.Action("Index", new { page = ViewBag.CurrentPage + 1, search = ViewBag.CurrentSearch, status = ViewBag.CurrentStatus, category = ViewBag.CurrentCategory })">Sau</a>
                         </li>
                     }
                 </ul>

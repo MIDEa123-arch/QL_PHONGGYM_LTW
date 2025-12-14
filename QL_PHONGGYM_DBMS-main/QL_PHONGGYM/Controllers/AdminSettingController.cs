@@ -13,7 +13,7 @@ namespace QL_PHONGGYM.Controllers
 
         public ActionResult Index()
         {
-            if (Session["AdminUser"] == null) return RedirectToAction("Login", "Auth");
+            if (Session["AdminUser"] == null) return RedirectToAction("Login", "AdminHome"); 
 
             var adminSession = (NhanVien)Session["AdminUser"];
             var admin = _context.NhanViens.Find(adminSession.MaNV);
@@ -25,7 +25,7 @@ namespace QL_PHONGGYM.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult UpdateProfile(string TenNV, string SDT, string Email)
         {
-            if (Session["AdminUser"] == null) return RedirectToAction("Login", "Auth");
+            if (Session["AdminUser"] == null) return RedirectToAction("Login", "AdminHome");
 
             try
             {
@@ -57,7 +57,7 @@ namespace QL_PHONGGYM.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult ChangePassword(string CurrentPassword, string NewPassword, string ConfirmPassword)
         {
-            if (Session["AdminUser"] == null) return RedirectToAction("Login", "Auth");
+            if (Session["AdminUser"] == null) return RedirectToAction("Login", "AdminHome");
 
             try
             {
