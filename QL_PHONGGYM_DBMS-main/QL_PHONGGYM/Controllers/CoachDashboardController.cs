@@ -486,5 +486,23 @@ namespace QL_PHONGGYM.Controllers
                 return Json(new { success = false, message = ex.Message });
             }
         }
+        public ActionResult Profile()
+        {
+
+            var hlv = Session["CoachUser"] as NhanVien;
+            if (hlv == null) return RedirectToAction("Login", "HLV");
+
+
+            var currentCoach = _context.NhanViens.Find(hlv.MaNV);
+
+            if (currentCoach == null)
+            {
+                Session["CoachUser"] = null;
+                return RedirectToAction("Login", "HLV");
+            }
+            ViewBag.ActiveMenu = "Profile";
+            ViewBag.Title = "Hồ sơ cá nhân";
+            return View(currentCoach);
+        }
     }
 }

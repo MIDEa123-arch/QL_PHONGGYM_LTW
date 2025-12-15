@@ -23,6 +23,7 @@
                     <option value="" @(string.IsNullOrEmpty(ViewBag.CurrentStatus) ? "selected" : "")>-- Tất cả trạng thái --</option>
                     <option value="Chờ xác nhận" @(ViewBag.CurrentStatus == "Chờ xác nhận" ? "selected" : "")>Chờ xác nhận</option>
                     <option value="Đã thanh toán" @(ViewBag.CurrentStatus == "Đã thanh toán" ? "selected" : "")>Đã thanh toán</option>
+                    <option value="Chưa thanh toán" @(ViewBag.CurrentStatus == "Chưa thanh toán" ? "selected" : "")>Chưa thanh toán</option>
                     <option value="Hủy" @(ViewBag.CurrentStatus == "Hủy" ? "selected" : "")>Hủy</option>
                 </select>
             </div>
