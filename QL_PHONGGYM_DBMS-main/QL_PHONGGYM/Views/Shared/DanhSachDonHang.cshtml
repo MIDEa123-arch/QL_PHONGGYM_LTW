@@ -21,12 +21,12 @@
                     <tr>
                         <td><span class="fw-bold text-primary">#@item.MaDonHang</span></td>
                         <td>
-                            <div class="fw-bold">@item.HoaDons.FirstOrDefault().KhachHang.TenKH</div>
-                            <small class="text-muted">@item.HoaDons.FirstOrDefault().KhachHang.SDT</small>
+                            <div class="fw-bold">@(item.HoaDons.FirstOrDefault()?.KhachHang?.TenKH ?? "Khách lẻ")</div>
+                            <small class="text-muted">@(item.HoaDons.FirstOrDefault()?.KhachHang?.SDT?? "Chưa có SĐT")</small>
                         </td>
                         <td>@item.NgayDat.ToString("dd/MM/yyyy HH:mm")</td>
                         <td class="fw-bold text-success">@item.TongTien.ToString("#,##0") đ</td>
-                        
+
                         <td>
                             @if (item.TrangThaiDonHang == "Chờ xác nhận")
                             {
@@ -83,4 +83,32 @@
         </tbody>
     </table>
 </div>
+@if (ViewBag.TotalPages > 1)
+{
+    <div class="d-flex justify-content-center mt-3 border-top pt-3">
+        <nav aria-label="Page navigation">
+            <ul class="pagination mb-0">
+                @if (ViewBag.CurrentPage > 1)
+                {
+                    <li class="page-item">
+                        <a class="page-link" href="javascript:void(0)" onclick="FilterOrders(@(ViewBag.CurrentPage - 1))">Trước</a>
+                    </li>
+                }
 
+                @for (int i = 1; i <= ViewBag.TotalPages; i++)
+                {
+                    <li class="page-item @(i == ViewBag.CurrentPage ? "active" : "")">
+                        <a class="page-link" href="javascript:void(0)" onclick="FilterOrders(@i)">@i</a>
+                    </li>
+                }
+
+                @if (ViewBag.CurrentPage < ViewBag.TotalPages)
+                {
+                    <li class="page-item">
+                        <a class="page-link" href="javascript:void(0)" onclick="FilterOrders(@(ViewBag.CurrentPage + 1))">Sau</a>
+                    </li>
+                }
+            </ul>
+        </nav>
+    </div>
+}
