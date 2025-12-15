@@ -87,7 +87,7 @@
                     <span class="fs-6 text-muted">Số buổi</span>
                     <span class="fs-6">@Model.SoBuoi buổi</span>
                 </div>
-                @if (!string.IsNullOrEmpty(Model.NhanVien.TenNV))
+                @if (!string.IsNullOrEmpty(Model.NhanVien?.TenNV))
                 {
                     <div class="mt-3 pt-3 border-top d-flex justify-content-between">
                         <span class="fs-6 text-muted d-block mb-2">Nhân viên phụ trách</span>
