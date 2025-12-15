@@ -22,12 +22,13 @@
                 <div class="col-md-12">
                     <label class="form-label fw-bold">Tên gói tập<span class="text-danger">*</span></label>
                     @Html.TextBoxFor(m => m.TenGoi, new { @class = "form-control", required = "required" })
-                    @Html.ValidationMessageFor(model => model.TenGoi, "", new { @class = "text-danger" })
+                    @Html.ValidationMessageFor(model => model.TenGoi, "", new { @class = "text-danger validation-message" })
                 </div>
 
                 <div class="col-md-6">
                     <label class="form-label fw-bold">Thời hạn (Số tháng)<span class="text-danger">*</span></label>
                     @Html.TextBoxFor(m => m.ThoiHan, new { @class = "form-control", type = "number", required = "required", min = "1" })
+                    @Html.ValidationMessageFor(model => model.ThoiHan, "", new { @class = "text-danger validation-message" })
                 </div>
 
                 <div class="col-md-6">
@@ -38,14 +39,14 @@
 
                     @Html.HiddenFor(m => m.Gia, new { id = "hdnGia" })
 
-                    @Html.ValidationMessageFor(m => m.Gia, "", new { @class = "text-danger small" })
+                    @Html.ValidationMessageFor(m => m.Gia, "", new { @class = "text-danger small validation-message" })
                 </div>
             </div>
 
             <div class="col-md-12 mt-3">
                 <label class="form-label fw-bold">Mô tả quyền lợi</label>
                 @Html.TextAreaFor(m => m.MoTa, new { @class = "form-control", rows = "4", required = "required" })
-                @Html.ValidationMessageFor(model => model.MoTa, "", new { @class = "text-danger" })
+                @Html.ValidationMessageFor(model => model.MoTa, "", new { @class = "text-danger validation-message" })
             </div>
 
             <div class="mt-4 text-end">
@@ -56,25 +57,56 @@
     </div>
 </div>
 
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-        var inputDisplay = document.getElementById('txtGiaDisplay');
-        var inputHidden = document.getElementById('hdnGia');
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $('#createForm').submit(function (e) {
+                e.preventDefault();
 
-        if (inputDisplay && inputHidden) {
-            function formatNumber(n) {
-                return n.replace(/\D/g, "").replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-            }
+                var form = $(this);
+                $('.validation-message').text('');
 
-            inputDisplay.addEventListener('input', function (e) {
-                var rawValue = e.target.value.replace(/\./g, '');
-                inputHidden.value = rawValue;
-                e.target.value = formatNumber(rawValue);
+                $.ajax({
+                    url: form.attr('action'),
+                    type: 'POST',
+                    data: form.serialize(),
+                    dataType: 'json',
+                    success: function (res) {
+                        if (res.success) {
+                            alert(res.message);
+                            window.location.href = '@Url.Action("Index", "AdminService")';
+                        } else {
+                            alert("Thêm gói tập thất bại: " + res.message);
+                            if (res.errors && res.errors.length > 0) {
+                                console.error("Chi tiết lỗi:", res.errors);
+                            }
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        alert('Lỗi kết nối Server!');
+                        console.error("AJAX Error:", error);
+                    }
+                });
             });
 
-            if (inputDisplay.value !== "") {
-                inputHidden.value = inputDisplay.value.replace(/\./g, '');
+            var inputDisplay = document.getElementById('txtGiaDisplay');
+            var inputHidden = document.getElementById('hdnGia');
+
+            if (inputDisplay && inputHidden) {
+                function formatNumber(n) {
+                    return n.replace(/\D/g, "").replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+                }
+
+                inputDisplay.addEventListener('input', function (e) {
+                    var rawValue = e.target.value.replace(/\./g, '');
+                    inputHidden.value = rawValue;
+                    e.target.value = formatNumber(rawValue);
+                });
+
+                if (inputDisplay.value !== "") {
+                    inputHidden.value = inputDisplay.value.replace(/\./g, '');
+                }
             }
-        }
-    });
-</script>
+        });
+    </script>
+}

@@ -18,50 +18,58 @@ namespace QL_PHONGGYM.Controllers
         }
         public ActionResult Index()
         {
-           if (Session["AdminUser"] == null) return RedirectToAction("Login", "AdminHome");
-           if (!IsAdmin()) return RedirectToAction("AccessDenied", "AdminHome");
+            if (Session["AdminUser"] == null) return RedirectToAction("Login", "AdminHome");
+            if (!IsAdmin()) return RedirectToAction("AccessDenied", "AdminHome");
 
             return View();
         }
 
         [HttpPost]
         public JsonResult GetRevenueData(string fromDate, string toDate)
-        {            
+        {
             DateTime start = DateTime.Parse(fromDate);
             DateTime end = DateTime.Parse(toDate).AddDays(1).AddSeconds(-1);
 
-            var listHoaDon = _context.ChiTietHoaDons
-                .Include(ct => ct.HoaDon)
-                .Where(ct => ct.HoaDon.TrangThai == "Đã thanh toán"
-                          && ct.HoaDon.NgayLap >= start
-                          && ct.HoaDon.NgayLap <= end)
+            var listHoaDon = _context.HoaDons
+                .Include(h => h.ChiTietHoaDons) 
+                .Where(h => h.TrangThai == "Đã thanh toán"
+                    && h.NgayLap >= start
+                    && h.NgayLap <= end)
                 .ToList();
 
-            var reportData = listHoaDon
-                .Select(ct => new
+            var reportRawData = new List<dynamic>();
+
+            foreach (var hd in listHoaDon)
+            {
+                decimal tongTienHang = hd.ChiTietHoaDons.Sum(ct => ct.DonGia * ct.SoLuong.Value);
+                decimal thucThu = hd.ThanhTien ?? 0;
+                decimal tyLe = (tongTienHang == 0) ? 1 : (thucThu / tongTienHang);
+                foreach (var ct in hd.ChiTietHoaDons)
                 {
-                    LoaiHinh = ct.SanPham != null ? "Bán hàng & Dụng cụ" :
-                               ct.DangKyGoiTap != null ? "Gói tập Gym" :
-                               ct.DangKyPT != null ? "Huấn luyện viên (PT)" :
-                               ct.DangKyLop != null ? "Lớp học" : "Khác",
-                    ThanhTien = (ct.DonGia * ct.SoLuong)
-                })
+                    string loaiHinh = "Khác";
+                    if (ct.SanPham != null) loaiHinh = "Bán hàng & Dụng cụ";
+                    else if (ct.DangKyGoiTap != null) loaiHinh = "Gói tập Gym";
+                    else if (ct.DangKyPT != null) loaiHinh = "Huấn luyện viên (PT)";
+                    else if (ct.DangKyLop != null) loaiHinh = "Lớp học";
+                    decimal doanhThuPhanBo = (ct.DonGia * ct.SoLuong.Value) * tyLe;
+                    reportRawData.Add(new { LoaiHinh = loaiHinh, ThanhTien = doanhThuPhanBo });
+                }
+            }
+            var reportData = reportRawData
                 .GroupBy(x => x.LoaiHinh)
-                .Select(g => new
-                {
-                    Label = g.Key,
-                    Value = g.Sum(x => x.ThanhTien)
-                })
+                 .Select(g => new
+                 {
+                     Label = g.Key,
+                    Value = g.Sum(x => (decimal)x.ThanhTien) 
+                 })
                 .OrderByDescending(x => x.Value)
                 .ToList();
-
-            decimal? totalRevenue = reportData.Sum(x => x.Value);
-
+            decimal totalRevenue = reportData.Sum(x => x.Value);
             return Json(new
             {
                 success = true,
                 data = reportData,
-                total = totalRevenue.Value.ToString("N0")
+                total = totalRevenue.ToString("N0")
             });
         }
         [HttpPost]
@@ -80,7 +88,7 @@ namespace QL_PHONGGYM.Controllers
 
             return Json(new { success = true, data = monthlyData, year = year });
         }
-        [HttpGet] 
+        [HttpGet]
         public ActionResult ExportToExcel(string fromDate, string toDate)
         {
             if (Session["AdminUser"] == null) return RedirectToAction("Login", "AdminHome");
@@ -120,7 +128,7 @@ namespace QL_PHONGGYM.Controllers
                         noiDung,
                         loaiHinh,
                         item.SoLuong ?? 1,
-                        (item.DonGia).ToString("0.##"), 
+                        (item.DonGia).ToString("0.##"),
                         (item.DonGia * (item.SoLuong ?? 1)).ToString("0.##")
                     );
                     sb.AppendLine(line);

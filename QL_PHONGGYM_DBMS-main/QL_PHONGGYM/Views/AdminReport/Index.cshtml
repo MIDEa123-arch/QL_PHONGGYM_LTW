@@ -308,7 +308,6 @@
 
     function getColor(i) { return ['#0d6efd', '#198754', '#ffc107', '#dc3545', '#0dcaf0'][i % 5]; }
     function exportExcel() {
-    // Lấy ngày đã được tính toán tự động ở các ô input
     var from = $('#fromDate').val();
     var to = $('#toDate').val();
 
@@ -316,9 +315,6 @@
         alert("Vui lòng chọn khoảng thời gian hợp lệ.");
         return;
     }
-
-    // Chuyển hướng trình duyệt sang Action Export để tải file
-    // Sử dụng window.location.href để tải file (GET request)
     var url = '@Url.Action("ExportToExcel", "AdminReport")' + '?fromDate=' + from + '&toDate=' + to;
     window.location.href = url;
 }

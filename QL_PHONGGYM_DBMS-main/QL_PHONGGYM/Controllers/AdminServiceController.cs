@@ -230,10 +230,8 @@ namespace QL_PHONGGYM.Controllers
         [HttpPost]
         public JsonResult Delete(int id)
         {
-            // Check quyền Admin
             if (!IsAdminLoggedIn()) return Json(new { success = false, message = "Unauthorized" });
 
-            // Tìm gói tập
             var goiTap = _context.GoiTaps.FirstOrDefault(t => t.MaGoiTap == id);
             if (goiTap == null)
             {
@@ -248,13 +246,12 @@ namespace QL_PHONGGYM.Controllers
 
                 if (checkDangKy)
                 {
-                    // Yêu cầu: Gói đang có người tập thì KHÔNG ĐƯỢC làm gì cả
                     return Json(new { success = false, message = "Gói tập này đang có hội viên sử dụng, không thể ngừng kinh doanh!" });
                 }
                 else
                 {
                
-                    goiTap.TrangThai = 0; // Giả sử 0 là Ngừng kinh doanh
+                    goiTap.TrangThai = 0; 
                     _context.SaveChanges();
 
                     return Json(new { success = true, message = "Đã chuyển gói tập sang trạng thái 'Ngừng kinh doanh' thành công!" });
