@@ -1,4 +1,7 @@
-﻿
+﻿create database ql_gym
+GO
+use ql_gym
+GO
 /****** Object:  Table [dbo].[CheckIn]    Script Date: 10/12/2025 1:25:46 CH ******/
 SET ANSI_NULLS ON
 GO
